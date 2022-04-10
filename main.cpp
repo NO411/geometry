@@ -4,6 +4,12 @@
 #include <string>
 #include <math.h>
 
+Vector2 firstPoint;
+Vector2 secondPoint;
+bool firstPointed = false;
+
+int drawObject = 2;
+
 void Init() {
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	SetTraceLogLevel(LOG_NONE);
@@ -22,7 +28,7 @@ class Line {
 	Vector2 pointA;
 	Vector2 pointB;
 
-	Line(Vector2& pointA, Vector2& pointB):pointA(pointA), pointB(pointB) {}
+	Line(Vector2 pointA, Vector2 pointB):pointA(pointA), pointB(pointB) {}
 	~Line() {}
 
 	// 1 = a, 2 = b
@@ -122,121 +128,141 @@ void DrawStraightLineObj(Line& line) {
 	DrawLineEx(line.GetFirstConnectionPoint(), line.GetSecondConnectionPoint(), 1, BLACK);
 }
 
+void SetDrawObj() {
+	if (!IsKeyDown(KEY_LEFT_CONTROL)) {
+		return;
+	}
+
+	switch (GetKeyPressed()) {
+	case KEY_C:
+		drawObject = 1;
+		break;
+	case KEY_D:
+		drawObject = 2;
+		break;
+	case KEY_R:
+		drawObject = 3;
+		break;
+	case KEY_S:
+		drawObject = 4;
+		break;
+	case KEY_P:
+		drawObject = 5;
+		break;
+	
+	default:
+		break;
+	}
+}
+
+void DrawObj() {
+	if (!IsMouseButtonPressed(0)) {
+		return;
+	}
+
+	if (!firstPointed) {
+		firstPointed = true;
+		firstPoint = GetMousePosition();
+		if (drawObject == 5) {
+			points.push_back(firstPoint);
+			firstPointed = false;
+		}
+	} else {
+		firstPointed = false;
+		secondPoint = GetMousePosition();
+		switch (drawObject) {
+		case 1:
+			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, secondPoint)});
+			break;
+		case 2:
+			distances.push_back(Line{firstPoint, secondPoint});
+			break;
+		case 3:
+			rays.push_back(Line{firstPoint, secondPoint});
+			break;
+		case 4:
+			straightLines.push_back(Line{firstPoint, secondPoint});
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void InterruptDrawing() {
+	if (IsKeyPressed(KEY_ESCAPE)) {
+		firstPointed = false;
+	}
+}
+
+
+void InputHandler() {
+	DrawObj();
+	SetDrawObj();
+	InterruptDrawing();
+}
+
+void Update() {
+	InputHandler();
+}
+
+void DrawDrawingObj() {
+	if (!firstPointed) {
+		return;
+	}
+	
+	Line line = {firstPoint, GetMousePosition()};
+	switch (drawObject) {
+	case 1:
+		DrawCircleObj({firstPoint, GetDistance(firstPoint, GetMousePosition())});
+		break;
+	case 2:
+		DrawDistanceObj(line);
+		break;
+	case 3:
+		DrawRayObj(line);
+		break;
+	case 4:
+		DrawStraightLineObj(line);
+		break;
+	case 5:
+		DrawPointObj(GetMousePosition());
+		break;
+	default:
+		break;
+	}
+}
+
+void Draw() {
+	ClearBackground(RAYWHITE);
+
+	for (auto& line: distances) {
+		DrawDistanceObj(line);
+	}
+	for (auto& circle: circles) {
+		DrawCircleObj(circle);
+	}
+	for (auto& ray: rays) {
+		DrawRayObj(ray);
+	}
+	for (auto& straightLine: straightLines) {
+		DrawStraightLineObj(straightLine);
+	}
+	for (auto& point: points) {
+		DrawPointObj(point);
+	}
+
+	DrawDrawingObj();
+}
+
 int main() {
 	Init();
 
-	Vector2 mousePos = {(float)GetMouseX(), (float)GetMouseY()};
-
-	Vector2 firstPoint;
-	Vector2 secondPoint;
-	bool firstPointed = false;
-
-	int drawObject = 2;
-
 	while (!WindowShouldClose()) {
-		mousePos = {(float)GetMouseX(), (float)GetMouseY()};
-
-		if (IsMouseButtonPressed(0)) {
-			if (!firstPointed) {
-				firstPointed = true;
-				firstPoint = mousePos;
-				if (drawObject == 5) {
-					points.push_back(firstPoint);
-					firstPointed = false;
-				}
-			} else {
-				firstPointed = false;
-				secondPoint = mousePos;
-
-				switch (drawObject) {
-				case 1:
-					circles.push_back(Circle{firstPoint, GetDistance(firstPoint, secondPoint)});
-					break;
-				case 2:
-					distances.push_back(Line{firstPoint, secondPoint});
-					break;
-				case 3:
-					rays.push_back(Line{firstPoint, secondPoint});
-					break;
-				case 4:
-					straightLines.push_back(Line{firstPoint, secondPoint});
-					break;
-				default:
-					break;
-				}
-			}
-		}
-
-
-		if (IsKeyDown(KEY_LEFT_CONTROL)) {
-			switch (GetKeyPressed()) {
-			case KEY_C:
-				drawObject = 1;
-				break;
-			case KEY_D:
-				drawObject = 2;
-				break;
-			case KEY_R:
-				drawObject = 3;
-				break;
-			case KEY_S:
-				drawObject = 4;
-				break;
-			case KEY_P:
-				drawObject = 5;
-				break;
-			
-			default:
-				break;
-			}
-		}
-
-		if (IsKeyPressed(KEY_ESCAPE)) {
-			firstPointed = false;
-		}
+		Update();
 
 		BeginDrawing();
-			ClearBackground(RAYWHITE);
-
-			for (auto& line: distances) {
-				DrawDistanceObj(line);
-			}
-			for (auto& circle: circles) {
-				DrawCircleObj(circle);
-			}
-			for (auto& ray: rays) {
-				DrawRayObj(ray);
-			}
-			for (auto& straightLine: straightLines) {
-				DrawStraightLineObj(straightLine);
-			}
-			for (auto& point: points) {
-				DrawPointObj(point);
-			}
-
-			if (firstPointed) {
-				Line line = {firstPoint, mousePos};
-				switch (drawObject) {
-				case 1:
-					DrawCircleObj({firstPoint, GetDistance(firstPoint, mousePos)});
-					break;
-				case 2:
-					DrawDistanceObj(line);
-					break;
-				case 3:
-					DrawRayObj(line);
-					break;
-				case 4:
-					DrawStraightLineObj(line);
-					break;
-				case 5:
-					DrawPointObj(mousePos);
-					break;
-				default:
-					break;
-				}
-			}
-
+			Draw();
 		EndDrawing();
 	}
 	CloseWindow();
