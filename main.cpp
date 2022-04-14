@@ -27,6 +27,9 @@ class GeometryObj {
 		//std::cout << "obj created" << std::endl;
 	}
 	~GeometryObj() {}
+
+	void CheckIntersections(Vector2 vec1, Vector2 vec2, float r);
+	void CheckIntersectionsCircle(Vector2 middle, float radius);
 };
 
 class Circle: public GeometryObj {
@@ -36,6 +39,7 @@ class Circle: public GeometryObj {
 
 	Circle(Vector2 middle, float radius):middle(middle), radius(radius) {
 		objectNumber = 1;
+		CheckIntersections(middle, {0, 0}, radius);
 	}
 	~Circle() {}
 };
@@ -51,6 +55,7 @@ class Line: public GeometryObj {
 	Line(Vector2 pointA, Vector2 pointB, int n):pointA(pointA), pointB(pointB) {
 		objectNumber = n;
 		UpdateConnectionPoints();
+		CheckIntersections(pointA, pointB, 0);
 	}
 	~Line() {}
 
@@ -137,6 +142,48 @@ Circle currentCircle = {{0, 0}, 0};
 
 float GetDistance(Vector2 vec1, Vector2 vec2) {
 	return sqrt(pow(vec2.x - vec1.x, 2) + pow(vec2.y - vec1.y, 2));
+}
+
+void GeometryObj::CheckIntersectionsCircle(Vector2 middle, float radius) {
+	for (auto& circle : circles) {
+		float c = GetDistance(circle.middle, middle);
+		if (c <= 0) {
+			continue;
+		}
+
+		float aSquare = pow(circle.radius, 2);
+		float x = (aSquare + pow(c, 2) - pow(radius, 2)) / (2 * c);
+		float xSquare = pow(x, 2);
+
+		if (xSquare > aSquare) {
+			continue;
+		}
+
+		float y = sqrt(aSquare - xSquare);
+
+		Vector2 vec;
+		float v1 = (middle.x - circle.middle.x) / c, v2 = (middle.y - circle.middle.y) / c;
+		float v3 = (circle.middle.x + x) * v1, v4 = y * v2, v5 = (circle.middle.y + x) * v2, v6 = y * v1;
+
+		if (y != 0) {
+			vec.x = v3 - v4;
+			vec.y = v5 + v6;
+			intersections.push_back(vec);
+		}
+
+		vec.x = v3 + v4;
+		vec.y = v5 - v6;
+		intersections.push_back(vec);
+	}
+}
+
+void GeometryObj::CheckIntersections(Vector2 vec1, Vector2 vec2, float r) {
+	if (objectNumber == 1) {
+		GeometryObj::CheckIntersectionsCircle(vec1, r);
+		return;
+	}
+
+
 }
 
 void DrawPointObj(Vector2 point) {
@@ -281,10 +328,16 @@ void DrawDrawingObj() {
 		DrawDistanceObj(currentLine);
 		break;
 	case 3:
-		DrawRayObj(currentLine);
+		{
+			currentLine.UpdateSecondConnectionPoint();
+			DrawRayObj(currentLine);
+		}
 		break;
 	case 4:
-		DrawStraightLineObj(currentLine);
+		{
+			currentLine.UpdateConnectionPoints();
+			DrawStraightLineObj(currentLine);
+		}
 		break;
 	case 5:
 		DrawPointObj(GetMousePosition());
