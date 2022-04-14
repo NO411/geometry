@@ -96,7 +96,7 @@ Vector2 CalculateConnectionPoint(Vector2& p1, Vector2& p2, float m, float n) {
 	}
 
 	// dividing by 0 is not possible ...
-	// needed to get verticle lines
+	// needed to get vertical lines
 	if (p1.x - p2.x == 0) {
 		connectionPoint.x = p1.x;
 		if (p1.y > p2.y) {
