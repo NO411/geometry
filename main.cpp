@@ -18,24 +18,47 @@ void Init() {
 	SetExitKey(0);
 }
 
-struct Circle {
-	Vector2 middle;
-	float radius;
+class GeometryObj {
+	public:
+	std::vector<Vector2> intersections;
+	int objectNumber;
+
+	GeometryObj() {}
+	~GeometryObj() {}
 };
 
-class Line {
+class Circle: public GeometryObj {
+	public:
+	Vector2 middle;
+	float radius;
+
+	Circle(Vector2 middle, float radius, int n):middle(middle), radius(radius) {
+		objectNumber = n;
+	}
+	~Circle() {}
+};
+
+class Line: public GeometryObj {
 	public:
 	Vector2 pointA;
 	Vector2 pointB;
 
-	Line(Vector2 pointA, Vector2 pointB):pointA(pointA), pointB(pointB) {}
+	Vector2 firstConnectionPoint;
+	Vector2 secondConnectionPoint;
+
+	Line(Vector2 pointA, Vector2 pointB, int n):pointA(pointA), pointB(pointB) {
+		objectNumber = n;
+		UpdateConnectionPoints();
+	}
 	~Line() {}
 
 	// 1 = a, 2 = b
 	Vector2 GetMN(int ab);
 
-	Vector2 GetFirstConnectionPoint();
-	Vector2 GetSecondConnectionPoint();
+	void UpdateFirstConnectionPoint();
+	void UpdateSecondConnectionPoint();
+
+	void UpdateConnectionPoints();
 };
 
 Vector2 Line::GetMN(int ab) {
@@ -73,30 +96,34 @@ Vector2 CalculateConnectionPoint(Vector2& p1, Vector2& p2, float m, float n) {
 	}
 
 	// dividing by 0 is not possible ...
-	// needed to get verticla lines
+	// needed to get verticle lines
 	if (p1.x - p2.x == 0) {
 		connectionPoint.x = p1.x;
 		if (p1.y > p2.y) {
-			connectionPoint.y = GetScreenHeight();
-		} else {
 			connectionPoint.y = 0;
+		} else {
+			connectionPoint.y = GetScreenHeight();
 		}
 	}
 
 	return connectionPoint;
 }
 
-Vector2 Line::GetFirstConnectionPoint() {
+void Line::UpdateFirstConnectionPoint() {
 	Vector2 mn = GetMN(1);
-	return CalculateConnectionPoint(pointB, pointA, mn.x, mn.y);
+	firstConnectionPoint = CalculateConnectionPoint(pointB, pointA, mn.x, mn.y);
 }
 
-Vector2 Line::GetSecondConnectionPoint() {
+void Line::UpdateSecondConnectionPoint() {
 	Vector2 mn = GetMN(2);
 
-	return CalculateConnectionPoint(pointA, pointB, mn.x, mn.y);
+	secondConnectionPoint = CalculateConnectionPoint(pointA, pointB, mn.x, mn.y);
 }
 
+void Line::UpdateConnectionPoints() {
+	UpdateFirstConnectionPoint();
+	UpdateSecondConnectionPoint();
+}
 
 std::vector<Circle> circles;     //1
 std::vector<Line> distances;     //2
@@ -113,19 +140,27 @@ void DrawPointObj(Vector2 point) {
 }
 
 void DrawCircleObj(Circle circle) {
-	DrawCircleLines(circle.middle.x, circle.middle.y, circle.radius, BLACK);
+	DrawCircleSectorLines(circle.middle, circle.radius, 0, 360, 2 * circle.radius, BLACK);
 }
 
 void DrawDistanceObj(Line line) {
 	DrawLineEx(line.pointA, line.pointB, 1, BLACK);
 }
 
-void DrawRayObj(Line line) {
-	DrawLineEx(line.pointA, line.GetSecondConnectionPoint(), 1, BLACK);
+bool SameVector2(Vector2 v1, Vector2 v2) {
+	return (v1.x == v2.x && v1.y == v2.y);
 }
 
-void DrawStraightLineObj(Line& line) {
-	DrawLineEx(line.GetFirstConnectionPoint(), line.GetSecondConnectionPoint(), 1, BLACK);
+void DrawRayObj(Line line) {
+	if (SameVector2(line.pointA, line.secondConnectionPoint) || SameVector2(line.pointA, GetMousePosition())) {
+		return;
+	}
+
+	DrawLineEx(line.pointA, line.secondConnectionPoint, 1, BLACK);
+}
+
+void DrawStraightLineObj(Line line) {
+	DrawLineEx(line.firstConnectionPoint, line.secondConnectionPoint, 1, BLACK);
 }
 
 void SetDrawObj() {
@@ -172,16 +207,16 @@ void DrawObj() {
 		secondPoint = GetMousePosition();
 		switch (drawObject) {
 		case 1:
-			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, secondPoint)});
+			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, secondPoint), 1});
 			break;
 		case 2:
-			distances.push_back(Line{firstPoint, secondPoint});
+			distances.push_back(Line{firstPoint, secondPoint, 2});
 			break;
 		case 3:
-			rays.push_back(Line{firstPoint, secondPoint});
+			rays.push_back(Line{firstPoint, secondPoint, 3});
 			break;
 		case 4:
-			straightLines.push_back(Line{firstPoint, secondPoint});
+			straightLines.push_back(Line{firstPoint, secondPoint, 4});
 			break;
 		default:
 			break;
@@ -195,15 +230,31 @@ void InterruptDrawing() {
 	}
 }
 
-
 void InputHandler() {
 	DrawObj();
 	SetDrawObj();
 	InterruptDrawing();
 }
 
+void CheckRezied() {
+	if (!IsWindowResized()) {
+		return;
+	}
+
+	for (auto& straightLine: straightLines)
+	{
+		straightLine.UpdateConnectionPoints();
+	}
+
+	for (auto& ray: rays)
+	{
+		ray.UpdateSecondConnectionPoint();
+	}
+}
+
 void Update() {
 	InputHandler();
+	CheckRezied();
 }
 
 void DrawDrawingObj() {
@@ -211,19 +262,18 @@ void DrawDrawingObj() {
 		return;
 	}
 	
-	Line line = {firstPoint, GetMousePosition()};
 	switch (drawObject) {
 	case 1:
-		DrawCircleObj({firstPoint, GetDistance(firstPoint, GetMousePosition())});
+		DrawCircleObj({firstPoint, GetDistance(firstPoint, GetMousePosition()), 1});
 		break;
 	case 2:
-		DrawDistanceObj(line);
+		DrawDistanceObj({firstPoint, GetMousePosition(), 2});
 		break;
 	case 3:
-		DrawRayObj(line);
+		DrawRayObj({firstPoint, GetMousePosition(), 3});
 		break;
 	case 4:
-		DrawStraightLineObj(line);
+		DrawStraightLineObj({firstPoint, GetMousePosition(), 4});
 		break;
 	case 5:
 		DrawPointObj(GetMousePosition());
