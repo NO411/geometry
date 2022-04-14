@@ -23,7 +23,9 @@ class GeometryObj {
 	std::vector<Vector2> intersections;
 	int objectNumber;
 
-	GeometryObj() {}
+	GeometryObj() {
+		//std::cout << "obj created" << std::endl;
+	}
 	~GeometryObj() {}
 };
 
@@ -32,8 +34,8 @@ class Circle: public GeometryObj {
 	Vector2 middle;
 	float radius;
 
-	Circle(Vector2 middle, float radius, int n):middle(middle), radius(radius) {
-		objectNumber = n;
+	Circle(Vector2 middle, float radius):middle(middle), radius(radius) {
+		objectNumber = 1;
 	}
 	~Circle() {}
 };
@@ -130,6 +132,8 @@ std::vector<Line> distances;     //2
 std::vector<Line> rays;          //3
 std::vector<Line> straightLines; //4
 std::vector<Vector2> points;     //5
+Line currentLine = {{0, 0}, {0, 0}, 2};
+Circle currentCircle = {{0, 0}, 0};
 
 float GetDistance(Vector2 vec1, Vector2 vec2) {
 	return sqrt(pow(vec2.x - vec1.x, 2) + pow(vec2.y - vec1.y, 2));
@@ -207,7 +211,7 @@ void DrawObj() {
 		secondPoint = GetMousePosition();
 		switch (drawObject) {
 		case 1:
-			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, secondPoint), 1});
+			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, secondPoint)});
 			break;
 		case 2:
 			distances.push_back(Line{firstPoint, secondPoint, 2});
@@ -262,18 +266,25 @@ void DrawDrawingObj() {
 		return;
 	}
 	
+	currentLine.pointA = firstPoint;
+	currentLine.pointB = GetMousePosition();
+
 	switch (drawObject) {
 	case 1:
-		DrawCircleObj({firstPoint, GetDistance(firstPoint, GetMousePosition()), 1});
+		{
+			currentCircle.middle = firstPoint;
+			currentCircle.radius = GetDistance(firstPoint, GetMousePosition());
+			DrawCircleObj(currentCircle);
+		}
 		break;
 	case 2:
-		DrawDistanceObj({firstPoint, GetMousePosition(), 2});
+		DrawDistanceObj(currentLine);
 		break;
 	case 3:
-		DrawRayObj({firstPoint, GetMousePosition(), 3});
+		DrawRayObj(currentLine);
 		break;
 	case 4:
-		DrawStraightLineObj({firstPoint, GetMousePosition(), 4});
+		DrawStraightLineObj(currentLine);
 		break;
 	case 5:
 		DrawPointObj(GetMousePosition());
