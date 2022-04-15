@@ -39,9 +39,11 @@ class Circle: public GeometryObj {
 
 	Circle(Vector2 middle, float radius):middle(middle), radius(radius) {
 		objectNumber = 1;
-		CheckIntersections(middle, {0, 0}, radius);
+		UpdateIntersections();
 	}
 	~Circle() {}
+
+	void UpdateIntersections();
 };
 
 class Line: public GeometryObj {
@@ -55,7 +57,7 @@ class Line: public GeometryObj {
 	Line(Vector2 pointA, Vector2 pointB, int n):pointA(pointA), pointB(pointB) {
 		objectNumber = n;
 		UpdateConnectionPoints();
-		CheckIntersections(pointA, pointB, 0);
+		UpdateIntersections();
 	}
 	~Line() {}
 
@@ -66,7 +68,31 @@ class Line: public GeometryObj {
 	void UpdateSecondConnectionPoint();
 
 	void UpdateConnectionPoints();
+	void UpdateIntersections();
 };
+
+void Line::UpdateIntersections() {
+	Vector2 v1, v2;
+	switch (objectNumber)
+	{
+	case 2:
+		v1 = pointA, v2 = pointB;
+		break;
+	case 3:
+		v1 = pointA, v2 = secondConnectionPoint;
+		break;
+	case 4:
+		v1 = firstConnectionPoint, v2 = secondConnectionPoint;
+		break;
+	default:
+		break;
+	}
+	CheckIntersections(v1, v2, 0);
+}
+
+void Circle::UpdateIntersections() {
+	CheckIntersections(middle, {0, 0}, radius);
+}
 
 Vector2 Line::GetMN(int ab) {
 	Vector2 p1 = pointA;
@@ -146,34 +172,43 @@ float GetDistance(Vector2 vec1, Vector2 vec2) {
 
 void GeometryObj::CheckIntersectionsCircle(Vector2 middle, float radius) {
 	for (auto& circle : circles) {
-		float c = GetDistance(circle.middle, middle);
-		if (c <= 0) {
+		Vector2 A = middle, B = circle.middle;
+		float a = radius, b = circle.radius;
+
+		float AB0 = B.x - A.x;
+		float AB1 = B.y - A.y;
+
+		float c = sqrt(AB0 * AB0 + AB1 * AB1);
+		if (c == 0) {
 			continue;
 		}
 
-		float aSquare = pow(circle.radius, 2);
-		float x = (aSquare + pow(c, 2) - pow(radius, 2)) / (2 * c);
-		float xSquare = pow(x, 2);
+		float x = (a * a + c * c - b * b) / (2 * c);
+		float y = a * a - x * x;
 
-		if (xSquare > aSquare) {
+		if (y < 0) {
+			continue;
+		} else if (y > 0) {
+			y = sqrt(y);
+		}
+
+		float ex0 = AB0 / c, ex1 = AB1 / c;
+		float ey0 = -ex1, ey1 = ex0;
+		float Q1x = A.x + x * ex0;
+		float Q1y = A.y + x * ex1;
+
+		if (y == 0) {
+			intersections.push_back({Q1x, Q1y});
 			continue;
 		}
+	
+		float Q2x = Q1x - y * ey0;
+		float Q2y = Q1y - y * ey1;
+		Q1x += y * ey0;
+		Q1y += y * ey1;
 
-		float y = sqrt(aSquare - xSquare);
-
-		Vector2 vec;
-		float v1 = (middle.x - circle.middle.x) / c, v2 = (middle.y - circle.middle.y) / c;
-		float v3 = (circle.middle.x + x) * v1, v4 = y * v2, v5 = (circle.middle.y + x) * v2, v6 = y * v1;
-
-		if (y != 0) {
-			vec.x = v3 - v4;
-			vec.y = v5 + v6;
-			intersections.push_back(vec);
-		}
-
-		vec.x = v3 + v4;
-		vec.y = v5 - v6;
-		intersections.push_back(vec);
+		intersections.push_back({Q1x, Q1y});
+		intersections.push_back({Q2x, Q2y});
 	}
 }
 
@@ -192,6 +227,10 @@ void DrawPointObj(Vector2 point) {
 
 void DrawCircleObj(Circle circle) {
 	DrawCircleSectorLines(circle.middle, circle.radius, 0, 360, 2 * circle.radius, BLACK);
+	for (auto& intersection : circle.intersections)
+	{
+		DrawPointObj(intersection);
+	}
 }
 
 void DrawDistanceObj(Line line) {
@@ -203,7 +242,7 @@ bool SameVector2(Vector2 v1, Vector2 v2) {
 }
 
 void DrawRayObj(Line line) {
-	if (SameVector2(line.pointA, line.secondConnectionPoint) || SameVector2(line.pointA, GetMousePosition())) {
+	if (SameVector2(line.pointA, line.secondConnectionPoint)) {
 		return;
 	}
 
