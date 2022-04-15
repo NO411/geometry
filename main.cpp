@@ -286,7 +286,6 @@ void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, 
 	
 	if (!CheckCollisionPointRec(intersection, GetCollisionRec({A1.x, A1.y, A2.x - A1.x, A2.y - A1.y}, {B1.x, B1.y, B2.x - B1.x, B2.y - B1.y})))
 	{
-		//std::cout << "intersection is not included by the two distances" << std::endl;
 		return;
 	}
 
@@ -299,7 +298,7 @@ void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Ve
 	B2 = {B2.x - A.x, B2.y - A.y};
 
 	float v1 = B2.x - B1.x, v2 = B2.y - B1.y;
-	float D = pow(r, 2) * (pow((v1), 2) + pow((v2), 2)) - pow(B1.x * (v2) - B1.y * (v1), 2);
+	float D = pow(r, 2) * (pow(v1, 2) + pow(v2, 2)) - pow(B1.x * v2 - B1.y * v1, 2);
 	float _t1 = -B1.x * v1 - B1.y * v2;
 	float _t2 = pow(v1, 2) + pow(v2, 2);
 	float t1 = (_t1 + sqrt(D)) / _t2, t2 = (_t1 - sqrt(D)) / _t2;
