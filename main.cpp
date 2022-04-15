@@ -187,14 +187,6 @@ float GetDistance(Vector2 vec1, Vector2 vec2)
 	return sqrt(pow(vec2.x - vec1.x, 2) + pow(vec2.y - vec1.y, 2));
 }
 
-void GeometryObj::CheckIntersectionsCircle(Vector2 middle, float radius)
-{
-	for (auto &circle : circles)
-	{
-		FindCircleCircleIntersections(middle, circle.middle, radius, circle.radius);
-	}
-}
-
 void GeometryObj::FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, float b)
 {
 	float c = GetDistance(A, B);
@@ -263,27 +255,31 @@ void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, 
 	// check whether the intersection is included of both lines
 
 	float switch_var;
-	if (A1.x > A2.x) {
+	if (A1.x > A2.x)
+	{
 		switch_var = A1.x;
 		A1.x = A2.x;
 		A2.x = switch_var;
 	}
-	if (A1.y > A2.y) {
+	if (A1.y > A2.y)
+	{
 		switch_var = A1.y;
 		A1.y = A2.y;
 		A2.y = switch_var;
 	}
-	if (B1.x > B2.x) {
+	if (B1.x > B2.x)
+	{
 		switch_var = B1.x;
 		B1.x = B2.x;
 		B2.x = switch_var;
 	}
-	if (B1.y > B2.y) {
+	if (B1.y > B2.y)
+	{
 		switch_var = B1.y;
 		B1.y = B2.y;
 		B2.y = switch_var;
 	}
-	
+
 	if (!CheckCollisionPointRec(intersection, GetCollisionRec({A1.x, A1.y, A2.x - A1.x, A2.y - A1.y}, {B1.x, B1.y, B2.x - B1.x, B2.y - B1.y})))
 	{
 		return;
@@ -322,19 +318,50 @@ void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Ve
 
 void GeometryObj::CheckIntersections(Vector2 vec1, Vector2 vec2, float r)
 {
-	if (objectNumber == 1)
+	switch (objectNumber)
 	{
-		CheckIntersectionsCircle(vec1, r);
-		for (auto& distance : distances) {
+	case 1:
+	{
+		for (auto &circle : circles)
+		{
+			FindCircleCircleIntersections(vec1, circle.middle, r, circle.radius);
+		}
+		for (auto &distance : distances)
+		{
 			FindCircleLineIntersections(vec1, r, distance.pointA, distance.pointB);
 		}
-		return;
+		for (auto &ray : rays)
+		{
+			FindCircleLineIntersections(vec1, r, ray.pointA, ray.secondConnectionPoint);
+		}
+		for (auto &straightLine : straightLines)
+		{
+			FindCircleLineIntersections(vec1, r, straightLine.firstConnectionPoint, straightLine.secondConnectionPoint);
+		}
 	}
-	if (objectNumber == 2)
+	break;
+	case 5:
+		break;
+	default:
 	{
-		for (auto& distance : distances) {
+		for (auto &circle : circles)
+		{
+			FindCircleLineIntersections(circle.middle, circle.radius, vec1, vec2);
+		}
+		for (auto &distance : distances)
+		{
 			FindLineLineIntersections(vec1, vec2, distance.pointA, distance.pointB);
 		}
+		for (auto &ray : rays)
+		{
+			FindLineLineIntersections(vec1, vec2, ray.pointA, ray.secondConnectionPoint);
+		}
+		for (auto &straightLine : straightLines)
+		{
+			FindLineLineIntersections(vec1, vec2, straightLine.firstConnectionPoint, straightLine.secondConnectionPoint);
+		}
+	}
+	break;
 	}
 }
 
@@ -346,19 +373,28 @@ void DrawPointObj(Vector2 point)
 void DrawCircleObj(Circle circle)
 {
 	DrawCircleSectorLines(circle.middle, circle.radius, 0, 360, 2 * circle.radius, BLACK);
+	/*
 	for (auto &intersection : circle.intersections)
 	{
 		DrawPointObj(intersection);
 	}
+	*/
+}
+
+void DrawLineIntersection(Line line)
+{
+	/*
+	for (auto &intersection : line.intersections)
+	{
+		DrawPointObj(intersection);
+	}
+	*/
 }
 
 void DrawDistanceObj(Line line)
 {
 	DrawLineEx(line.pointA, line.pointB, 1, BLACK);
-	for (auto &intersection : line.intersections)
-	{
-		DrawPointObj(intersection);
-	}
+	DrawLineIntersection(line);
 }
 
 bool SameVector2(Vector2 v1, Vector2 v2)
@@ -374,11 +410,13 @@ void DrawRayObj(Line line)
 	}
 
 	DrawLineEx(line.pointA, line.secondConnectionPoint, 1, BLACK);
+	DrawLineIntersection(line);
 }
 
 void DrawStraightLineObj(Line line)
 {
 	DrawLineEx(line.firstConnectionPoint, line.secondConnectionPoint, 1, BLACK);
+	DrawLineIntersection(line);
 }
 
 void SetDrawObj()
