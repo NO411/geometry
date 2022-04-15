@@ -197,15 +197,15 @@ void GeometryObj::CheckIntersectionsCircle(Vector2 middle, float radius)
 
 void GeometryObj::FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, float b)
 {
-	float AB0 = B.x - A.x;
-	float AB1 = B.y - A.y;
-	float c = sqrt(AB0 * AB0 + AB1 * AB1);
+	float c = GetDistance(A, B);
 	if (c == 0)
 	{
 		return;
 	}
-	float x = (a * a + c * c - b * b) / (2 * c);
-	float y = a * a - x * x;
+
+	float powa = pow(a, 2);
+	float x = (powa + pow(c, 2) - pow(b, 2)) / (2 * c);
+	float y = powa - pow(x, 2);
 	if (y < 0)
 	{
 		return;
@@ -214,7 +214,7 @@ void GeometryObj::FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, f
 	{
 		y = sqrt(y);
 	}
-	float ex0 = AB0 / c, ex1 = AB1 / c;
+	float ex0 = (B.x - A.x) / c, ex1 = (B.y - A.y) / c;
 	float ey0 = -ex1, ey1 = ex0;
 	float Q1x = A.x + x * ex0;
 	float Q1y = A.y + x * ex1;
@@ -258,8 +258,6 @@ void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, 
 		y = mnA.x * B1.x + mnA.y;
 	}
 
-
-	
 	Vector2 intersection = {x, y};
 
 	// check whether the intersection is included of both lines
@@ -295,8 +293,32 @@ void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, 
 	intersections.push_back(intersection);
 }
 
-void GeometryObj::FindCircleLineIntersections(Vector2 A, float a, Vector2 B1, Vector2 B2)
+void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Vector2 B2)
 {
+	B1 = {B1.x - A.x, B1.y - A.y};
+	B2 = {B2.x - A.x, B2.y - A.y};
+
+	float v1 = B2.x - B1.x, v2 = B2.y - B1.y;
+	float D = pow(r, 2) * (pow((v1), 2) + pow((v2), 2)) - pow(B1.x * (v2) - B1.y * (v1), 2);
+	float _t1 = -B1.x * v1 - B1.y * v2;
+	float _t2 = pow(v1, 2) + pow(v2, 2);
+	float t1 = (_t1 + sqrt(D)) / _t2, t2 = (_t1 - sqrt(D)) / _t2;
+
+	Vector2 mn = GetMN(B1, B2);
+
+	if (t1 >= 0 && t1 <= 1)
+	{
+		float x = v1 * t1 + B1.x;
+		float y = mn.x * x + mn.y;
+		intersections.push_back({x + A.x, y + A.y});
+	}
+
+	if (t2 >= 0 && t2 <= 1)
+	{
+		float x = v1 * t2 + B1.x;
+		float y = mn.x * x + mn.y;
+		intersections.push_back({x + A.x, y + A.y});
+	}
 }
 
 void GeometryObj::CheckIntersections(Vector2 vec1, Vector2 vec2, float r)
@@ -304,6 +326,9 @@ void GeometryObj::CheckIntersections(Vector2 vec1, Vector2 vec2, float r)
 	if (objectNumber == 1)
 	{
 		CheckIntersectionsCircle(vec1, r);
+		for (auto& distance : distances) {
+			FindCircleLineIntersections(vec1, r, distance.pointA, distance.pointB);
+		}
 		return;
 	}
 	if (objectNumber == 2)
