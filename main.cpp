@@ -39,7 +39,6 @@ public:
 	~GeometryObj() {}
 
 	void CheckIntersections(Vector2 vec1, Vector2 vec2, float r);
-	void CheckIntersectionsCircle(Vector2 middle, float radius);
 
 	void FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, float b);
 	void FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, Vector2 B2);
@@ -520,7 +519,7 @@ void InputHandler()
 	InterruptDrawing();
 }
 
-void CheckRezied()
+void CheckResized()
 {
 	if (!IsWindowResized())
 	{
@@ -530,18 +529,27 @@ void CheckRezied()
 	for (auto &straightLine : straightLines)
 	{
 		straightLine.UpdateConnectionPoints();
+		straightLine.UpdateIntersections();
 	}
-
 	for (auto &ray : rays)
 	{
 		ray.UpdateSecondConnectionPoint();
+		ray.UpdateIntersections();
+	}
+	for (auto &circle : circles)
+	{
+		circle.UpdateIntersections();
+	}
+	for (auto &distance : distances)
+	{
+		distance.UpdateIntersections();
 	}
 }
 
 void Update()
 {
 	InputHandler();
-	CheckRezied();
+	CheckResized();
 }
 
 void DrawDrawingObj()
