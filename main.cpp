@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <math.h>
+#include <algorithm>
 
 Vector2 firstPoint;
 Vector2 secondPoint;
@@ -29,7 +30,6 @@ Vector2 GetMN(Vector2 p1, Vector2 p2)
 class GeometryObj
 {
 public:
-	std::vector<Vector2> intersections;
 	int objectNumber;
 
 	GeometryObj()
@@ -179,8 +179,11 @@ std::vector<Line> distances;	 // 2
 std::vector<Line> rays;			 // 3
 std::vector<Line> straightLines; // 4
 std::vector<Vector2> points;	 // 5
+std::vector<Vector2> intersections;
+
 Line currentLine = {{0, 0}, {0, 0}, 2};
 Circle currentCircle = {{0, 0}, 0};
+Vector2 currentPoint = GetMousePosition();
 
 float GetDistance(Vector2 vec1, Vector2 vec2)
 {
@@ -367,34 +370,18 @@ void GeometryObj::CheckIntersections(Vector2 vec1, Vector2 vec2, float r)
 
 void DrawPointObj(Vector2 point)
 {
-	DrawRing(point, 2, 5, 0, 360, 1000, {51, 79, 84, 150});
+	DrawCircleSector(point, 3, 0, 360, 30, BLUE);
+	DrawRing(point, 3, 4, 0, 360, 30, DARKBLUE);
 }
 
 void DrawCircleObj(Circle circle)
 {
 	DrawCircleSectorLines(circle.middle, circle.radius, 0, 360, 2 * circle.radius, BLACK);
-	/*
-	for (auto &intersection : circle.intersections)
-	{
-		DrawPointObj(intersection);
-	}
-	*/
-}
-
-void DrawLineIntersection(Line line)
-{
-	/*
-	for (auto &intersection : line.intersections)
-	{
-		DrawPointObj(intersection);
-	}
-	*/
 }
 
 void DrawDistanceObj(Line line)
 {
 	DrawLineEx(line.pointA, line.pointB, 1, BLACK);
-	DrawLineIntersection(line);
 }
 
 bool SameVector2(Vector2 v1, Vector2 v2)
@@ -410,13 +397,11 @@ void DrawRayObj(Line line)
 	}
 
 	DrawLineEx(line.pointA, line.secondConnectionPoint, 1, BLACK);
-	DrawLineIntersection(line);
 }
 
 void DrawStraightLineObj(Line line)
 {
 	DrawLineEx(line.firstConnectionPoint, line.secondConnectionPoint, 1, BLACK);
-	DrawLineIntersection(line);
 }
 
 void SetDrawObj()
@@ -449,8 +434,35 @@ void SetDrawObj()
 	}
 }
 
+void UpdateCurrentPoint()
+{
+	std::vector<float> intersectionDistances;
+
+	for (auto &intersection : intersections)
+	{
+		intersectionDistances.push_back(GetDistance(GetMousePosition(), intersection));
+	}
+
+	auto minPos = std::min_element(intersectionDistances.begin(),intersectionDistances.end()) - intersectionDistances.begin();
+	if (!intersectionDistances.empty())
+	{
+		if (intersectionDistances.at(minPos) <= 10)
+		{
+			currentPoint = intersections.at(minPos);
+			return;
+		}
+	}
+
+	currentPoint = GetMousePosition();
+}
+
 void DrawObj()
 {
+	if (drawObject == 5)
+	{
+		UpdateCurrentPoint();
+	}
+
 	if (!IsMouseButtonPressed(0))
 	{
 		return;
@@ -462,8 +474,8 @@ void DrawObj()
 		firstPoint = GetMousePosition();
 		if (drawObject == 5)
 		{
-			points.push_back(firstPoint);
 			firstPointed = false;
+			points.push_back(currentPoint);
 		}
 	}
 	else
@@ -531,6 +543,12 @@ void Update()
 
 void DrawDrawingObj()
 {
+	if (drawObject == 5)
+	{
+		DrawPointObj(currentPoint);
+		return;
+	}
+
 	if (!firstPointed)
 	{
 		return;
@@ -563,9 +581,6 @@ void DrawDrawingObj()
 		DrawStraightLineObj(currentLine);
 	}
 	break;
-	case 5:
-		DrawPointObj(GetMousePosition());
-		break;
 	default:
 		break;
 	}
