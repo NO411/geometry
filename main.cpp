@@ -66,6 +66,8 @@ class Line : public GeometryObj
 public:
 	Vector2 pointA;
 	Vector2 pointB;
+	float m;
+	float n;
 
 	Vector2 firstConnectionPoint;
 	Vector2 secondConnectionPoint;
@@ -73,6 +75,10 @@ public:
 	Line(Vector2 pointA, Vector2 pointB, int n) : pointA(pointA), pointB(pointB)
 	{
 		objectNumber = n;
+		Vector2 mn = GetMN(pointA, pointB);
+		m = mn.x;
+		n = mn.y;
+
 		UpdateConnectionPoints();
 		UpdateIntersections();
 	}
@@ -157,14 +163,12 @@ Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n)
 
 void Line::UpdateFirstConnectionPoint()
 {
-	Vector2 mn = GetMN(pointA, pointB);
-	firstConnectionPoint = CalculateConnectionPoint(pointB, pointA, mn.x, mn.y);
+	firstConnectionPoint = CalculateConnectionPoint(pointB, pointA, m, n);
 }
 
 void Line::UpdateSecondConnectionPoint()
 {
-	Vector2 mn = GetMN(pointB, pointA);
-	secondConnectionPoint = CalculateConnectionPoint(pointA, pointB, mn.x, mn.y);
+	secondConnectionPoint = CalculateConnectionPoint(pointA, pointB, m, n);
 }
 
 void Line::UpdateConnectionPoints()
@@ -442,7 +446,7 @@ void UpdateCurrentPoint()
 		intersectionDistances.push_back(GetDistance(GetMousePosition(), intersection));
 	}
 
-	auto minPos = std::min_element(intersectionDistances.begin(),intersectionDistances.end()) - intersectionDistances.begin();
+	auto minPos = std::min_element(intersectionDistances.begin(), intersectionDistances.end()) - intersectionDistances.begin();
 	if (!intersectionDistances.empty())
 	{
 		if (intersectionDistances.at(minPos) <= 10)
@@ -472,8 +476,10 @@ void DrawObj()
 		{
 			firstPointed = false;
 
-			for (auto &point : points) {
-				if (SameVector2(point, currentPoint)){
+			for (auto &point : points)
+			{
+				if (SameVector2(point, currentPoint))
+				{
 					return;
 				}
 			}
