@@ -66,8 +66,6 @@ class Line : public GeometryObj
 public:
 	Vector2 pointA;
 	Vector2 pointB;
-	float m;
-	float n;
 
 	Vector2 firstConnectionPoint;
 	Vector2 secondConnectionPoint;
@@ -75,9 +73,6 @@ public:
 	Line(Vector2 pointA, Vector2 pointB, int n) : pointA(pointA), pointB(pointB)
 	{
 		objectNumber = n;
-		Vector2 mn = GetMN(pointA, pointB);
-		m = mn.x;
-		n = mn.y;
 
 		UpdateConnectionPoints();
 		UpdateIntersections();
@@ -163,12 +158,14 @@ Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n)
 
 void Line::UpdateFirstConnectionPoint()
 {
-	firstConnectionPoint = CalculateConnectionPoint(pointB, pointA, m, n);
+	Vector2 mn = GetMN(pointA, pointB);
+	firstConnectionPoint = CalculateConnectionPoint(pointB, pointA, mn.x, mn.y);
 }
 
 void Line::UpdateSecondConnectionPoint()
 {
-	secondConnectionPoint = CalculateConnectionPoint(pointA, pointB, m, n);
+	Vector2 mn = GetMN(pointA, pointB);
+	secondConnectionPoint = CalculateConnectionPoint(pointA, pointB, mn.x, mn.y);
 }
 
 void Line::UpdateConnectionPoints()
@@ -456,6 +453,7 @@ void UpdateCurrentPoint()
 		}
 	}
 
+	intersectionDistances.clear();
 	currentPoint = GetMousePosition();
 }
 
