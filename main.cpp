@@ -458,10 +458,7 @@ void UpdateCurrentPoint()
 
 void DrawObj()
 {
-	if (drawObject == 5)
-	{
-		UpdateCurrentPoint();
-	}
+	UpdateCurrentPoint();
 
 	if (!IsMouseButtonPressed(0))
 	{
@@ -471,17 +468,23 @@ void DrawObj()
 	if (!firstPointed)
 	{
 		firstPointed = true;
-		firstPoint = GetMousePosition();
+		firstPoint = currentPoint;
 		if (drawObject == 5)
 		{
 			firstPointed = false;
+
+			for (auto &point : points) {
+				if (SameVector2(point, currentPoint)){
+					return;
+				}
+			}
 			points.push_back(currentPoint);
 		}
 	}
 	else
 	{
 		firstPointed = false;
-		secondPoint = GetMousePosition();
+		secondPoint = currentPoint;
 		switch (drawObject)
 		{
 		case 1:
@@ -543,11 +546,7 @@ void Update()
 
 void DrawDrawingObj()
 {
-	if (drawObject == 5)
-	{
-		DrawPointObj(currentPoint);
-		return;
-	}
+	DrawPointObj(currentPoint);
 
 	if (!firstPointed)
 	{
@@ -555,14 +554,14 @@ void DrawDrawingObj()
 	}
 
 	currentLine.pointA = firstPoint;
-	currentLine.pointB = GetMousePosition();
+	currentLine.pointB = currentPoint;
 
 	switch (drawObject)
 	{
 	case 1:
 	{
 		currentCircle.middle = firstPoint;
-		currentCircle.radius = GetDistance(firstPoint, GetMousePosition());
+		currentCircle.radius = GetDistance(firstPoint, currentPoint);
 		DrawCircleObj(currentCircle);
 	}
 	break;
