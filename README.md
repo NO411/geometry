@@ -12,7 +12,7 @@ Download and compile Raylib:
 Download [w64devkit](https://github.com/skeeto/w64devkit/releases/download/v1.11.0/w64devkit-1.11.0.zip) and unzip the folder.
 On your Windows system, type `env` in the search box and click Enter. Click on `Environment Variables`. Under `System Variables`, click the Path variable. In the new dialog window, copy the pathname of your extracted `w64devkit/bin` folder and paste it into a new path.
 
-You should now have a finished g++ compiler. To prove this, search for `cmd` in the Windows search box and press Enter. Run `g++ --version`.
+You should now have a finished g++ compiler. To prove this, run the `w64devkit.exe` and search for `cmd` in the Windows search box and press Enter. Run `g++ --version`.
 
 Download and unzip [Raylib](https://github.com/raysan5/raylib).
 
