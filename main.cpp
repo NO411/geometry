@@ -32,10 +32,7 @@ class GeometryObj
 public:
 	int objectNumber;
 
-	GeometryObj()
-	{
-		// std::cout << "obj created" << std::endl;
-	}
+	GeometryObj() {}
 	~GeometryObj() {}
 
 	void CheckIntersections(Vector2 vec1, Vector2 vec2, float r);
@@ -257,7 +254,6 @@ void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, 
 
 	// check whether the intersection is included of both lines
 
-
 	if (!CheckCollisionLines(A1, A2, B1, B2, &intersection))
 	{
 		return;
@@ -279,18 +275,46 @@ void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Ve
 
 	Vector2 mn = GetMN(B1, B2);
 
-	if (t1 >= 0 && t1 <= 1)
+	if (!(B1.x == B2.x))
 	{
-		float x = v1 * t1 + B1.x;
-		float y = mn.x * x + mn.y;
-		intersections.push_back({x + A.x, y + A.y});
+		if (t1 >= 0 && t1 <= 1)
+		{
+			float x = v1 * t1 + B1.x;
+			float y = mn.x * x + mn.y;
+			intersections.push_back({x + A.x, y + A.y});
+		}
+
+		if (t2 >= 0 && t2 <= 1)
+		{
+			float x = v1 * t2 + B1.x;
+			float y = mn.x * x + mn.y;
+			intersections.push_back({x + A.x, y + A.y});
+		}
+		return;
 	}
 
-	if (t2 >= 0 && t2 <= 1)
+	B1 = {B1.x + A.x, B1.y + A.y};
+	B2 = {B2.x + A.x, B2.y + A.y};
+
+	float undersqrt = 2 * A.x * B1.x + pow(r, 2) - pow(B1.x, 2) - pow(A.x, 2);
+	float _y = sqrt(undersqrt);
+	float y1 = A.y + _y, y2 = A.y - _y;
+
+	float b1 = B1.y, b2 = B2.y, _var;
+	if (b1 > b2)
 	{
-		float x = v1 * t2 + B1.x;
-		float y = mn.x * x + mn.y;
-		intersections.push_back({x + A.x, y + A.y});
+		_var = b1;
+		b1 = b2;
+		b2 = _var;
+	}
+
+	if (y1 >= b1 && y1 <= b2)
+	{
+		intersections.push_back({B1.x, y1});
+	}
+	if (y2 >= b1 && y2 <= b2)
+	{
+		intersections.push_back({B1.x, y2});
 	}
 }
 
@@ -412,23 +436,46 @@ void SetDrawObj()
 void UpdateCurrentPoint()
 {
 	std::vector<float> intersectionDistances;
+	std::vector<float>::iterator::difference_type minPos;
+
+	auto CanConnectPoint = [&minPos, &intersectionDistances]()
+	{
+		minPos = std::min_element(intersectionDistances.begin(), intersectionDistances.end()) - intersectionDistances.begin();
+		if (intersectionDistances.empty())
+		{
+			return false;
+		}
+		if (intersectionDistances.at(minPos) <= 10)
+		{
+			return true;
+		}
+		return false;
+	};
 
 	for (auto &intersection : intersections)
 	{
 		intersectionDistances.push_back(GetDistance(GetMousePosition(), intersection));
 	}
 
-	auto minPos = std::min_element(intersectionDistances.begin(), intersectionDistances.end()) - intersectionDistances.begin();
-	if (!intersectionDistances.empty())
+	if (CanConnectPoint())
 	{
-		if (intersectionDistances.at(minPos) <= 10)
-		{
-			currentPoint = intersections.at(minPos);
-			return;
-		}
+		currentPoint = intersections.at(minPos);
+		return;
 	}
-	
 	intersectionDistances.clear();
+
+	for (auto &point : points)
+	{
+		intersectionDistances.push_back(GetDistance(point, GetMousePosition()));
+	}
+
+	if (CanConnectPoint())
+	{
+		currentPoint = points.at(minPos);
+		return;
+	}
+	intersectionDistances.clear();
+
 	currentPoint = GetMousePosition();
 }
 
