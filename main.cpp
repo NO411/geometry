@@ -257,33 +257,8 @@ void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, 
 
 	// check whether the intersection is included of both lines
 
-	float switch_var;
-	if (A1.x > A2.x)
-	{
-		switch_var = A1.x;
-		A1.x = A2.x;
-		A2.x = switch_var;
-	}
-	if (A1.y > A2.y)
-	{
-		switch_var = A1.y;
-		A1.y = A2.y;
-		A2.y = switch_var;
-	}
-	if (B1.x > B2.x)
-	{
-		switch_var = B1.x;
-		B1.x = B2.x;
-		B2.x = switch_var;
-	}
-	if (B1.y > B2.y)
-	{
-		switch_var = B1.y;
-		B1.y = B2.y;
-		B2.y = switch_var;
-	}
 
-	if (!CheckCollisionPointRec(intersection, GetCollisionRec({A1.x, A1.y, A2.x - A1.x, A2.y - A1.y}, {B1.x, B1.y, B2.x - B1.x, B2.y - B1.y})))
+	if (!CheckCollisionLines(A1, A2, B1, B2, &intersection))
 	{
 		return;
 	}
@@ -452,7 +427,7 @@ void UpdateCurrentPoint()
 			return;
 		}
 	}
-
+	
 	intersectionDistances.clear();
 	currentPoint = GetMousePosition();
 }
