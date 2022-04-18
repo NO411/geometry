@@ -467,6 +467,16 @@ Vector2 GetOrthogonalLinesIntersection(Vector2 point, Vector2 pointA, Vector2 po
 	return connectionPoint;
 }
 
+Vector2 GetCircleConnection(Circle circle)
+{
+	Vector2 mouse = GetMousePosition();
+	float x = circle.middle.x + (mouse.x - circle.middle.x) / (GetDistance(mouse, circle.middle) / circle.radius);
+	Vector2 mn = GetMN(circle.middle, mouse);
+	float y = mn.x * x + mn.y;
+
+	return {x, y};
+}
+
 void UpdateCurrentPoint()
 {
 	std::vector<float> connectionDistances;
@@ -480,10 +490,11 @@ void UpdateCurrentPoint()
 	5 circles
 	*/
 
-	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints](Vector2 point)
+	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints, &connectionTypes](Vector2 point, int connectionType)
 	{
 		connectionDistances.push_back(GetDistance(point, GetMousePosition()));
 		connectionPoints.push_back(point);
+		connectionTypes.push_back(connectionType);
 	};
 
 	auto LineConnection = [&connectionTypes, &ConnectionDistancesPush](Line line, int lineType)
@@ -502,28 +513,25 @@ void UpdateCurrentPoint()
 		Vector2 intersection = GetOrthogonalLinesIntersection(GetMousePosition(), pointA, pointB);
 		if (IsPointOnLine(intersection.x, pointA, pointB))
 		{
-			ConnectionDistancesPush(intersection);
-			connectionTypes.push_back(4);
+			ConnectionDistancesPush(intersection, 4);
 		}
 	};
 
 	for (auto &distance : distances)
 	{
-		ConnectionDistancesPush(distance.pointA);
-		connectionTypes.push_back(3);
+		ConnectionDistancesPush(distance.pointA, 3);
 
-		ConnectionDistancesPush(distance.pointB);
-		connectionTypes.push_back(3);
+		ConnectionDistancesPush(distance.pointB, 3);
 
 		LineConnection(distance, 2);
 	}
 	for (auto &circle : circles)
 	{
+		ConnectionDistancesPush(GetCircleConnection(circle), 5);
 	}
 	for (auto &ray : rays)
 	{
-		ConnectionDistancesPush(ray.pointA);
-		connectionTypes.push_back(3);
+		ConnectionDistancesPush(ray.pointA, 3);
 
 		LineConnection(ray, 3);
 	}
@@ -533,19 +541,17 @@ void UpdateCurrentPoint()
 	}
 	for (auto &point : points)
 	{
-		ConnectionDistancesPush(point);
-		connectionTypes.push_back(2);
+		ConnectionDistancesPush(point, 2);
 	}
 	for (auto &intersection : intersections)
 	{
-		ConnectionDistancesPush(intersection);
-		connectionTypes.push_back(1);
+		ConnectionDistancesPush(intersection, 1);
 	}
 	
 	while (!connectionDistances.empty())
 	{
 		auto minPos = std::min_element(connectionTypes.begin(), connectionTypes.end()) - connectionTypes.begin();
-		if (connectionDistances.at(minPos) <= 10)
+		if (connectionDistances.at(minPos) <= 7)
 		{
 			currentPoint = connectionPoints.at(minPos);
 			return;
