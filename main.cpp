@@ -463,6 +463,11 @@ Vector2 GetOrthogonalLinesIntersection(Vector2 point, Vector2 pointA, Vector2 po
 	{
 		connectionPoint = {pointA.x, point.y};
 	}
+	
+	if (pointA.y == pointB.y)
+	{
+		connectionPoint = {point.x, pointA.y};
+	}
 
 	return connectionPoint;
 }
