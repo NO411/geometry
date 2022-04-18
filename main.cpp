@@ -433,6 +433,40 @@ void SetDrawObj()
 	}
 }
 
+bool IsPointOnLine(int pointX, Vector2 pointA, Vector2 pointB)
+{
+	float x1 = pointA.x, x2 = pointB.x, _var;
+	if (x1 > x2)
+	{
+		_var = x1;
+		x1 = x2;
+		x2 = _var;
+	}
+	if (pointX >= x1 && pointX <= x2)
+	{
+		return true;
+	}
+	return false;
+}
+
+Vector2 GetOrthogonalLinesIntersection(Vector2 point, Vector2 pointA, Vector2 pointB)
+{
+	Vector2 mn = GetMN(pointA, pointB);
+	float m2 = -1 / mn.x;
+	float n2 = point.y - m2 * point.x;
+	float x = (n2 - mn.y) / (mn.x - m2);
+	float y = mn.x * x + mn.y;
+
+	Vector2 connectionPoint = {x, y};
+
+	if (pointA.x == pointB.x)
+	{
+		connectionPoint = {pointA.x, point.y};
+	}
+
+	return connectionPoint;
+}
+
 void UpdateCurrentPoint()
 {
 	std::vector<float> connectionDistances;
@@ -446,39 +480,65 @@ void UpdateCurrentPoint()
 	5 circles
 	*/
 
-	auto connectionDistancesPush = [&connectionDistances, &connectionPoints](Vector2 point)
+	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints](Vector2 point)
 	{
 		connectionDistances.push_back(GetDistance(point, GetMousePosition()));
 		connectionPoints.push_back(point);
 	};
 
+	auto LineConnection = [&connectionTypes, &ConnectionDistancesPush](Line line, int lineType)
+	{
+		Vector2 pointA = line.pointA, pointB = line.pointB;
+		if (lineType > 2)
+		{
+			pointB = line.secondConnectionPoint;
+		}
+		
+		if (lineType == 4)
+		{
+			pointA = line.firstConnectionPoint;
+		}
+	
+		Vector2 intersection = GetOrthogonalLinesIntersection(GetMousePosition(), pointA, pointB);
+		if (IsPointOnLine(intersection.x, pointA, pointB))
+		{
+			ConnectionDistancesPush(intersection);
+			connectionTypes.push_back(4);
+		}
+	};
+
 	for (auto &distance : distances)
 	{
-		connectionDistancesPush(distance.pointA);
+		ConnectionDistancesPush(distance.pointA);
 		connectionTypes.push_back(3);
 
-		connectionDistancesPush(distance.pointB);
+		ConnectionDistancesPush(distance.pointB);
 		connectionTypes.push_back(3);
+
+		LineConnection(distance, 2);
 	}
 	for (auto &circle : circles)
 	{
 	}
 	for (auto &ray : rays)
 	{
-		connectionDistancesPush(ray.pointA);
+		ConnectionDistancesPush(ray.pointA);
 		connectionTypes.push_back(3);
+
+		LineConnection(ray, 3);
 	}
 	for (auto &straightLine : straightLines)
 	{
+		LineConnection(straightLine, 4);
 	}
 	for (auto &point : points)
 	{
-		connectionDistancesPush(point);
+		ConnectionDistancesPush(point);
 		connectionTypes.push_back(2);
 	}
 	for (auto &intersection : intersections)
 	{
-		connectionDistancesPush(intersection);
+		ConnectionDistancesPush(intersection);
 		connectionTypes.push_back(1);
 	}
 	
@@ -676,7 +736,6 @@ int main()
 
 		BeginDrawing();
 		Draw();
-		DrawFPS(0, 0);
 		EndDrawing();
 	}
 	CloseWindow();
