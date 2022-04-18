@@ -435,46 +435,65 @@ void SetDrawObj()
 
 void UpdateCurrentPoint()
 {
-	std::vector<float> intersectionDistances;
-	std::vector<float>::iterator::difference_type minPos;
+	std::vector<float> connectionDistances;
+	std::vector<Vector2> connectionPoints;
+	std::vector<int> connectionTypes;
+	/* connection order:
+	1 intersections
+	2 points
+	3 line end point
+	4 lines
+	5 circles
+	*/
 
-	auto CanConnectPoint = [&minPos, &intersectionDistances]()
+	auto connectionDistancesPush = [&connectionDistances, &connectionPoints](Vector2 point)
 	{
-		minPos = std::min_element(intersectionDistances.begin(), intersectionDistances.end()) - intersectionDistances.begin();
-		if (intersectionDistances.empty())
-		{
-			return false;
-		}
-		if (intersectionDistances.at(minPos) <= 10)
-		{
-			return true;
-		}
-		return false;
+		connectionDistances.push_back(GetDistance(point, GetMousePosition()));
+		connectionPoints.push_back(point);
 	};
 
-	for (auto &intersection : intersections)
+	for (auto &distance : distances)
 	{
-		intersectionDistances.push_back(GetDistance(GetMousePosition(), intersection));
-	}
+		connectionDistancesPush(distance.pointA);
+		connectionTypes.push_back(3);
 
-	if (CanConnectPoint())
+		connectionDistancesPush(distance.pointB);
+		connectionTypes.push_back(3);
+	}
+	for (auto &circle : circles)
 	{
-		currentPoint = intersections.at(minPos);
-		return;
 	}
-	intersectionDistances.clear();
-
+	for (auto &ray : rays)
+	{
+		connectionDistancesPush(ray.pointA);
+		connectionTypes.push_back(3);
+	}
+	for (auto &straightLine : straightLines)
+	{
+	}
 	for (auto &point : points)
 	{
-		intersectionDistances.push_back(GetDistance(point, GetMousePosition()));
+		connectionDistancesPush(point);
+		connectionTypes.push_back(2);
 	}
-
-	if (CanConnectPoint())
+	for (auto &intersection : intersections)
 	{
-		currentPoint = points.at(minPos);
-		return;
+		connectionDistancesPush(intersection);
+		connectionTypes.push_back(1);
 	}
-	intersectionDistances.clear();
+	
+	while (!connectionDistances.empty())
+	{
+		auto minPos = std::min_element(connectionTypes.begin(), connectionTypes.end()) - connectionTypes.begin();
+		if (connectionDistances.at(minPos) <= 10)
+		{
+			currentPoint = connectionPoints.at(minPos);
+			return;
+		}
+		connectionDistances.erase(connectionDistances.begin() + minPos);
+		connectionPoints.erase(connectionPoints.begin() + minPos);
+		connectionTypes.erase(connectionTypes.begin() + minPos);
+	}
 
 	currentPoint = GetMousePosition();
 }
@@ -623,9 +642,9 @@ void Draw()
 {
 	ClearBackground(RAYWHITE);
 
-	for (auto &line : distances)
+	for (auto &distance : distances)
 	{
-		DrawDistanceObj(line);
+		DrawDistanceObj(distance);
 	}
 	for (auto &circle : circles)
 	{
@@ -657,6 +676,7 @@ int main()
 
 		BeginDrawing();
 		Draw();
+		DrawFPS(0, 0);
 		EndDrawing();
 	}
 	CloseWindow();
