@@ -8,6 +8,7 @@
 Vector2 firstPoint;
 Vector2 secondPoint;
 bool firstPointed = false;
+std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 int drawObject = 2;
 
@@ -375,12 +376,12 @@ void DrawPointObj(Vector2 point)
 
 void DrawCircleObj(Circle circle)
 {
-	DrawCircleSectorLines(circle.middle, circle.radius, 0, 360, 2 * circle.radius, BLACK);
+	DrawCircleSectorLines(circle.middle, circle.radius, 0, 360, 2 * circle.radius, GRAY);
 }
 
 void DrawDistanceObj(Line line)
 {
-	DrawLineEx(line.pointA, line.pointB, 1, BLACK);
+	DrawLineEx(line.pointA, line.pointB, 1, GRAY);
 }
 
 bool SameVector2(Vector2 v1, Vector2 v2)
@@ -395,12 +396,12 @@ void DrawRayObj(Line line)
 		return;
 	}
 
-	DrawLineEx(line.pointA, line.secondConnectionPoint, 1, BLACK);
+	DrawLineEx(line.pointA, line.secondConnectionPoint, 1, GRAY);
 }
 
 void DrawStraightLineObj(Line line)
 {
-	DrawLineEx(line.firstConnectionPoint, line.secondConnectionPoint, 1, BLACK);
+	DrawLineEx(line.firstConnectionPoint, line.secondConnectionPoint, 1, GRAY);
 }
 
 void SetDrawObj()
@@ -556,7 +557,7 @@ void UpdateCurrentPoint()
 	while (!connectionDistances.empty())
 	{
 		auto minPos = std::min_element(connectionTypes.begin(), connectionTypes.end()) - connectionTypes.begin();
-		if (connectionDistances.at(minPos) <= 7)
+		if (connectionDistances.at(minPos) <= 8)
 		{
 			currentPoint = connectionPoints.at(minPos);
 			return;
@@ -670,8 +671,6 @@ void Update()
 
 void DrawDrawingObj()
 {
-	DrawPointObj(currentPoint);
-
 	if (!firstPointed)
 	{
 		return;
@@ -711,7 +710,7 @@ void DrawDrawingObj()
 
 void Draw()
 {
-	ClearBackground(RAYWHITE);
+	ClearBackground(WHITE);
 
 	for (auto &distance : distances)
 	{
@@ -729,12 +728,28 @@ void Draw()
 	{
 		DrawStraightLineObj(straightLine);
 	}
+	int i = 0;
 	for (auto &point : points)
 	{
 		DrawPointObj(point);
+
+		int chars = pointChars.size();
+		int charn = i % chars;
+		std::string letter = pointChars.substr(charn, 1);
+		DrawText(letter.c_str(), point.x + 4, point.y + 4, 10, BLACK);
+
+		if (i >= chars)
+		{
+			int n = i / chars;
+			std::string pointn = std::to_string(n);
+			DrawText(pointn.c_str(), point.x + 12, point.y + 8, 5, GRAY);
+		}
+
+		i++;
 	}
 
 	DrawDrawingObj();
+	DrawPointObj(currentPoint);
 }
 
 int main()
