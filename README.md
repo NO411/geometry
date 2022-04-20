@@ -11,6 +11,8 @@ Made with Raylib.
 - `ESC` interrupt drawing
 - `left mouse click` set first / second point of a line or the middle point or radius of a circle
 
+The cursor automatically connects to intersections, other points, lines, and circles.
+
 ## Installation
 ### Windows
 
