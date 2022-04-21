@@ -8,6 +8,7 @@ Made with Raylib.
 - `CTRL` + `D` distance drawing mode
 - `CTRL` + `R` ray drawing mode
 - `CTRL` + `P` point drawing mode
+- `CTRL` + `E` enable eraser
 - `ESC` interrupt drawing
 - `left mouse click` set first / second point of a line or the middle point or radius of a circle
 
