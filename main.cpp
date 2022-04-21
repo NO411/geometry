@@ -10,6 +10,7 @@ Vector2 firstPoint;
 Vector2 secondPoint;
 bool firstPointed = false;
 std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const float movementSpeed = 4;
 
 int drawObject = 2;
 
@@ -58,6 +59,8 @@ public:
 	~Circle() {}
 
 	void UpdateIntersections();
+
+	void Move(int direction, bool y);
 };
 
 class Line : public GeometryObj
@@ -83,6 +86,8 @@ public:
 
 	void UpdateConnectionPoints();
 	void UpdateIntersections();
+
+	void Move(int direction, bool y);
 };
 
 class Point
@@ -92,12 +97,15 @@ public:
 	std::string letter;
 	std::string letterNumber;
 
-	Point(Vector2 point):point(point) {
+	Point(Vector2 point) : point(point)
+	{
 		SetPointLetter();
 	}
 	~Point() {}
 
 	void SetPointLetter();
+
+	void Move(int direction, bool y);
 };
 
 void Line::UpdateIntersections()
@@ -128,7 +136,6 @@ void Circle::UpdateIntersections()
 Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n)
 {
 	Vector2 connectionPoint = {};
-
 	float y = m * GetScreenWidth() + n;
 	connectionPoint.x = GetScreenWidth();
 	if (p1.x > p2.x)
@@ -192,9 +199,9 @@ std::vector<Circle> circles;	 // 1
 std::vector<Line> distances;	 // 2
 std::vector<Line> rays;			 // 3
 std::vector<Line> straightLines; // 4
-std::vector<Point> points;	 // 5
+std::vector<Point> points;		 // 5
 								 // 6 erasers
-std::vector<Vector2> intersections;
+std::vector<Point> intersections;
 
 Line currentLine = {{0, 0}, {0, 0}, 2};
 Circle currentCircle = {{0, 0}, 0};
@@ -243,7 +250,7 @@ void Point::SetPointLetter()
 			letterNumbers.at(found).push_back(n);
 		}
 	}
-	
+
 	auto minPos = std::min_element(letterQuantity.begin(), letterQuantity.end()) - letterQuantity.begin();
 	letter = pointChars.substr(minPos, 1);
 
@@ -252,7 +259,7 @@ void Point::SetPointLetter()
 	{
 		i++;
 	}
-	
+
 	if (i == 0)
 	{
 		letterNumber = "";
@@ -292,15 +299,15 @@ void GeometryObj::FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, f
 	float Q1y = A.y + x * ex1;
 	if (y == 0)
 	{
-		intersections.push_back({Q1x, Q1y});
+		intersections.push_back({{Q1x, Q1y}});
 		return;
 	}
 	float Q2x = Q1x - y * ey0;
 	float Q2y = Q1y - y * ey1;
 	Q1x += y * ey0;
 	Q1y += y * ey1;
-	intersections.push_back({Q1x, Q1y});
-	intersections.push_back({Q2x, Q2y});
+	intersections.push_back({{Q1x, Q1y}});
+	intersections.push_back({{Q2x, Q2y}});
 }
 
 void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, Vector2 B2)
@@ -361,14 +368,14 @@ void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Ve
 		{
 			float x = v1 * t1 + B1.x;
 			float y = mn.x * x + mn.y;
-			intersections.push_back({x + A.x, y + A.y});
+			intersections.push_back({{x + A.x, y + A.y}});
 		}
 
 		if (t2 >= 0 && t2 <= 1)
 		{
 			float x = v1 * t2 + B1.x;
 			float y = mn.x * x + mn.y;
-			intersections.push_back({x + A.x, y + A.y});
+			intersections.push_back({{x + A.x, y + A.y}});
 		}
 		return;
 	}
@@ -390,11 +397,11 @@ void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Ve
 
 	if (y1 >= b1 && y1 <= b2)
 	{
-		intersections.push_back({B1.x, y1});
+		intersections.push_back({{B1.x, y1}});
 	}
 	if (y2 >= b1 && y2 <= b2)
 	{
-		intersections.push_back({B1.x, y2});
+		intersections.push_back({{B1.x, y2}});
 	}
 }
 
@@ -633,7 +640,7 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 	}
 	for (auto &intersection : intersections)
 	{
-		ConnectionDistancesPush(intersection, 2, 0, 0);
+		ConnectionDistancesPush(intersection.point, 2, 0, 0);
 	}
 
 	while (!connectionDistances.empty())
@@ -681,7 +688,7 @@ void EraseObj(std::tuple<int, std::size_t> objTuple)
 {
 	int objType = std::get<0>(objTuple);
 	std::size_t objPos = std::get<1>(objTuple);
-	
+
 	if (objType < 1)
 	{
 		return;
@@ -774,11 +781,113 @@ void InterruptDrawing()
 	}
 }
 
+void Circle::Move(int direction, bool y)
+{
+	float movement = direction * movementSpeed;
+
+	if (y)
+	{
+		middle.y += movement;
+		return;
+	}
+
+	middle.x += movement;
+}
+
+void Line::Move(int direction, bool y)
+{
+	float movement = direction * movementSpeed;
+
+	if (y)
+	{
+		pointA.y += movement;
+		pointB.y += movement;
+	}
+	else
+	{
+		pointA.x += movement;
+		pointB.x += movement;
+	}
+
+	if (objectNumber > 2)
+	{
+		UpdateSecondConnectionPoint();
+	}
+
+	if (objectNumber > 3)
+	{
+		UpdateFirstConnectionPoint();
+	}
+}
+
+void Point::Move(int direction, bool y)
+{
+	float movement = direction * movementSpeed;
+
+	if (y)
+	{
+		point.y += movement;
+		return;
+	}
+
+	point.x += movement;
+}
+
+void MoveObjects(int direction, bool y)
+{
+	for (auto &distance : distances)
+	{
+		distance.Move(direction, y);
+	}
+	for (auto &circle : circles)
+	{
+		circle.Move(direction, y);
+	}
+	for (auto &ray : rays)
+	{
+		ray.Move(direction, y);
+	}
+	for (auto &straightLine : straightLines)
+	{
+		straightLine.Move(direction, y);
+	}
+	for (auto &point : points)
+	{
+		point.Move(direction, y);
+	}
+	for (auto &intersection : intersections)
+	{
+		intersection.Move(direction, y);
+	}
+}
+
+void Move()
+{
+	if (IsKeyDown(KEY_LEFT))
+	{
+		MoveObjects(-1, false);
+	}
+	else if (IsKeyDown(KEY_RIGHT))
+	{
+		MoveObjects(1, false);
+	}
+	
+	if (IsKeyDown(KEY_UP))
+	{
+		MoveObjects(-1, true);
+	}
+	else if (IsKeyDown(KEY_DOWN))
+	{
+		MoveObjects(1, true);
+	}
+}
+
 void InputHandler()
 {
 	DrawObj();
 	SetDrawObj();
 	InterruptDrawing();
+	Move();
 }
 
 void CheckResized()
