@@ -4,6 +4,7 @@
 #include <string>
 #include <math.h>
 #include <algorithm>
+#include <tuple>
 
 Vector2 firstPoint;
 Vector2 secondPoint;
@@ -82,6 +83,21 @@ public:
 
 	void UpdateConnectionPoints();
 	void UpdateIntersections();
+};
+
+class Point
+{
+public:
+	Vector2 point;
+	std::string letter;
+	std::string letterNumber;
+
+	Point(Vector2 point):point(point) {
+		SetPointLetter();
+	}
+	~Point() {}
+
+	void SetPointLetter();
 };
 
 void Line::UpdateIntersections()
@@ -176,12 +192,75 @@ std::vector<Circle> circles;	 // 1
 std::vector<Line> distances;	 // 2
 std::vector<Line> rays;			 // 3
 std::vector<Line> straightLines; // 4
-std::vector<Vector2> points;	 // 5
+std::vector<Point> points;	 // 5
+								 // 6 erasers
 std::vector<Vector2> intersections;
 
 Line currentLine = {{0, 0}, {0, 0}, 2};
 Circle currentCircle = {{0, 0}, 0};
 Vector2 currentPoint = GetMousePosition();
+
+bool PointLetterExists(std::string letter)
+{
+	for (auto &point : points)
+	{
+		if (point.letter == letter)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void Point::SetPointLetter()
+{
+	for (std::size_t i = 0; i < pointChars.size(); i++)
+	{
+		std::string _letter = pointChars.substr(i, 1);
+		if (!PointLetterExists(_letter))
+		{
+			letter = _letter;
+			letterNumber = "";
+			return;
+		}
+	}
+
+	std::vector<int> letterQuantity(pointChars.size());
+	std::vector<std::vector<int>> letterNumbers(pointChars.size());
+
+	for (auto &point : points)
+	{
+		auto found = pointChars.find(point.letter);
+		if (found != std::string::npos)
+		{
+			letterQuantity.at(found)++;
+
+			int n = 0;
+			if (point.letterNumber != "")
+			{
+				n = std::stoi(point.letterNumber);
+			}
+			letterNumbers.at(found).push_back(n);
+		}
+	}
+	
+	auto minPos = std::min_element(letterQuantity.begin(), letterQuantity.end()) - letterQuantity.begin();
+	letter = pointChars.substr(minPos, 1);
+
+	int i = 0;
+	while (std::count(letterNumbers.at(minPos).begin(), letterNumbers.at(minPos).end(), i))
+	{
+		i++;
+	}
+	
+	if (i == 0)
+	{
+		letterNumber = "";
+		return;
+	}
+
+	letterNumber = std::to_string(i);
+}
 
 float GetDistance(Vector2 vec1, Vector2 vec2)
 {
@@ -376,12 +455,12 @@ void DrawPointObj(Vector2 point)
 
 void DrawCircleObj(Circle circle)
 {
-	DrawCircleSectorLines(circle.middle, circle.radius, 0, 360, 2 * circle.radius, GRAY);
+	DrawCircleSectorLines(circle.middle, circle.radius, 0, 360, 2 * circle.radius, LIGHTGRAY);
 }
 
 void DrawDistanceObj(Line line)
 {
-	DrawLineEx(line.pointA, line.pointB, 1, GRAY);
+	DrawLineEx(line.pointA, line.pointB, 2, LIGHTGRAY);
 }
 
 bool SameVector2(Vector2 v1, Vector2 v2)
@@ -396,12 +475,12 @@ void DrawRayObj(Line line)
 		return;
 	}
 
-	DrawLineEx(line.pointA, line.secondConnectionPoint, 1, GRAY);
+	DrawLineEx(line.pointA, line.secondConnectionPoint, 2, LIGHTGRAY);
 }
 
 void DrawStraightLineObj(Line line)
 {
-	DrawLineEx(line.firstConnectionPoint, line.secondConnectionPoint, 1, GRAY);
+	DrawLineEx(line.firstConnectionPoint, line.secondConnectionPoint, 2, LIGHTGRAY);
 }
 
 void SetDrawObj()
@@ -427,6 +506,9 @@ void SetDrawObj()
 		break;
 	case KEY_P:
 		drawObject = 5;
+		break;
+	case KEY_E:
+		drawObject = 6;
 		break;
 
 	default:
@@ -464,7 +546,7 @@ Vector2 GetOrthogonalLinesIntersection(Vector2 point, Vector2 pointA, Vector2 po
 	{
 		connectionPoint = {pointA.x, point.y};
 	}
-	
+
 	if (pointA.y == pointB.y)
 	{
 		connectionPoint = {point.x, pointA.y};
@@ -483,96 +565,127 @@ Vector2 GetCircleConnection(Circle circle)
 	return {x, y};
 }
 
-void UpdateCurrentPoint()
+std::tuple<int, std::size_t> UpdateCurrentPoint()
 {
 	std::vector<float> connectionDistances;
 	std::vector<Vector2> connectionPoints;
 	std::vector<int> connectionTypes;
+	std::vector<std::tuple<int, std::size_t>> objPlaces;
 	/* connection order:
-	1 intersections
-	2 points
+	1 points
+	2 intersections
 	3 line end point
 	4 lines
 	5 circles
 	*/
 
-	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints, &connectionTypes](Vector2 point, int connectionType)
+	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vector2 point, int connectionType, int objType, std::size_t objPos)
 	{
 		connectionDistances.push_back(GetDistance(point, GetMousePosition()));
 		connectionPoints.push_back(point);
 		connectionTypes.push_back(connectionType);
+		objPlaces.push_back(std::make_tuple(objType, objPos));
 	};
 
-	auto LineConnection = [&connectionTypes, &ConnectionDistancesPush](Line line, int lineType)
+	auto LineConnection = [&connectionTypes, &ConnectionDistancesPush](Line line, int lineType, int objType, std::size_t objPos)
 	{
 		Vector2 pointA = line.pointA, pointB = line.pointB;
 		if (lineType > 2)
 		{
 			pointB = line.secondConnectionPoint;
 		}
-		
+
 		if (lineType == 4)
 		{
 			pointA = line.firstConnectionPoint;
 		}
-	
+
 		Vector2 intersection = GetOrthogonalLinesIntersection(GetMousePosition(), pointA, pointB);
 		if (IsPointOnLine(intersection.x, pointA, pointB))
 		{
-			ConnectionDistancesPush(intersection, 4);
+			ConnectionDistancesPush(intersection, 4, objType, objPos);
 		}
 	};
 
-	for (auto &distance : distances)
+	for (std::size_t i = 0; i < distances.size(); ++i)
 	{
-		ConnectionDistancesPush(distance.pointA, 3);
+		ConnectionDistancesPush(distances[i].pointA, 3, 2, i);
+		ConnectionDistancesPush(distances[i].pointB, 3, 2, i);
+		LineConnection(distances[i], 2, 2, i);
+	}
+	for (std::size_t i = 0; i < circles.size(); ++i)
+	{
+		ConnectionDistancesPush(GetCircleConnection(circles[i]), 5, 1, i);
+	}
+	for (std::size_t i = 0; i < rays.size(); ++i)
+	{
+		ConnectionDistancesPush(rays[i].pointA, 3, 3, i);
 
-		ConnectionDistancesPush(distance.pointB, 3);
-
-		LineConnection(distance, 2);
+		LineConnection(rays[i], 3, 3, i);
 	}
-	for (auto &circle : circles)
+	for (std::size_t i = 0; i < straightLines.size(); ++i)
 	{
-		ConnectionDistancesPush(GetCircleConnection(circle), 5);
+		LineConnection(straightLines[i], 4, 4, i);
 	}
-	for (auto &ray : rays)
+	for (std::size_t i = 0; i < points.size(); ++i)
 	{
-		ConnectionDistancesPush(ray.pointA, 3);
-
-		LineConnection(ray, 3);
-	}
-	for (auto &straightLine : straightLines)
-	{
-		LineConnection(straightLine, 4);
-	}
-	for (auto &point : points)
-	{
-		ConnectionDistancesPush(point, 2);
+		ConnectionDistancesPush(points[i].point, 1, 5, i);
 	}
 	for (auto &intersection : intersections)
 	{
-		ConnectionDistancesPush(intersection, 1);
+		ConnectionDistancesPush(intersection, 2, 0, 0);
 	}
-	
+
 	while (!connectionDistances.empty())
 	{
 		auto minPos = std::min_element(connectionTypes.begin(), connectionTypes.end()) - connectionTypes.begin();
 		if (connectionDistances.at(minPos) <= 8)
 		{
 			currentPoint = connectionPoints.at(minPos);
-			return;
+			return objPlaces.at(minPos);
 		}
 		connectionDistances.erase(connectionDistances.begin() + minPos);
 		connectionPoints.erase(connectionPoints.begin() + minPos);
 		connectionTypes.erase(connectionTypes.begin() + minPos);
+		objPlaces.erase(objPlaces.begin() + minPos);
 	}
 
 	currentPoint = GetMousePosition();
+	return std::make_tuple(0, 0);
+}
+
+void EraseObj(std::tuple<int, std::size_t> objTuple)
+{
+	auto [objType, objPos] = objTuple;
+	if (objType < 1)
+	{
+		return;
+	}
+	switch (objType)
+	{
+	case 1:
+		circles.erase(circles.begin() + objPos);
+		break;
+	case 2:
+		distances.erase(distances.begin() + objPos);
+		break;
+	case 3:
+		rays.erase(rays.begin() + objPos);
+		break;
+	case 4:
+		straightLines.erase(straightLines.begin() + objPos);
+		break;
+	case 5:
+		points.erase(points.begin() + objPos);
+		break;
+	default:
+		break;
+	}
 }
 
 void DrawObj()
 {
-	UpdateCurrentPoint();
+	auto objTuple = UpdateCurrentPoint();
 
 	if (!IsMouseButtonPressed(0))
 	{
@@ -589,12 +702,17 @@ void DrawObj()
 
 			for (auto &point : points)
 			{
-				if (SameVector2(point, currentPoint))
+				if (SameVector2(point.point, currentPoint))
 				{
 					return;
 				}
 			}
-			points.push_back(currentPoint);
+			points.push_back({currentPoint});
+		}
+		else if (drawObject == 6)
+		{
+			firstPointed = false;
+			EraseObj(objTuple);
 		}
 	}
 	else
@@ -728,24 +846,12 @@ void Draw()
 	{
 		DrawStraightLineObj(straightLine);
 	}
-	int i = 0;
+
 	for (auto &point : points)
 	{
-		DrawPointObj(point);
-
-		int chars = pointChars.size();
-		int charn = i % chars;
-		std::string letter = pointChars.substr(charn, 1);
-		DrawText(letter.c_str(), point.x + 4, point.y + 4, 10, BLACK);
-
-		if (i >= chars)
-		{
-			int n = i / chars;
-			std::string pointn = std::to_string(n);
-			DrawText(pointn.c_str(), point.x + 12, point.y + 8, 5, GRAY);
-		}
-
-		i++;
+		DrawPointObj(point.point);
+		DrawText(point.letter.c_str(), point.point.x + 4, point.point.y + 4, 10, BLACK);
+		DrawText(point.letterNumber.c_str(), point.point.x + 12, point.point.y + 8, 5, LIGHTGRAY);
 	}
 
 	DrawDrawingObj();
