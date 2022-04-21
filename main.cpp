@@ -873,7 +873,7 @@ void Move()
 	{
 		MoveObjects(1, false);
 	}
-	
+
 	if (IsKeyDown(KEY_UP))
 	{
 		MoveObjects(-1, true);
