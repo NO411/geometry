@@ -3,14 +3,21 @@ Made with Raylib.
 
 ## Usage
 
-- `CTRL` + `C` circle drawing mode
-- `CTRL` + `S` straight line drawing mode
-- `CTRL` + `D` distance drawing mode
-- `CTRL` + `R` ray drawing mode
-- `CTRL` + `P` point drawing mode
-- `CTRL` + `E` enable eraser
-- `ESC` interrupt drawing
-- `left mouse click` set first / second point of a line or the middle point or radius of a circle
+| Keys                          | Action                                                                       |
+|-------------------------------|------------------------------------------------------------------------------|
+| `CTRL` + `C`                  | circle drawing mode                                                          |
+| `CTRL` + `S`                  | straight line drawing mode                                                   |
+| `CTRL` + `D`                  | distance drawing mode                                                        |
+| `CTRL` + `R`                  | ray drawing mode                                                             |
+| `CTRL` + `P`                  | point drawing mode                                                           |
+| `CTRL` + `E`                  | enable eraser                                                                |
+| `left mouse button`           | set first / second point of a line or the middle point or radius of a circle |
+| `ESC`                         | Place/use                                                                    |
+| `←`                           | move everything to the left                                                  |
+| `→`                           | move everything to the right                                                 |
+| `↑`                           | move everything up                                                           |
+| `↓`                           | move everything down                                                         |
+
 
 The cursor automatically connects to intersections, other points, lines, and circles.
 
