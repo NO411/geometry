@@ -859,6 +859,8 @@ void MoveObjects(int direction, bool y)
 	{
 		intersection.Move(direction, y);
 	}
+
+	UpdateAllIntersections();
 }
 
 void Move()
