@@ -654,9 +654,34 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 	return std::make_tuple(0, 0);
 }
 
+void UpdateAllIntersections()
+{
+	intersections.clear();
+	for (auto &straightLine : straightLines)
+	{
+		straightLine.UpdateConnectionPoints();
+		straightLine.UpdateIntersections();
+	}
+	for (auto &ray : rays)
+	{
+		ray.UpdateSecondConnectionPoint();
+		ray.UpdateIntersections();
+	}
+	for (auto &circle : circles)
+	{
+		circle.UpdateIntersections();
+	}
+	for (auto &distance : distances)
+	{
+		distance.UpdateIntersections();
+	}
+}
+
 void EraseObj(std::tuple<int, std::size_t> objTuple)
 {
-	auto [objType, objPos] = objTuple;
+	int objType = std::get<0>(objTuple);
+	std::size_t objPos = std::get<1>(objTuple);
+	
 	if (objType < 1)
 	{
 		return;
@@ -681,6 +706,8 @@ void EraseObj(std::tuple<int, std::size_t> objTuple)
 	default:
 		break;
 	}
+
+	UpdateAllIntersections();
 }
 
 void DrawObj()
@@ -761,24 +788,7 @@ void CheckResized()
 		return;
 	}
 
-	for (auto &straightLine : straightLines)
-	{
-		straightLine.UpdateConnectionPoints();
-		straightLine.UpdateIntersections();
-	}
-	for (auto &ray : rays)
-	{
-		ray.UpdateSecondConnectionPoint();
-		ray.UpdateIntersections();
-	}
-	for (auto &circle : circles)
-	{
-		circle.UpdateIntersections();
-	}
-	for (auto &distance : distances)
-	{
-		distance.UpdateIntersections();
-	}
+	UpdateAllIntersections();
 }
 
 void Update()
