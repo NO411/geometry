@@ -6,8 +6,6 @@
 #include <algorithm>
 #include <tuple>
 
-Vector2 firstPoint;
-Vector2 secondPoint;
 bool firstPointed = false;
 std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const float movementSpeed = 4;
@@ -97,6 +95,7 @@ public:
 	std::string letter;
 	std::string letterNumber;
 
+	Point() {}
 	Point(Vector2 point) : point(point)
 	{
 		SetPointLetter();
@@ -203,6 +202,7 @@ std::vector<Point> points;		 // 5
 								 // 6 erasers
 std::vector<Point> intersections;
 
+Point firstPoint;
 Line currentLine = {{0, 0}, {0, 0}, 2};
 Circle currentCircle = {{0, 0}, 0};
 Vector2 currentPoint = GetMousePosition();
@@ -729,7 +729,7 @@ void DrawObj()
 	if (!firstPointed)
 	{
 		firstPointed = true;
-		firstPoint = currentPoint;
+		firstPoint = {currentPoint};
 		if (drawObject == 5)
 		{
 			firstPointed = false;
@@ -752,20 +752,19 @@ void DrawObj()
 	else
 	{
 		firstPointed = false;
-		secondPoint = currentPoint;
 		switch (drawObject)
 		{
 		case 1:
-			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, secondPoint)});
+			circles.push_back(Circle{firstPoint.point, GetDistance(firstPoint.point, currentPoint)});
 			break;
 		case 2:
-			distances.push_back(Line{firstPoint, secondPoint, 2});
+			distances.push_back(Line{firstPoint.point, currentPoint, 2});
 			break;
 		case 3:
-			rays.push_back(Line{firstPoint, secondPoint, 3});
+			rays.push_back(Line{firstPoint.point, currentPoint, 3});
 			break;
 		case 4:
-			straightLines.push_back(Line{firstPoint, secondPoint, 4});
+			straightLines.push_back(Line{firstPoint.point, currentPoint, 4});
 			break;
 		default:
 			break;
@@ -860,6 +859,8 @@ void MoveObjects(int direction, bool y)
 		intersection.Move(direction, y);
 	}
 
+	firstPoint.Move(direction, y);
+
 	UpdateAllIntersections();
 }
 
@@ -915,15 +916,15 @@ void DrawDrawingObj()
 		return;
 	}
 
-	currentLine.pointA = firstPoint;
+	currentLine.pointA = firstPoint.point;
 	currentLine.pointB = currentPoint;
 
 	switch (drawObject)
 	{
 	case 1:
 	{
-		currentCircle.middle = firstPoint;
-		currentCircle.radius = GetDistance(firstPoint, currentPoint);
+		currentCircle.middle = firstPoint.point;
+		currentCircle.radius = GetDistance(firstPoint.point, currentPoint);
 		DrawCircleObj(currentCircle);
 	}
 	break;
