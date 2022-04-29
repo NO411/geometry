@@ -9,8 +9,9 @@
 bool firstPointed = false;
 std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const float movementSpeed = 4;
+float scaling = 0.025;
 
-int drawObject = 2;
+int editMode = 2;
 
 void Init()
 {
@@ -43,6 +44,25 @@ public:
 	void FindCircleLineIntersections(Vector2 A, float a, Vector2 B1, Vector2 B2);
 };
 
+class Point
+{
+public:
+	Vector2 point;
+	std::string letter;
+	std::string letterNumber;
+
+	Point() {}
+	Point(Vector2 point) : point(point)
+	{
+		SetPointLetter();
+	}
+	~Point() {}
+
+	void SetPointLetter();
+
+	void Move(int direction, bool y);
+};
+
 class Circle : public GeometryObj
 {
 public:
@@ -70,12 +90,18 @@ public:
 	Vector2 firstConnectionPoint;
 	Vector2 secondConnectionPoint;
 
+	bool showLength = false;
+	float length;
+	Point middle;
+
 	Line(Vector2 pointA, Vector2 pointB, int n) : pointA(pointA), pointB(pointB)
 	{
 		objectNumber = n;
 
 		UpdateConnectionPoints();
 		UpdateIntersections();
+
+		UpdateLength();
 	}
 	~Line() {}
 
@@ -86,25 +112,7 @@ public:
 	void UpdateIntersections();
 
 	void Move(int direction, bool y);
-};
-
-class Point
-{
-public:
-	Vector2 point;
-	std::string letter;
-	std::string letterNumber;
-
-	Point() {}
-	Point(Vector2 point) : point(point)
-	{
-		SetPointLetter();
-	}
-	~Point() {}
-
-	void SetPointLetter();
-
-	void Move(int direction, bool y);
+	void UpdateLength();
 };
 
 void Line::UpdateIntersections()
@@ -200,6 +208,8 @@ std::vector<Line> rays;			 // 3
 std::vector<Line> straightLines; // 4
 std::vector<Point> points;		 // 5
 								 // 6 erasers
+								 // 7 distance measurement
+								 // 8 angle measurement
 std::vector<Point> intersections;
 
 Point firstPoint;
@@ -272,6 +282,13 @@ void Point::SetPointLetter()
 float GetDistance(Vector2 vec1, Vector2 vec2)
 {
 	return sqrt(pow(vec2.x - vec1.x, 2) + pow(vec2.y - vec1.y, 2));
+}
+
+void Line::UpdateLength()
+{
+	length = GetDistance(pointA, pointB) * scaling;
+
+	middle.point = {(pointA.x + pointB.x) / 2, (pointA.y + pointB.y) / 2};
 }
 
 void GeometryObj::FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, float b)
@@ -470,6 +487,19 @@ void DrawDistanceObj(Line line)
 	DrawLineEx(line.pointA, line.pointB, 2, LIGHTGRAY);
 }
 
+void DrawDistanceLengths(Line line, Font *font)
+{
+	if (!line.showLength)
+	{
+		return;
+	}
+	int fontSize = 12;
+	std::string len = std::to_string(line.length);
+	Vector2 measure = MeasureTextEx(*font, len.c_str(), fontSize, 0);
+	DrawTextEx(*font, len.c_str(), {line.middle.point.x, line.middle.point.y}, fontSize, 0, BLACK);
+	DrawRectangleRec({line.middle.point.x - 2, line.middle.point.y - 2, measure.x + 4, measure.y + 4}, {200, 200, 200, 150});
+}
+
 bool SameVector2(Vector2 v1, Vector2 v2)
 {
 	return (v1.x == v2.x && v1.y == v2.y);
@@ -500,24 +530,44 @@ void SetDrawObj()
 	switch (GetKeyPressed())
 	{
 	case KEY_C:
-		drawObject = 1;
+		editMode = 1;
 		break;
 	case KEY_D:
-		drawObject = 2;
+		editMode = 2;
 		break;
 	case KEY_R:
-		drawObject = 3;
+		editMode = 3;
 		break;
 	case KEY_S:
-		drawObject = 4;
+		editMode = 4;
 		break;
 	case KEY_P:
-		drawObject = 5;
+		editMode = 5;
 		break;
 	case KEY_E:
-		drawObject = 6;
+		editMode = 6;
+		if (IsKeyDown(KEY_M))
+		{
+			if (IsKeyDown(KEY_D))
+			{
+				editMode = 9;
+			}
+			else if (IsKeyDown(KEY_A))
+			{
+				editMode = 10;
+			}
+		}
 		break;
-
+	case KEY_M:
+		if (IsKeyDown(KEY_D))
+		{
+			editMode = 7;
+		}
+		else if (IsKeyDown(KEY_A))
+		{
+			editMode = 8;
+		}
+		break;
 	default:
 		break;
 	}
@@ -720,7 +770,8 @@ void EraseObj(std::tuple<int, std::size_t> objTuple)
 void DrawObj()
 {
 	auto objTuple = UpdateCurrentPoint();
-
+	int objType = std::get<0>(objTuple);
+	std::size_t objPos = std::get<1>(objTuple);
 	if (!IsMouseButtonPressed(0))
 	{
 		return;
@@ -730,8 +781,9 @@ void DrawObj()
 	{
 		firstPointed = true;
 		firstPoint = {currentPoint};
-		if (drawObject == 5)
+		switch (editMode)
 		{
+		case 5:
 			firstPointed = false;
 
 			for (auto &point : points)
@@ -742,17 +794,40 @@ void DrawObj()
 				}
 			}
 			points.push_back({currentPoint});
-		}
-		else if (drawObject == 6)
-		{
+			break;
+		case 6:
 			firstPointed = false;
 			EraseObj(objTuple);
+			break;
+		case 7:
+			firstPointed = false;
+			if (objType == 2)
+			{
+				distances.at(objPos).showLength = true;
+			}
+			break;
+		case 8:
+			firstPointed = false;
+			break;
+		case 9:
+			firstPointed = false;
+			if (objType == 2)
+			{
+				distances.at(objPos).showLength = false;
+			}
+			break;
+		case 10:
+			firstPointed = false;
+			break;
+
+		default:
+			break;
 		}
 	}
 	else
 	{
 		firstPointed = false;
-		switch (drawObject)
+		switch (editMode)
 		{
 		case 1:
 			circles.push_back(Circle{firstPoint.point, GetDistance(firstPoint.point, currentPoint)});
@@ -837,6 +912,7 @@ void MoveObjects(int direction, bool y)
 	for (auto &distance : distances)
 	{
 		distance.Move(direction, y);
+		distance.middle.Move(direction, y);
 	}
 	for (auto &circle : circles)
 	{
@@ -909,7 +985,7 @@ void Update()
 	CheckResized();
 }
 
-void DrawDrawingObj()
+void DrawDrawingObj(Font *font)
 {
 	if (!firstPointed)
 	{
@@ -919,7 +995,7 @@ void DrawDrawingObj()
 	currentLine.pointA = firstPoint.point;
 	currentLine.pointB = currentPoint;
 
-	switch (drawObject)
+	switch (editMode)
 	{
 	case 1:
 	{
@@ -948,7 +1024,7 @@ void DrawDrawingObj()
 	}
 }
 
-void Draw()
+void Draw(Font *font)
 {
 	ClearBackground(WHITE);
 
@@ -969,14 +1045,19 @@ void Draw()
 		DrawStraightLineObj(straightLine);
 	}
 
+	for (auto &distance : distances)
+	{
+		DrawDistanceLengths(distance, font);
+	}
+
 	for (auto &point : points)
 	{
 		DrawPointObj(point.point);
-		DrawText(point.letter.c_str(), point.point.x + 4, point.point.y + 4, 10, BLACK);
-		DrawText(point.letterNumber.c_str(), point.point.x + 12, point.point.y + 8, 5, LIGHTGRAY);
+		DrawTextEx(*font, point.letter.c_str(), {point.point.x + 4, point.point.y + 4}, 12, 0, BLACK);
+		DrawTextEx(*font, point.letterNumber.c_str(), {point.point.x + 12, point.point.y + 8}, 8, 0, GRAY);
 	}
 
-	DrawDrawingObj();
+	DrawDrawingObj(font);
 	DrawPointObj(currentPoint);
 }
 
@@ -984,14 +1065,21 @@ int main()
 {
 	Init();
 
+	Font font = LoadFont("resources/anonymous_pro_bold.ttf");
+	SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
+
 	while (!WindowShouldClose())
 	{
 		Update();
 
 		BeginDrawing();
-		Draw();
+
+		Draw(&font);
+		DrawFPS(0, 0);
+
 		EndDrawing();
 	}
+	UnloadFont(font);
 	CloseWindow();
 	return 0;
 }

@@ -3,21 +3,22 @@ Made with Raylib.
 
 ## Usage
 
-| Keys                          | Action                                                                       |
-|-------------------------------|------------------------------------------------------------------------------|
-| `CTRL` + `C`                  | circle drawing mode                                                          |
-| `CTRL` + `S`                  | straight line drawing mode                                                   |
-| `CTRL` + `D`                  | distance drawing mode                                                        |
-| `CTRL` + `R`                  | ray drawing mode                                                             |
-| `CTRL` + `P`                  | point drawing mode                                                           |
-| `CTRL` + `E`                  | enable eraser                                                                |
-| `left mouse button`           | set first / second point of a line or the middle point or radius of a circle |
-| `ESC`                         | Place/use                                                                    |
-| `←`                           | move everything to the left                                                  |
-| `→`                           | move everything to the right                                                 |
-| `↑`                           | move everything up                                                           |
-| `↓`                           | move everything down                                                         |
-
+| Keys                             | Action                                                                       |
+|----------------------------------|------------------------------------------------------------------------------|
+| `CTRL` and press `C`             | circle drawing mode                                                          |
+| `CTRL` and press `S`             | straight line drawing mode                                                   |
+| `CTRL` and press `D`             | distance drawing mode                                                        |
+| `CTRL` and press `R`             | ray drawing mode                                                             |
+| `CTRL` and press `P`             | point drawing mode                                                           |
+| `CTRL` and press `E`             | enable eraser                                                                |
+| `left mouse button`              | set first / second point of a line or the middle point or radius of a circle |
+| `ESC`                            | Place/use                                                                    |
+| `←`                              | move everything to the left                                                  |
+| `→`                              | move everything to the right                                                 |
+| `↑`                              | move everything up                                                           |
+| `↓`                              | move everything down                                                         |
+| `CTRL` + `D` and press `M`       | distance measurement mode                                                    |
+| `CTRL` + `D` + `M` and press `E` | distance measurement eraser mode                                             |
 
 The cursor automatically connects to intersections, other points, lines, and circles.
 
