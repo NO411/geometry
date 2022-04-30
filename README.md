@@ -23,6 +23,15 @@ Made with Raylib.
 The cursor automatically connects to intersections, other points, lines, and circles.
 
 ## Installation
+
+### Linux
+
+#### Ubuntu
+
+```
+sudo apt install g++ git make libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev && git clone https://github.com/NO411/geometry && git clone https://github.com/raysan5/raylib && cd raylib/src && make PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=SHARED && sudo make install RAYLIB_LIBTYPE=SHARED && cd ../../geometry && g++ main.cpp -o geometry.exe -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./geometry.exe
+```
+
 ### Windows
 
 Download the geometry source code and extract the .zip file.
