@@ -28,8 +28,21 @@ The cursor automatically connects to intersections, other points, lines, and cir
 
 #### Ubuntu
 
+Navigate to the folder where you want to install geometry.
+
+```
+cd <path to your installation folder>
+```
+
+Then run:
+
 ```
 sudo apt install g++ git make libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev && git clone https://github.com/NO411/geometry && git clone https://github.com/raysan5/raylib && cd raylib/src && make PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=SHARED && sudo make install RAYLIB_LIBTYPE=SHARED && cd ../../geometry && g++ main.cpp -o geometry.exe -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./geometry.exe
+```
+
+To run the program after installing it in your installation folder, type:
+```
+cd geometry && ./geometry.exe
 ```
 
 ### Windows
