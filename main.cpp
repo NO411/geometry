@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <tuple>
 
+Camera2D camera = {0};
+
 bool firstPointed = false;
 std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const float movementSpeed = 4;
@@ -216,6 +218,21 @@ Point firstPoint;
 Line currentLine = {{0, 0}, {0, 0}, 2};
 Circle currentCircle = {{0, 0}, 0};
 Vector2 currentPoint = GetMousePosition();
+
+float GetMouseX2()
+{
+	return (GetMouseX() - camera.offset.x + GetScreenWidth() / 2);
+}
+
+float GetMouseY2()
+{
+	return (GetMouseY() - camera.offset.y + GetScreenHeight() / 2);
+}
+
+Vector2 GetMousePosition2()
+{
+	return {GetMouseX2(), GetMouseY2()};
+}
 
 bool PointLetterExists(std::string letter)
 {
@@ -614,7 +631,7 @@ Vector2 GetOrthogonalLinesIntersection(Vector2 point, Vector2 pointA, Vector2 po
 
 Vector2 GetCircleConnection(Circle circle)
 {
-	Vector2 mouse = GetMousePosition();
+	Vector2 mouse = GetMousePosition2();
 	float x = circle.middle.x + (mouse.x - circle.middle.x) / (GetDistance(mouse, circle.middle) / circle.radius);
 	Vector2 mn = GetMN(circle.middle, mouse);
 	float y = mn.x * x + mn.y;
@@ -638,7 +655,7 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 
 	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vector2 point, int connectionType, int objType, std::size_t objPos)
 	{
-		connectionDistances.push_back(GetDistance(point, GetMousePosition()));
+		connectionDistances.push_back(GetDistance(point, GetMousePosition2()));
 		connectionPoints.push_back(point);
 		connectionTypes.push_back(connectionType);
 		objPlaces.push_back(std::make_tuple(objType, objPos));
@@ -657,7 +674,7 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 			pointA = line.firstConnectionPoint;
 		}
 
-		Vector2 intersection = GetOrthogonalLinesIntersection(GetMousePosition(), pointA, pointB);
+		Vector2 intersection = GetOrthogonalLinesIntersection(GetMousePosition2(), pointA, pointB);
 		if (IsPointOnLine(intersection.x, pointA, pointB))
 		{
 			ConnectionDistancesPush(intersection, 4, objType, objPos);
@@ -707,7 +724,7 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 		objPlaces.erase(objPlaces.begin() + minPos);
 	}
 
-	currentPoint = GetMousePosition();
+	currentPoint = GetMousePosition2();
 	return std::make_tuple(0, 0);
 }
 
@@ -855,109 +872,24 @@ void InterruptDrawing()
 	}
 }
 
-void Circle::Move(int direction, bool y)
-{
-	float movement = direction * movementSpeed;
-
-	if (y)
-	{
-		middle.y += movement;
-		return;
-	}
-
-	middle.x += movement;
-}
-
-void Line::Move(int direction, bool y)
-{
-	float movement = direction * movementSpeed;
-
-	if (y)
-	{
-		pointA.y += movement;
-		pointB.y += movement;
-	}
-	else
-	{
-		pointA.x += movement;
-		pointB.x += movement;
-	}
-
-	if (objectNumber > 2)
-	{
-		UpdateSecondConnectionPoint();
-	}
-
-	if (objectNumber > 3)
-	{
-		UpdateFirstConnectionPoint();
-	}
-}
-
-void Point::Move(int direction, bool y)
-{
-	float movement = direction * movementSpeed;
-
-	if (y)
-	{
-		point.y += movement;
-		return;
-	}
-
-	point.x += movement;
-}
-
-void MoveObjects(int direction, bool y)
-{
-	for (auto &distance : distances)
-	{
-		distance.Move(direction, y);
-		distance.middle.Move(direction, y);
-	}
-	for (auto &circle : circles)
-	{
-		circle.Move(direction, y);
-	}
-	for (auto &ray : rays)
-	{
-		ray.Move(direction, y);
-	}
-	for (auto &straightLine : straightLines)
-	{
-		straightLine.Move(direction, y);
-	}
-	for (auto &point : points)
-	{
-		point.Move(direction, y);
-	}
-	for (auto &intersection : intersections)
-	{
-		intersection.Move(direction, y);
-	}
-
-	firstPoint.Move(direction, y);
-
-	UpdateAllIntersections();
-}
-
 void Move()
 {
 	if (IsKeyDown(KEY_LEFT))
 	{
-		MoveObjects(-1, false);
+		camera.offset.x -= movementSpeed;
 	}
 	else if (IsKeyDown(KEY_RIGHT))
 	{
-		MoveObjects(1, false);
+		camera.offset.x += movementSpeed;
 	}
 
 	if (IsKeyDown(KEY_UP))
 	{
-		MoveObjects(-1, true);
+		camera.offset.y -= movementSpeed;
 	}
 	else if (IsKeyDown(KEY_DOWN))
 	{
-		MoveObjects(1, true);
+		camera.offset.y += movementSpeed;
 	}
 }
 
@@ -977,6 +909,8 @@ void CheckResized()
 	}
 
 	UpdateAllIntersections();
+	camera.target = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
+	camera.offset = camera.target;
 }
 
 void Update()
@@ -1068,15 +1002,22 @@ int main()
 	Font font = LoadFont("resources/anonymous_pro_bold.ttf");
 	SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
+	camera.target = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
+	camera.offset = camera.target;
+	camera.zoom = 1;
+
 	while (!WindowShouldClose())
 	{
 		Update();
-
+		
 		BeginDrawing();
 
-		Draw(&font);
-		DrawFPS(0, 0);
+		BeginMode2D(camera);
 
+		Draw(&font);
+		DrawPointObj({0, 0});
+
+		EndMode2D();
 		EndDrawing();
 	}
 	UnloadFont(font);
