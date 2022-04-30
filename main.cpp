@@ -1011,11 +1011,9 @@ int main()
 		Update();
 		
 		BeginDrawing();
-
 		BeginMode2D(camera);
 
 		Draw(&font);
-		DrawPointObj({0, 0});
 
 		EndMode2D();
 		EndDrawing();
