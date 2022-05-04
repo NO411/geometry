@@ -10,7 +10,7 @@ Camera2D camera = {0};
 
 bool firstPointed = false;
 std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const float movementSpeed = 4;
+const float movementSpeed = 6;
 float scaling = 0.025;
 
 int editMode = 2;
@@ -144,42 +144,35 @@ void Circle::UpdateIntersections()
 
 Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n)
 {
-	Vector2 connectionPoint = {};
-	float y = m * GetScreenWidth() + n;
-	connectionPoint.x = GetScreenWidth();
+	Vector2 connectionPoint;
+
+	// correct connectionPoint offset
+	Vector2 offset = {
+		camera.offset.x - GetScreenWidth() / 2,
+		camera.offset.y - GetScreenHeight() / 2
+	};
+
 	if (p1.x > p2.x)
 	{
-		y = n;
-		connectionPoint.x = 0;
-	}
-
-	if (y > GetScreenHeight())
-	{
-		connectionPoint.y = GetScreenHeight();
-		connectionPoint.x = (connectionPoint.y - n) / m;
-	}
-	else if (y < 0)
-	{
-		connectionPoint.y = 0;
-		connectionPoint.x = (connectionPoint.y - n) / m;
+		connectionPoint.x = -offset.x;
 	}
 	else
 	{
-		connectionPoint.y = y;
+		connectionPoint.x = GetScreenWidth() - offset.x;
 	}
 
-	// dividing by 0 is not possible ...
-	// needed to get vertical lines
+	connectionPoint.y = m * connectionPoint.x + n;
+
 	if (p1.x == p2.x)
 	{
 		connectionPoint.x = p1.x;
 		if (p1.y > p2.y)
 		{
-			connectionPoint.y = 0;
+			connectionPoint.y = -offset.y;
 		}
 		else
 		{
-			connectionPoint.y = GetScreenHeight();
+			connectionPoint.y = GetScreenHeight() - offset.y;
 		}
 	}
 
@@ -891,6 +884,18 @@ void Move()
 	{
 		camera.offset.y += movementSpeed;
 	}
+
+	for (auto &straightLine : straightLines)
+	{
+		straightLine.UpdateConnectionPoints();
+	}
+
+	for (auto &ray : rays)
+	{
+		ray.UpdateSecondConnectionPoint();
+	}
+
+	UpdateAllIntersections();
 }
 
 void InputHandler()
