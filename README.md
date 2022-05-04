@@ -1,6 +1,8 @@
 # geometry
 Made with Raylib.
 
+![screenshot](https://raw.githubusercontent.com/NO411/geometry/master/screenshot.png)
+
 ## Usage
 
 | Keys                             | Action                                                                       |
