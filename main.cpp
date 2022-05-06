@@ -22,6 +22,7 @@ void Init()
 	InitWindow(900, 600, "geometry");
 	SetTargetFPS(60);
 	SetExitKey(0);
+	SetWindowIcon(LoadImage("resources/icon.png"));
 }
 
 Vector2 GetMN(Vector2 p1, Vector2 p2)
