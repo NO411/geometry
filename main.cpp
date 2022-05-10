@@ -7,13 +7,26 @@
 #include <tuple>
 
 Camera2D camera = {0};
+enum EditMod
+{
+	CIRCLE,
+	DISTANCE,
+	RAY,
+	STRAIGHTLINE,
+	POINT,
+	ERASER,
+	DISTANCEMEASUREMENT,
+	ANGLEMEASUREMENT,
+	DISTANCEMEASUREMENTERASER,
+	ANGLEMEASUREMENTERASER
+};
 
 bool firstPointed = false;
 std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const float movementSpeed = 6;
 float scaling = 0.025;
 
-int editMode = 2;
+int editMode = DISTANCE;
 
 void Init()
 {
@@ -150,8 +163,7 @@ Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n)
 	// correct connectionPoint offset
 	Vector2 offset = {
 		camera.offset.x - GetScreenWidth() / 2,
-		camera.offset.y - GetScreenHeight() / 2
-	};
+		camera.offset.y - GetScreenHeight() / 2};
 
 	if (p1.x > p2.x)
 	{
@@ -541,42 +553,42 @@ void SetDrawObj()
 	switch (GetKeyPressed())
 	{
 	case KEY_C:
-		editMode = 1;
+		editMode = CIRCLE;
 		break;
 	case KEY_D:
-		editMode = 2;
+		editMode = DISTANCE;
 		break;
 	case KEY_R:
-		editMode = 3;
+		editMode = RAY;
 		break;
 	case KEY_S:
-		editMode = 4;
+		editMode = STRAIGHTLINE;
 		break;
 	case KEY_P:
-		editMode = 5;
+		editMode = POINT;
 		break;
 	case KEY_E:
-		editMode = 6;
+		editMode = ERASER;
 		if (IsKeyDown(KEY_M))
 		{
 			if (IsKeyDown(KEY_D))
 			{
-				editMode = 9;
+				editMode = DISTANCEMEASUREMENTERASER;
 			}
 			else if (IsKeyDown(KEY_A))
 			{
-				editMode = 10;
+				editMode = ANGLEMEASUREMENTERASER;
 			}
 		}
 		break;
 	case KEY_M:
 		if (IsKeyDown(KEY_D))
 		{
-			editMode = 7;
+			editMode = DISTANCEMEASUREMENT;
 		}
 		else if (IsKeyDown(KEY_A))
 		{
-			editMode = 8;
+			editMode = ANGLEMEASUREMENT;
 		}
 		break;
 	default:
@@ -794,7 +806,7 @@ void DrawObj()
 		firstPoint = {currentPoint};
 		switch (editMode)
 		{
-		case 5:
+		case POINT:
 			firstPointed = false;
 
 			for (auto &point : points)
@@ -806,28 +818,28 @@ void DrawObj()
 			}
 			points.push_back({currentPoint});
 			break;
-		case 6:
+		case ERASER:
 			firstPointed = false;
 			EraseObj(objTuple);
 			break;
-		case 7:
+		case DISTANCEMEASUREMENT:
 			firstPointed = false;
 			if (objType == 2)
 			{
 				distances.at(objPos).showLength = true;
 			}
 			break;
-		case 8:
+		case ANGLEMEASUREMENT:
 			firstPointed = false;
 			break;
-		case 9:
+		case DISTANCEMEASUREMENTERASER:
 			firstPointed = false;
 			if (objType == 2)
 			{
 				distances.at(objPos).showLength = false;
 			}
 			break;
-		case 10:
+		case ANGLEMEASUREMENTERASER:
 			firstPointed = false;
 			break;
 
@@ -840,16 +852,16 @@ void DrawObj()
 		firstPointed = false;
 		switch (editMode)
 		{
-		case 1:
+		case CIRCLE:
 			circles.push_back(Circle{firstPoint.point, GetDistance(firstPoint.point, currentPoint)});
 			break;
-		case 2:
+		case DISTANCE:
 			distances.push_back(Line{firstPoint.point, currentPoint, 2});
 			break;
-		case 3:
+		case RAY:
 			rays.push_back(Line{firstPoint.point, currentPoint, 3});
 			break;
-		case 4:
+		case STRAIGHTLINE:
 			straightLines.push_back(Line{firstPoint.point, currentPoint, 4});
 			break;
 		default:
@@ -937,23 +949,23 @@ void DrawDrawingObj(Font *font)
 
 	switch (editMode)
 	{
-	case 1:
+	case CIRCLE:
 	{
 		currentCircle.middle = firstPoint.point;
 		currentCircle.radius = GetDistance(firstPoint.point, currentPoint);
 		DrawCircleObj(currentCircle);
 	}
 	break;
-	case 2:
+	case DISTANCE:
 		DrawDistanceObj(currentLine);
 		break;
-	case 3:
+	case RAY:
 	{
 		currentLine.UpdateSecondConnectionPoint();
 		DrawRayObj(currentLine);
 	}
 	break;
-	case 4:
+	case STRAIGHTLINE:
 	{
 		currentLine.UpdateConnectionPoints();
 		DrawStraightLineObj(currentLine);
@@ -1015,7 +1027,7 @@ int main()
 	while (!WindowShouldClose())
 	{
 		Update();
-		
+
 		BeginDrawing();
 		BeginMode2D(camera);
 
