@@ -596,7 +596,7 @@ void SetDrawObj()
 	}
 }
 
-bool IsPointOnLine(int pointX, Vector2 pointA, Vector2 pointB)
+bool IsPointOnLine(Vector2 point, Vector2 pointA, Vector2 pointB)
 {
 	float x1 = pointA.x, x2 = pointB.x, _var;
 	if (x1 > x2)
@@ -605,9 +605,23 @@ bool IsPointOnLine(int pointX, Vector2 pointA, Vector2 pointB)
 		x1 = x2;
 		x2 = _var;
 	}
-	if (pointX >= x1 && pointX <= x2)
+	if (point.x >= x1 && point.x <= x2)
 	{
 		return true;
+	}
+	if (x1 == x2)
+	{
+		float y1 = pointA.y, y2 = pointB.y;
+		if (y1 > y2)
+		{
+			_var = y1;
+			y1 = y2;
+			y2 = _var;
+		}
+		if (point.y >= y1 && point.y <= y2)
+		{
+			return true;
+		}
 	}
 	return false;
 }
@@ -681,7 +695,7 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 		}
 
 		Vector2 intersection = GetOrthogonalLinesIntersection(GetMousePosition2(), pointA, pointB);
-		if (IsPointOnLine(intersection.x, pointA, pointB))
+		if (IsPointOnLine(intersection, pointA, pointB))
 		{
 			ConnectionDistancesPush(intersection, 4, objType, objPos);
 		}
