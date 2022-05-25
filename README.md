@@ -75,7 +75,7 @@ Copy the `libraylib.a` file from the `raylib/src` folder to your initially creat
 To create the final geometry.exe, navigate to your geometry folder on the command line and run:
 
 ```
-g++ main.cpp -o geometry.exe -O1 -Wall -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm
+g++ main.cpp -o geometry.exe -O1 -Wall -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
 ```
 
 Or just follow this [tutorial](https://www.youtube.com/watch?v=HPDLTQ4J_zQ).
