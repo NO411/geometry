@@ -44,13 +44,13 @@ sudo apt install g++ git make libasound2-dev mesa-common-dev libx11-dev libxrand
 
 To run the program after installing it in your installation folder, type:
 ```
-cd geometry && ./geometry.exe
+cd geometry && ./geometry
 ```
 
 ### Windows
 
 Download the geometry source code and extract the .zip file.
-In the extracted folder, create a folder named `include` and a folder named `lib`.
+In the extracted folder, create a folder named `include` and a folder named `lib` in the `src` folder.
 
 Download and compile Raylib:
 
@@ -72,10 +72,10 @@ mingw32-make PLATFORM=PLATFORM_DESKTOP
 
 Copy the `libraylib.a` file from the `raylib/src` folder to your initially created `lib` folder and copy the `raylib.h` file to your `include` folder.
 
-To create the final geometry.exe, navigate to your geometry folder on the command line and run:
+To create the final geometry.exe, navigate to your `geometry/src` folder on the command line and run:
 
 ```
-g++ main.cpp -o geometry.exe -O1 -Wall -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
+g++ main.cpp math/math_misc.cpp -o ../geometry.exe -O1 -Wall -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
 ```
 
 Or just follow this [tutorial](https://www.youtube.com/watch?v=HPDLTQ4J_zQ).
