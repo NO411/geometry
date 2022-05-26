@@ -6,7 +6,14 @@
 #include <algorithm>
 #include <tuple>
 
-Camera2D camera = {0};
+enum GeometryObject
+{
+	CIRCLE,
+	DISTANCE,
+	RAY,
+	STRAIGHTLINE,
+	POINT
+};
 
 enum EditMode
 {
@@ -22,11 +29,11 @@ enum EditMode
 	ANGLEMEASUREMENTERASER
 };
 
+Camera2D camera = {0};
 bool firstPointed = false;
 std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const float movementSpeed = 6;
 float scaling = 0.025;
-
 int editMode = DRAWDISTANCE;
 
 void Init()
@@ -84,7 +91,7 @@ public:
 
 	Circle(Vector2 middle, float radius) : middle(middle), radius(radius)
 	{
-		objectNumber = 1;
+		objectNumber = CIRCLE;
 		UpdateIntersections();
 	}
 	~Circle() {}
@@ -133,13 +140,13 @@ void Line::UpdateIntersections()
 	Vector2 v1, v2;
 	switch (objectNumber)
 	{
-	case 2:
+	case DISTANCE:
 		v1 = pointA, v2 = pointB;
 		break;
-	case 3:
+	case RAY:
 		v1 = pointA, v2 = secondConnectionPoint;
 		break;
-	case 4:
+	case STRAIGHTLINE:
 		v1 = firstConnectionPoint, v2 = secondConnectionPoint;
 		break;
 	default:
@@ -215,7 +222,7 @@ std::vector<Point> points;
 std::vector<Point> intersections;
 
 Point firstPoint;
-Line currentLine = {{0, 0}, {0, 0}, 2};
+Line currentLine = {{0, 0}, {0, 0}, DISTANCE};
 Circle currentCircle = {{0, 0}, 0};
 Vector2 currentPoint = GetMousePosition();
 
@@ -444,7 +451,7 @@ void GeometryObj::CheckIntersections(Vector2 *vec1, Vector2 *vec2, float r)
 {
 	switch (objectNumber)
 	{
-	case 1:
+	case CIRCLE:
 	{
 		for (auto &circle : circles)
 		{
@@ -464,7 +471,7 @@ void GeometryObj::CheckIntersections(Vector2 *vec1, Vector2 *vec2, float r)
 		}
 	}
 	break;
-	case 5:
+	case POINT:
 		break;
 	default:
 	{
@@ -676,15 +683,15 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 		objPlaces.push_back(std::make_tuple(objType, objPos));
 	};
 
-	auto LineConnection = [&connectionTypes, &ConnectionDistancesPush](Line line, int lineType, int objType, std::size_t objPos)
+	auto LineConnection = [&connectionTypes, &ConnectionDistancesPush](Line line, int objType, std::size_t objPos)
 	{
 		Vector2 pointA = line.pointA, pointB = line.pointB;
-		if (lineType > 2)
+		if (objType > DISTANCE)
 		{
 			pointB = line.secondConnectionPoint;
 		}
 
-		if (lineType == 4)
+		if (objType == STRAIGHTLINE)
 		{
 			pointA = line.firstConnectionPoint;
 		}
@@ -698,31 +705,31 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 
 	for (std::size_t i = 0; i < distances.size(); ++i)
 	{
-		ConnectionDistancesPush(distances[i].pointA, 3, 2, i);
-		ConnectionDistancesPush(distances[i].pointB, 3, 2, i);
-		LineConnection(distances[i], 2, 2, i);
+		ConnectionDistancesPush(distances[i].pointA, 3, DISTANCE, i);
+		ConnectionDistancesPush(distances[i].pointB, 3, DISTANCE, i);
+		LineConnection(distances[i], DISTANCE, i);
 	}
 	for (std::size_t i = 0; i < circles.size(); ++i)
 	{
-		ConnectionDistancesPush(*GetCircleConnection(&circles[i]), 5, 1, i);
+		ConnectionDistancesPush(*GetCircleConnection(&circles[i]), 5, CIRCLE, i);
 	}
 	for (std::size_t i = 0; i < rays.size(); ++i)
 	{
-		ConnectionDistancesPush(rays[i].pointA, 3, 3, i);
+		ConnectionDistancesPush(rays[i].pointA, 3, RAY, i);
 
-		LineConnection(rays[i], 3, 3, i);
+		LineConnection(rays[i], RAY, i);
 	}
 	for (std::size_t i = 0; i < straightLines.size(); ++i)
 	{
-		LineConnection(straightLines[i], 4, 4, i);
+		LineConnection(straightLines[i], STRAIGHTLINE, i);
 	}
 	for (std::size_t i = 0; i < points.size(); ++i)
 	{
-		ConnectionDistancesPush(points[i].point, 1, 5, i);
+		ConnectionDistancesPush(points[i].point, 1, POINT, i);
 	}
 	for (auto &intersection : intersections)
 	{
-		ConnectionDistancesPush(intersection.point, 2, 0, 0);
+		ConnectionDistancesPush(intersection.point, 2, -1, 0);
 	}
 
 	while (!connectionDistances.empty())
@@ -740,7 +747,7 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 	}
 
 	currentPoint = *GetMousePosition2();
-	return new std::tuple<int, std::size_t>{std::make_tuple(0, 0)};
+	return new std::tuple<int, std::size_t>{std::make_tuple(-1, -1)};
 }
 
 void UpdateAllIntersections()
@@ -771,25 +778,25 @@ void EraseObj(std::tuple<int, std::size_t> *objTuple)
 	int objType = std::get<0>(*objTuple);
 	std::size_t objPos = std::get<1>(*objTuple);
 
-	if (objType < 1)
+	if (objType < CIRCLE)
 	{
 		return;
 	}
 	switch (objType)
 	{
-	case 1:
+	case CIRCLE:
 		circles.erase(circles.begin() + objPos);
 		break;
-	case 2:
+	case DISTANCE:
 		distances.erase(distances.begin() + objPos);
 		break;
-	case 3:
+	case RAY:
 		rays.erase(rays.begin() + objPos);
 		break;
-	case 4:
+	case STRAIGHTLINE:
 		straightLines.erase(straightLines.begin() + objPos);
 		break;
-	case 5:
+	case POINT:
 		points.erase(points.begin() + objPos);
 		break;
 	default:
@@ -833,7 +840,7 @@ void DrawObj()
 			break;
 		case DISTANCEMEASUREMENT:
 			firstPointed = false;
-			if (objType == 2)
+			if (objType == DISTANCE)
 			{
 				distances.at(objPos).showLength = true;
 			}
@@ -843,7 +850,7 @@ void DrawObj()
 			break;
 		case DISTANCEMEASUREMENTERASER:
 			firstPointed = false;
-			if (objType == 2)
+			if (objType == DISTANCE)
 			{
 				distances.at(objPos).showLength = false;
 			}
@@ -865,13 +872,13 @@ void DrawObj()
 			circles.push_back(Circle{firstPoint.point, GetDistance(&firstPoint.point, &currentPoint)});
 			break;
 		case DRAWDISTANCE:
-			distances.push_back(Line{firstPoint.point, currentPoint, 2});
+			distances.push_back(Line{firstPoint.point, currentPoint, DISTANCE});
 			break;
 		case DRAWRAY:
-			rays.push_back(Line{firstPoint.point, currentPoint, 3});
+			rays.push_back(Line{firstPoint.point, currentPoint, RAY});
 			break;
 		case DRAWSTRAIGHTLINE:
-			straightLines.push_back(Line{firstPoint.point, currentPoint, 4});
+			straightLines.push_back(Line{firstPoint.point, currentPoint, STRAIGHTLINE});
 			break;
 		default:
 			break;
