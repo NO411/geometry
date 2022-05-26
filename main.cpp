@@ -392,7 +392,7 @@ void FindLineLineIntersections(Vector2 *A1, Vector2 *A2, Vector2 *B1, Vector2 *B
 
 void FindCircleLineIntersections(Vector2 *A, float r, Vector2 *pointA, Vector2 *pointB)
 {
-	//Vector2 *A, float r, Vector2 *B1, Vector2 *B2
+	// Vector2 *A, float r, Vector2 *B1, Vector2 *B2
 	Vector2 B1 = {pointA->x - A->x, pointA->y - A->y};
 	Vector2 B2 = {pointB->x - A->x, pointB->y - A->y};
 
@@ -653,7 +653,7 @@ Vector2 *GetOrthogonalLinesIntersection(Vector2 *point, Vector2 *pointA, Vector2
 
 Vector2 *GetCircleConnection(Circle *circle)
 {
-	Vector2* mouse = GetMousePosition2();
+	Vector2 *mouse = GetMousePosition2();
 	float x = circle->middle.x + (mouse->x - circle->middle.x) / (GetDistance(mouse, &circle->middle) / circle->radius);
 	Vector2 mn = *GetMN(&circle->middle, mouse);
 	float y = mn.x * x + mn.y;
@@ -667,13 +667,15 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 	std::vector<Vector2> connectionPoints;
 	std::vector<int> connectionTypes;
 	std::vector<std::tuple<int, std::size_t>> objPlaces;
-	/* connection order:
-	1 points
-	2 intersections
-	3 line end point
-	4 lines
-	5 circles
-	*/
+
+	enum ConnectionOrder
+	{
+		POINTCONNECTION,
+		INTERSECTIONCONNECTION,
+		LINEANDPOINTCONNECTION,
+		LINECONNECTION,
+		CIRCLECONNECTION
+	};
 
 	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vector2 point, int connectionType, int objType, std::size_t objPos)
 	{
@@ -696,26 +698,26 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 			pointA = line.firstConnectionPoint;
 		}
 
-		Vector2* intersection = GetOrthogonalLinesIntersection(GetMousePosition2(), &pointA, &pointB);
+		Vector2 *intersection = GetOrthogonalLinesIntersection(GetMousePosition2(), &pointA, &pointB);
 		if (IsPointOnLine(intersection, &pointA, &pointB))
 		{
-			ConnectionDistancesPush(*intersection, 4, objType, objPos);
+			ConnectionDistancesPush(*intersection, LINECONNECTION, objType, objPos);
 		}
 	};
 
 	for (std::size_t i = 0; i < distances.size(); ++i)
 	{
-		ConnectionDistancesPush(distances[i].pointA, 3, DISTANCE, i);
-		ConnectionDistancesPush(distances[i].pointB, 3, DISTANCE, i);
+		ConnectionDistancesPush(distances[i].pointA, LINEANDPOINTCONNECTION, DISTANCE, i);
+		ConnectionDistancesPush(distances[i].pointB, LINEANDPOINTCONNECTION, DISTANCE, i);
 		LineConnection(distances[i], DISTANCE, i);
 	}
 	for (std::size_t i = 0; i < circles.size(); ++i)
 	{
-		ConnectionDistancesPush(*GetCircleConnection(&circles[i]), 5, CIRCLE, i);
+		ConnectionDistancesPush(*GetCircleConnection(&circles[i]), CIRCLECONNECTION, CIRCLE, i);
 	}
 	for (std::size_t i = 0; i < rays.size(); ++i)
 	{
-		ConnectionDistancesPush(rays[i].pointA, 3, RAY, i);
+		ConnectionDistancesPush(rays[i].pointA, LINEANDPOINTCONNECTION, RAY, i);
 
 		LineConnection(rays[i], RAY, i);
 	}
@@ -725,11 +727,11 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 	}
 	for (std::size_t i = 0; i < points.size(); ++i)
 	{
-		ConnectionDistancesPush(points[i].point, 1, POINT, i);
+		ConnectionDistancesPush(points[i].point, POINTCONNECTION, POINT, i);
 	}
 	for (auto &intersection : intersections)
 	{
-		ConnectionDistancesPush(intersection.point, 2, -1, 0);
+		ConnectionDistancesPush(intersection.point, INTERSECTIONCONNECTION, -1, 0);
 	}
 
 	while (!connectionDistances.empty())
