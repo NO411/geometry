@@ -392,7 +392,6 @@ void FindLineLineIntersections(Vector2 *A1, Vector2 *A2, Vector2 *B1, Vector2 *B
 
 void FindCircleLineIntersections(Vector2 *A, float r, Vector2 *pointA, Vector2 *pointB)
 {
-	// Vector2 *A, float r, Vector2 *B1, Vector2 *B2
 	Vector2 B1 = {pointA->x - A->x, pointA->y - A->y};
 	Vector2 B2 = {pointB->x - A->x, pointB->y - A->y};
 
