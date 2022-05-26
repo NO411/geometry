@@ -7,13 +7,14 @@
 #include <tuple>
 
 Camera2D camera = {0};
-enum EditMod
+
+enum EditMode
 {
-	CIRCLE,
-	DISTANCE,
-	RAY,
-	STRAIGHTLINE,
-	POINT,
+	DRAWCIRCLE,
+	DRAWDISTANCE,
+	DRAWRAY,
+	DRAWSTRAIGHTLINE,
+	DRAWPOINT,
 	ERASER,
 	DISTANCEMEASUREMENT,
 	ANGLEMEASUREMENT,
@@ -26,7 +27,7 @@ std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const float movementSpeed = 6;
 float scaling = 0.025;
 
-int editMode = DISTANCE;
+int editMode = DRAWDISTANCE;
 
 void Init()
 {
@@ -38,11 +39,11 @@ void Init()
 	SetWindowIcon(LoadImage("resources/icon.png"));
 }
 
-Vector2 GetMN(Vector2 p1, Vector2 p2)
+Vector2 *GetMN(Vector2 *p1, Vector2 *p2)
 {
-	float m = (p1.y - p2.y) / (p1.x - p2.x);
-	float n = p2.y - (m * p2.x);
-	return {m, n};
+	float m = (p1->y - p2->y) / (p1->x - p2->x);
+	float n = p2->y - (m * p2->x);
+	return new Vector2{m, n};
 }
 
 class GeometryObj
@@ -53,11 +54,7 @@ public:
 	GeometryObj() {}
 	~GeometryObj() {}
 
-	void CheckIntersections(Vector2 vec1, Vector2 vec2, float r);
-
-	void FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, float b);
-	void FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, Vector2 B2);
-	void FindCircleLineIntersections(Vector2 A, float a, Vector2 B1, Vector2 B2);
+	void CheckIntersections(Vector2 *vec1, Vector2 *vec2, float r);
 };
 
 class Point
@@ -148,15 +145,15 @@ void Line::UpdateIntersections()
 	default:
 		break;
 	}
-	CheckIntersections(v1, v2, 0);
+	CheckIntersections(&v1, &v2, 0);
 }
 
 void Circle::UpdateIntersections()
 {
-	CheckIntersections(middle, {0, 0}, radius);
+	CheckIntersections(&middle, new Vector2{0, 0}, radius);
 }
 
-Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n)
+Vector2 *CalculateConnectionPoint(Vector2 *p1, Vector2 *p2, float m, float n)
 {
 	Vector2 connectionPoint;
 
@@ -165,7 +162,7 @@ Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n)
 		camera.offset.x - GetScreenWidth() / 2,
 		camera.offset.y - GetScreenHeight() / 2};
 
-	if (p1.x > p2.x)
+	if (p1->x > p2->x)
 	{
 		connectionPoint.x = -offset.x;
 	}
@@ -176,10 +173,10 @@ Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n)
 
 	connectionPoint.y = m * connectionPoint.x + n;
 
-	if (p1.x == p2.x)
+	if (p1->x == p2->x)
 	{
-		connectionPoint.x = p1.x;
-		if (p1.y > p2.y)
+		connectionPoint.x = p1->x;
+		if (p1->y > p2->y)
 		{
 			connectionPoint.y = -offset.y;
 		}
@@ -189,19 +186,19 @@ Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n)
 		}
 	}
 
-	return connectionPoint;
+	return new Vector2{connectionPoint};
 }
 
 void Line::UpdateFirstConnectionPoint()
 {
-	Vector2 mn = GetMN(pointA, pointB);
-	firstConnectionPoint = CalculateConnectionPoint(pointB, pointA, mn.x, mn.y);
+	Vector2 mn = *GetMN(&pointA, &pointB);
+	firstConnectionPoint = *CalculateConnectionPoint(&pointB, &pointA, mn.x, mn.y);
 }
 
 void Line::UpdateSecondConnectionPoint()
 {
-	Vector2 mn = GetMN(pointA, pointB);
-	secondConnectionPoint = CalculateConnectionPoint(pointA, pointB, mn.x, mn.y);
+	Vector2 mn = *GetMN(&pointA, &pointB);
+	secondConnectionPoint = *CalculateConnectionPoint(&pointA, &pointB, mn.x, mn.y);
 }
 
 void Line::UpdateConnectionPoints()
@@ -210,14 +207,11 @@ void Line::UpdateConnectionPoints()
 	UpdateSecondConnectionPoint();
 }
 
-std::vector<Circle> circles;	 // 1
-std::vector<Line> distances;	 // 2
-std::vector<Line> rays;			 // 3
-std::vector<Line> straightLines; // 4
-std::vector<Point> points;		 // 5
-								 // 6 erasers
-								 // 7 distance measurement
-								 // 8 angle measurement
+std::vector<Circle> circles;
+std::vector<Line> distances;
+std::vector<Line> rays;
+std::vector<Line> straightLines;
+std::vector<Point> points;
 std::vector<Point> intersections;
 
 Point firstPoint;
@@ -235,16 +229,16 @@ float GetMouseY2()
 	return (GetMouseY() - camera.offset.y + GetScreenHeight() / 2);
 }
 
-Vector2 GetMousePosition2()
+Vector2 *GetMousePosition2()
 {
-	return {GetMouseX2(), GetMouseY2()};
+	return new Vector2{GetMouseX2(), GetMouseY2()};
 }
 
-bool PointLetterExists(std::string letter)
+bool PointLetterExists(std::string *letter)
 {
 	for (auto &point : points)
 	{
-		if (point.letter == letter)
+		if (point.letter == *letter)
 		{
 			return true;
 		}
@@ -257,7 +251,7 @@ void Point::SetPointLetter()
 	for (std::size_t i = 0; i < pointChars.size(); i++)
 	{
 		std::string _letter = pointChars.substr(i, 1);
-		if (!PointLetterExists(_letter))
+		if (!PointLetterExists(&_letter))
 		{
 			letter = _letter;
 			letterNumber = "";
@@ -302,19 +296,19 @@ void Point::SetPointLetter()
 	letterNumber = std::to_string(i);
 }
 
-float GetDistance(Vector2 vec1, Vector2 vec2)
+float GetDistance(Vector2 *vec1, Vector2 *vec2)
 {
-	return sqrt(pow(vec2.x - vec1.x, 2) + pow(vec2.y - vec1.y, 2));
+	return sqrt(pow(vec2->x - vec1->x, 2) + pow(vec2->y - vec1->y, 2));
 }
 
 void Line::UpdateLength()
 {
-	length = GetDistance(pointA, pointB) * scaling;
+	length = GetDistance(&pointA, &pointB) * scaling;
 
 	middle.point = {(pointA.x + pointB.x) / 2, (pointA.y + pointB.y) / 2};
 }
 
-void GeometryObj::FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, float b)
+void FindCircleCircleIntersections(Vector2 *A, Vector2 *B, float a, float b)
 {
 	float c = GetDistance(A, B);
 	if (c == 0)
@@ -333,10 +327,10 @@ void GeometryObj::FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, f
 	{
 		y = sqrt(y);
 	}
-	float ex0 = (B.x - A.x) / c, ex1 = (B.y - A.y) / c;
+	float ex0 = (B->x - A->x) / c, ex1 = (B->y - A->y) / c;
 	float ey0 = -ex1, ey1 = ex0;
-	float Q1x = A.x + x * ex0;
-	float Q1y = A.y + x * ex1;
+	float Q1x = A->x + x * ex0;
+	float Q1y = A->y + x * ex1;
 	if (y == 0)
 	{
 		intersections.push_back({{Q1x, Q1y}});
@@ -350,10 +344,10 @@ void GeometryObj::FindCircleCircleIntersections(Vector2 A, Vector2 B, float a, f
 	intersections.push_back({{Q2x, Q2y}});
 }
 
-void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, Vector2 B2)
+void FindLineLineIntersections(Vector2 *A1, Vector2 *A2, Vector2 *B1, Vector2 *B2)
 {
-	Vector2 mnA = GetMN(A1, A2);
-	Vector2 mnB = GetMN(B1, B2);
+	Vector2 mnA = *GetMN(A1, A2);
+	Vector2 mnB = *GetMN(B1, B2);
 	float x, y;
 
 	// no intersection if the lines are parallel
@@ -366,22 +360,22 @@ void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, 
 	x = (mnA.y - mnB.y) / (mnB.x - mnA.x);
 	y = mnA.x * x + mnA.y;
 
-	if (A1.x == A2.x)
+	if (A1->x == A2->x)
 	{
-		x = A1.x;
-		y = mnB.x * A1.x + mnB.y;
+		x = A1->x;
+		y = mnB.x * A1->x + mnB.y;
 	}
-	else if (B1.x == B2.x)
+	else if (B1->x == B2->x)
 	{
-		x = B1.x;
-		y = mnA.x * B1.x + mnA.y;
+		x = B1->x;
+		y = mnA.x * B1->x + mnA.y;
 	}
 
 	Vector2 intersection = {x, y};
 
 	// check whether the intersection is included of both lines
 
-	if (!CheckCollisionLines(A1, A2, B1, B2, &intersection))
+	if (!CheckCollisionLines(*A1, *A2, *B1, *B2, &intersection))
 	{
 		return;
 	}
@@ -389,10 +383,11 @@ void GeometryObj::FindLineLineIntersections(Vector2 A1, Vector2 A2, Vector2 B1, 
 	intersections.push_back(intersection);
 }
 
-void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Vector2 B2)
+void FindCircleLineIntersections(Vector2 *A, float r, Vector2 *pointA, Vector2 *pointB)
 {
-	B1 = {B1.x - A.x, B1.y - A.y};
-	B2 = {B2.x - A.x, B2.y - A.y};
+	//Vector2 *A, float r, Vector2 *B1, Vector2 *B2
+	Vector2 B1 = {pointA->x - A->x, pointA->y - A->y};
+	Vector2 B2 = {pointB->x - A->x, pointB->y - A->y};
 
 	float v1 = B2.x - B1.x, v2 = B2.y - B1.y;
 	float D = pow(r, 2) * (pow(v1, 2) + pow(v2, 2)) - pow(B1.x * v2 - B1.y * v1, 2);
@@ -400,7 +395,7 @@ void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Ve
 	float _t2 = pow(v1, 2) + pow(v2, 2);
 	float t1 = (_t1 + sqrt(D)) / _t2, t2 = (_t1 - sqrt(D)) / _t2;
 
-	Vector2 mn = GetMN(B1, B2);
+	Vector2 mn = *GetMN(&B1, &B2);
 
 	if (!(B1.x == B2.x))
 	{
@@ -408,24 +403,24 @@ void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Ve
 		{
 			float x = v1 * t1 + B1.x;
 			float y = mn.x * x + mn.y;
-			intersections.push_back({{x + A.x, y + A.y}});
+			intersections.push_back({{x + A->x, y + A->y}});
 		}
 
 		if (t2 >= 0 && t2 <= 1)
 		{
 			float x = v1 * t2 + B1.x;
 			float y = mn.x * x + mn.y;
-			intersections.push_back({{x + A.x, y + A.y}});
+			intersections.push_back({{x + A->x, y + A->y}});
 		}
 		return;
 	}
 
-	B1 = {B1.x + A.x, B1.y + A.y};
-	B2 = {B2.x + A.x, B2.y + A.y};
+	B1 = {B1.x + A->x, B1.y + A->y};
+	B2 = {B2.x + A->x, B2.y + A->y};
 
-	float undersqrt = 2 * A.x * B1.x + pow(r, 2) - pow(B1.x, 2) - pow(A.x, 2);
+	float undersqrt = 2 * A->x * B1.x + pow(r, 2) - pow(B1.x, 2) - pow(A->x, 2);
 	float _y = sqrt(undersqrt);
-	float y1 = A.y + _y, y2 = A.y - _y;
+	float y1 = A->y + _y, y2 = A->y - _y;
 
 	float b1 = B1.y, b2 = B2.y, _var;
 	if (b1 > b2)
@@ -445,7 +440,7 @@ void GeometryObj::FindCircleLineIntersections(Vector2 A, float r, Vector2 B1, Ve
 	}
 }
 
-void GeometryObj::CheckIntersections(Vector2 vec1, Vector2 vec2, float r)
+void GeometryObj::CheckIntersections(Vector2 *vec1, Vector2 *vec2, float r)
 {
 	switch (objectNumber)
 	{
@@ -453,19 +448,19 @@ void GeometryObj::CheckIntersections(Vector2 vec1, Vector2 vec2, float r)
 	{
 		for (auto &circle : circles)
 		{
-			FindCircleCircleIntersections(vec1, circle.middle, r, circle.radius);
+			FindCircleCircleIntersections(vec1, &circle.middle, r, circle.radius);
 		}
 		for (auto &distance : distances)
 		{
-			FindCircleLineIntersections(vec1, r, distance.pointA, distance.pointB);
+			FindCircleLineIntersections(vec1, r, &distance.pointA, &distance.pointB);
 		}
 		for (auto &ray : rays)
 		{
-			FindCircleLineIntersections(vec1, r, ray.pointA, ray.secondConnectionPoint);
+			FindCircleLineIntersections(vec1, r, &ray.pointA, &ray.secondConnectionPoint);
 		}
 		for (auto &straightLine : straightLines)
 		{
-			FindCircleLineIntersections(vec1, r, straightLine.firstConnectionPoint, straightLine.secondConnectionPoint);
+			FindCircleLineIntersections(vec1, r, &straightLine.firstConnectionPoint, &straightLine.secondConnectionPoint);
 		}
 	}
 	break;
@@ -475,72 +470,72 @@ void GeometryObj::CheckIntersections(Vector2 vec1, Vector2 vec2, float r)
 	{
 		for (auto &circle : circles)
 		{
-			FindCircleLineIntersections(circle.middle, circle.radius, vec1, vec2);
+			FindCircleLineIntersections(&circle.middle, circle.radius, vec1, vec2);
 		}
 		for (auto &distance : distances)
 		{
-			FindLineLineIntersections(vec1, vec2, distance.pointA, distance.pointB);
+			FindLineLineIntersections(vec1, vec2, &distance.pointA, &distance.pointB);
 		}
 		for (auto &ray : rays)
 		{
-			FindLineLineIntersections(vec1, vec2, ray.pointA, ray.secondConnectionPoint);
+			FindLineLineIntersections(vec1, vec2, &ray.pointA, &ray.secondConnectionPoint);
 		}
 		for (auto &straightLine : straightLines)
 		{
-			FindLineLineIntersections(vec1, vec2, straightLine.firstConnectionPoint, straightLine.secondConnectionPoint);
+			FindLineLineIntersections(vec1, vec2, &straightLine.firstConnectionPoint, &straightLine.secondConnectionPoint);
 		}
 	}
 	break;
 	}
 }
 
-void DrawPointObj(Vector2 point)
+void DrawPointObj(Vector2 *point)
 {
-	DrawCircleSector(point, 3, 0, 360, 30, BLUE);
-	DrawRing(point, 3, 4, 0, 360, 30, DARKBLUE);
+	DrawCircleSector(*point, 3, 0, 360, 30, BLUE);
+	DrawRing(*point, 3, 4, 0, 360, 30, DARKBLUE);
 }
 
-void DrawCircleObj(Circle circle)
+void DrawCircleObj(Circle *circle)
 {
-	DrawCircleSectorLines(circle.middle, circle.radius, 0, 360, 2 * circle.radius, LIGHTGRAY);
+	DrawCircleSectorLines(circle->middle, circle->radius, 0, 360, 2 * circle->radius, LIGHTGRAY);
 }
 
-void DrawDistanceObj(Line line)
+void DrawDistanceObj(Line *line)
 {
-	DrawLineEx(line.pointA, line.pointB, 2, LIGHTGRAY);
+	DrawLineEx(line->pointA, line->pointB, 2, LIGHTGRAY);
 }
 
-void DrawDistanceLengths(Line line, Font *font)
+void DrawDistanceLengths(Line *line, Font *font)
 {
-	if (!line.showLength)
+	if (!line->showLength)
 	{
 		return;
 	}
 	int fontSize = 12;
-	std::string len = std::to_string(line.length);
+	std::string len = std::to_string(line->length);
 	Vector2 measure = MeasureTextEx(*font, len.c_str(), fontSize, 0);
-	DrawTextEx(*font, len.c_str(), {line.middle.point.x, line.middle.point.y}, fontSize, 0, BLACK);
-	DrawRectangleRec({line.middle.point.x - 2, line.middle.point.y - 2, measure.x + 4, measure.y + 4}, {200, 200, 200, 150});
+	DrawTextEx(*font, len.c_str(), {line->middle.point.x, line->middle.point.y}, fontSize, 0, BLACK);
+	DrawRectangleRec({line->middle.point.x - 2, line->middle.point.y - 2, measure.x + 4, measure.y + 4}, {200, 200, 200, 150});
 }
 
-bool SameVector2(Vector2 v1, Vector2 v2)
+bool SameVector2(Vector2 *v1, Vector2 *v2)
 {
-	return (v1.x == v2.x && v1.y == v2.y);
+	return (v1->x == v2->x && v1->y == v2->y);
 }
 
-void DrawRayObj(Line line)
+void DrawRayObj(Line *line)
 {
-	if (SameVector2(line.pointA, line.secondConnectionPoint))
+	if (SameVector2(&line->pointA, &line->secondConnectionPoint))
 	{
 		return;
 	}
 
-	DrawLineEx(line.pointA, line.secondConnectionPoint, 2, LIGHTGRAY);
+	DrawLineEx(line->pointA, line->secondConnectionPoint, 2, LIGHTGRAY);
 }
 
-void DrawStraightLineObj(Line line)
+void DrawStraightLineObj(Line *line)
 {
-	DrawLineEx(line.firstConnectionPoint, line.secondConnectionPoint, 2, LIGHTGRAY);
+	DrawLineEx(line->firstConnectionPoint, line->secondConnectionPoint, 2, LIGHTGRAY);
 }
 
 void SetDrawObj()
@@ -553,19 +548,19 @@ void SetDrawObj()
 	switch (GetKeyPressed())
 	{
 	case KEY_C:
-		editMode = CIRCLE;
+		editMode = DRAWCIRCLE;
 		break;
 	case KEY_D:
-		editMode = DISTANCE;
+		editMode = DRAWDISTANCE;
 		break;
 	case KEY_R:
-		editMode = RAY;
+		editMode = DRAWRAY;
 		break;
 	case KEY_S:
-		editMode = STRAIGHTLINE;
+		editMode = DRAWSTRAIGHTLINE;
 		break;
 	case KEY_P:
-		editMode = POINT;
+		editMode = DRAWPOINT;
 		break;
 	case KEY_E:
 		editMode = ERASER;
@@ -596,29 +591,29 @@ void SetDrawObj()
 	}
 }
 
-bool IsPointOnLine(Vector2 point, Vector2 pointA, Vector2 pointB)
+bool IsPointOnLine(Vector2 *point, Vector2 *pointA, Vector2 *pointB)
 {
-	float x1 = pointA.x, x2 = pointB.x, _var;
+	float x1 = pointA->x, x2 = pointB->x, _var;
 	if (x1 > x2)
 	{
 		_var = x1;
 		x1 = x2;
 		x2 = _var;
 	}
-	if (point.x >= x1 && point.x <= x2)
+	if (point->x >= x1 && point->x <= x2)
 	{
 		return true;
 	}
 	if (x1 == x2)
 	{
-		float y1 = pointA.y, y2 = pointB.y;
+		float y1 = pointA->y, y2 = pointB->y;
 		if (y1 > y2)
 		{
 			_var = y1;
 			y1 = y2;
 			y2 = _var;
 		}
-		if (point.y >= y1 && point.y <= y2)
+		if (point->y >= y1 && point->y <= y2)
 		{
 			return true;
 		}
@@ -626,40 +621,40 @@ bool IsPointOnLine(Vector2 point, Vector2 pointA, Vector2 pointB)
 	return false;
 }
 
-Vector2 GetOrthogonalLinesIntersection(Vector2 point, Vector2 pointA, Vector2 pointB)
+Vector2 *GetOrthogonalLinesIntersection(Vector2 *point, Vector2 *pointA, Vector2 *pointB)
 {
-	Vector2 mn = GetMN(pointA, pointB);
+	Vector2 mn = *GetMN(pointA, pointB);
 	float m2 = -1 / mn.x;
-	float n2 = point.y - m2 * point.x;
+	float n2 = point->y - m2 * point->x;
 	float x = (n2 - mn.y) / (mn.x - m2);
 	float y = mn.x * x + mn.y;
 
 	Vector2 connectionPoint = {x, y};
 
-	if (pointA.x == pointB.x)
+	if (pointA->x == pointB->x)
 	{
-		connectionPoint = {pointA.x, point.y};
+		connectionPoint = {pointA->x, point->y};
 	}
 
-	if (pointA.y == pointB.y)
+	if (pointA->y == pointB->y)
 	{
-		connectionPoint = {point.x, pointA.y};
+		connectionPoint = {point->x, pointA->y};
 	}
 
-	return connectionPoint;
+	return new Vector2{connectionPoint};
 }
 
-Vector2 GetCircleConnection(Circle circle)
+Vector2 *GetCircleConnection(Circle *circle)
 {
-	Vector2 mouse = GetMousePosition2();
-	float x = circle.middle.x + (mouse.x - circle.middle.x) / (GetDistance(mouse, circle.middle) / circle.radius);
-	Vector2 mn = GetMN(circle.middle, mouse);
+	Vector2* mouse = GetMousePosition2();
+	float x = circle->middle.x + (mouse->x - circle->middle.x) / (GetDistance(mouse, &circle->middle) / circle->radius);
+	Vector2 mn = *GetMN(&circle->middle, mouse);
 	float y = mn.x * x + mn.y;
 
-	return {x, y};
+	return new Vector2{x, y};
 }
 
-std::tuple<int, std::size_t> UpdateCurrentPoint()
+std::tuple<int, std::size_t> *UpdateCurrentPoint()
 {
 	std::vector<float> connectionDistances;
 	std::vector<Vector2> connectionPoints;
@@ -675,7 +670,7 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 
 	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vector2 point, int connectionType, int objType, std::size_t objPos)
 	{
-		connectionDistances.push_back(GetDistance(point, GetMousePosition2()));
+		connectionDistances.push_back(GetDistance(&point, GetMousePosition2()));
 		connectionPoints.push_back(point);
 		connectionTypes.push_back(connectionType);
 		objPlaces.push_back(std::make_tuple(objType, objPos));
@@ -694,10 +689,10 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 			pointA = line.firstConnectionPoint;
 		}
 
-		Vector2 intersection = GetOrthogonalLinesIntersection(GetMousePosition2(), pointA, pointB);
-		if (IsPointOnLine(intersection, pointA, pointB))
+		Vector2* intersection = GetOrthogonalLinesIntersection(GetMousePosition2(), &pointA, &pointB);
+		if (IsPointOnLine(intersection, &pointA, &pointB))
 		{
-			ConnectionDistancesPush(intersection, 4, objType, objPos);
+			ConnectionDistancesPush(*intersection, 4, objType, objPos);
 		}
 	};
 
@@ -709,7 +704,7 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 	}
 	for (std::size_t i = 0; i < circles.size(); ++i)
 	{
-		ConnectionDistancesPush(GetCircleConnection(circles[i]), 5, 1, i);
+		ConnectionDistancesPush(*GetCircleConnection(&circles[i]), 5, 1, i);
 	}
 	for (std::size_t i = 0; i < rays.size(); ++i)
 	{
@@ -736,7 +731,7 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 		if (connectionDistances.at(minPos) <= 8)
 		{
 			currentPoint = connectionPoints.at(minPos);
-			return objPlaces.at(minPos);
+			return new std::tuple<int, std::size_t>{objPlaces.at(minPos)};
 		}
 		connectionDistances.erase(connectionDistances.begin() + minPos);
 		connectionPoints.erase(connectionPoints.begin() + minPos);
@@ -744,8 +739,8 @@ std::tuple<int, std::size_t> UpdateCurrentPoint()
 		objPlaces.erase(objPlaces.begin() + minPos);
 	}
 
-	currentPoint = GetMousePosition2();
-	return std::make_tuple(0, 0);
+	currentPoint = *GetMousePosition2();
+	return new std::tuple<int, std::size_t>{std::make_tuple(0, 0)};
 }
 
 void UpdateAllIntersections()
@@ -771,10 +766,10 @@ void UpdateAllIntersections()
 	}
 }
 
-void EraseObj(std::tuple<int, std::size_t> objTuple)
+void EraseObj(std::tuple<int, std::size_t> *objTuple)
 {
-	int objType = std::get<0>(objTuple);
-	std::size_t objPos = std::get<1>(objTuple);
+	int objType = std::get<0>(*objTuple);
+	std::size_t objPos = std::get<1>(*objTuple);
 
 	if (objType < 1)
 	{
@@ -807,8 +802,8 @@ void EraseObj(std::tuple<int, std::size_t> objTuple)
 void DrawObj()
 {
 	auto objTuple = UpdateCurrentPoint();
-	int objType = std::get<0>(objTuple);
-	std::size_t objPos = std::get<1>(objTuple);
+	int objType = std::get<0>(*objTuple);
+	std::size_t objPos = std::get<1>(*objTuple);
 	if (!IsMouseButtonPressed(0))
 	{
 		return;
@@ -820,12 +815,12 @@ void DrawObj()
 		firstPoint = {currentPoint};
 		switch (editMode)
 		{
-		case POINT:
+		case DRAWPOINT:
 			firstPointed = false;
 
 			for (auto &point : points)
 			{
-				if (SameVector2(point.point, currentPoint))
+				if (SameVector2(&point.point, &currentPoint))
 				{
 					return;
 				}
@@ -866,16 +861,16 @@ void DrawObj()
 		firstPointed = false;
 		switch (editMode)
 		{
-		case CIRCLE:
-			circles.push_back(Circle{firstPoint.point, GetDistance(firstPoint.point, currentPoint)});
+		case DRAWCIRCLE:
+			circles.push_back(Circle{firstPoint.point, GetDistance(&firstPoint.point, &currentPoint)});
 			break;
-		case DISTANCE:
+		case DRAWDISTANCE:
 			distances.push_back(Line{firstPoint.point, currentPoint, 2});
 			break;
-		case RAY:
+		case DRAWRAY:
 			rays.push_back(Line{firstPoint.point, currentPoint, 3});
 			break;
-		case STRAIGHTLINE:
+		case DRAWSTRAIGHTLINE:
 			straightLines.push_back(Line{firstPoint.point, currentPoint, 4});
 			break;
 		default:
@@ -963,26 +958,26 @@ void DrawDrawingObj(Font *font)
 
 	switch (editMode)
 	{
-	case CIRCLE:
+	case DRAWCIRCLE:
 	{
 		currentCircle.middle = firstPoint.point;
-		currentCircle.radius = GetDistance(firstPoint.point, currentPoint);
-		DrawCircleObj(currentCircle);
+		currentCircle.radius = GetDistance(&firstPoint.point, &currentPoint);
+		DrawCircleObj(&currentCircle);
 	}
 	break;
-	case DISTANCE:
-		DrawDistanceObj(currentLine);
+	case DRAWDISTANCE:
+		DrawDistanceObj(&currentLine);
 		break;
-	case RAY:
+	case DRAWRAY:
 	{
 		currentLine.UpdateSecondConnectionPoint();
-		DrawRayObj(currentLine);
+		DrawRayObj(&currentLine);
 	}
 	break;
-	case STRAIGHTLINE:
+	case DRAWSTRAIGHTLINE:
 	{
 		currentLine.UpdateConnectionPoints();
-		DrawStraightLineObj(currentLine);
+		DrawStraightLineObj(&currentLine);
 	}
 	break;
 	default:
@@ -996,35 +991,35 @@ void Draw(Font *font)
 
 	for (auto &distance : distances)
 	{
-		DrawDistanceObj(distance);
+		DrawDistanceObj(&distance);
 	}
 	for (auto &circle : circles)
 	{
-		DrawCircleObj(circle);
+		DrawCircleObj(&circle);
 	}
 	for (auto &ray : rays)
 	{
-		DrawRayObj(ray);
+		DrawRayObj(&ray);
 	}
 	for (auto &straightLine : straightLines)
 	{
-		DrawStraightLineObj(straightLine);
+		DrawStraightLineObj(&straightLine);
 	}
 
 	for (auto &distance : distances)
 	{
-		DrawDistanceLengths(distance, font);
+		DrawDistanceLengths(&distance, font);
 	}
 
 	for (auto &point : points)
 	{
-		DrawPointObj(point.point);
+		DrawPointObj(&point.point);
 		DrawTextEx(*font, point.letter.c_str(), {point.point.x + 4, point.point.y + 4}, 12, 0, BLACK);
 		DrawTextEx(*font, point.letterNumber.c_str(), {point.point.x + 12, point.point.y + 8}, 8, 0, GRAY);
 	}
 
 	DrawDrawingObj(font);
-	DrawPointObj(currentPoint);
+	DrawPointObj(&currentPoint);
 }
 
 int main()
