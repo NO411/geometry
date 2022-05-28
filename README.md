@@ -39,7 +39,7 @@ cd <path to your installation folder>
 Then run:
 
 ```
-sudo apt install g++ git make libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev && git clone https://github.com/NO411/geometry && git clone https://github.com/raysan5/raylib && cd raylib/src && make PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=SHARED && sudo make install RAYLIB_LIBTYPE=SHARED && cd ../../geometry/src && g++ main.cpp math/math_misc.cpp -o ../geometry -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./../geometry
+sudo apt install g++ git make libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev && git clone https://github.com/NO411/geometry && git clone https://github.com/raysan5/raylib && cd raylib/src && make PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=SHARED && sudo make install RAYLIB_LIBTYPE=SHARED && cd ../../geometry/src && g++ main.cpp math/math_misc.cpp math/intersections.cpp app/draw.cpp app/geometry_objects.cpp app/main_logic.cpp -o ../geometry -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./../geometry
 ```
 
 To run the program after installing it in your installation folder, type:
