@@ -1,7 +1,6 @@
 #include "app/main_logic.h"
 #include "math/math_misc.h"
 #include "raylib.h"
-#include <iostream>
 
 void Init()
 {

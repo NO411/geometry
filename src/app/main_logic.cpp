@@ -94,61 +94,61 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 		CIRCLECONNECTION
 	};
 
-	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vector2 point, int connectionType, int objType, std::size_t objPos)
+	auto ConnectionDistancesPush = [&connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vector2 *point, int connectionType, int objType, std::size_t objPos)
 	{
-		connectionDistances.push_back(GetDistance(&point, GetMousePosition2()));
-		connectionPoints.push_back(point);
+		connectionDistances.push_back(GetDistance(point, GetMousePosition2()));
+		connectionPoints.push_back(*point);
 		connectionTypes.push_back(connectionType);
 		objPlaces.push_back(std::make_tuple(objType, objPos));
 	};
 
-	auto LineConnection = [&connectionTypes, &ConnectionDistancesPush](Line line, int objType, std::size_t objPos)
+	auto LineConnection = [&connectionTypes, &ConnectionDistancesPush](Line *line, int objType, std::size_t objPos)
 	{
-		Vector2 pointA = line.pointA, pointB = line.pointB;
+		Vector2 pointA = line->pointA, pointB = line->pointB;
 		if (objType > DISTANCE)
 		{
-			pointB = line.secondConnectionPoint;
+			pointB = line->secondConnectionPoint;
 		}
 
 		if (objType == STRAIGHTLINE)
 		{
-			pointA = line.firstConnectionPoint;
+			pointA = line->firstConnectionPoint;
 		}
 
 		Vector2 *intersection = GetOrthogonalLinesIntersection(GetMousePosition2(), &pointA, &pointB);
 		if (IsPointOnLine(intersection, &pointA, &pointB))
 		{
-			ConnectionDistancesPush(*intersection, LINECONNECTION, objType, objPos);
+			ConnectionDistancesPush(intersection, LINECONNECTION, objType, objPos);
 		}
 	};
 
 	for (std::size_t i = 0; i < distances.size(); ++i)
 	{
-		ConnectionDistancesPush(distances[i].pointA, LINEANDPOINTCONNECTION, DISTANCE, i);
-		ConnectionDistancesPush(distances[i].pointB, LINEANDPOINTCONNECTION, DISTANCE, i);
-		LineConnection(distances[i], DISTANCE, i);
+		ConnectionDistancesPush(&distances[i].pointA, LINEANDPOINTCONNECTION, DISTANCE, i);
+		ConnectionDistancesPush(&distances[i].pointB, LINEANDPOINTCONNECTION, DISTANCE, i);
+		LineConnection(&distances[i], DISTANCE, i);
 	}
 	for (std::size_t i = 0; i < circles.size(); ++i)
 	{
-		ConnectionDistancesPush(*GetCircleConnection(&circles[i]), CIRCLECONNECTION, CIRCLE, i);
+		ConnectionDistancesPush(GetCircleConnection(&circles[i]), CIRCLECONNECTION, CIRCLE, i);
 	}
 	for (std::size_t i = 0; i < rays.size(); ++i)
 	{
-		ConnectionDistancesPush(rays[i].pointA, LINEANDPOINTCONNECTION, RAY, i);
+		ConnectionDistancesPush(&rays[i].pointA, LINEANDPOINTCONNECTION, RAY, i);
 
-		LineConnection(rays[i], RAY, i);
+		LineConnection(&rays[i], RAY, i);
 	}
 	for (std::size_t i = 0; i < straightLines.size(); ++i)
 	{
-		LineConnection(straightLines[i], STRAIGHTLINE, i);
+		LineConnection(&straightLines[i], STRAIGHTLINE, i);
 	}
 	for (std::size_t i = 0; i < points.size(); ++i)
 	{
-		ConnectionDistancesPush(points[i].point, POINTCONNECTION, POINT, i);
+		ConnectionDistancesPush(&points[i].point, POINTCONNECTION, POINT, i);
 	}
 	for (auto &intersection : intersections)
 	{
-		ConnectionDistancesPush(intersection.point, INTERSECTIONCONNECTION, -1, 0);
+		ConnectionDistancesPush(&intersection.point, INTERSECTIONCONNECTION, -1, 0);
 	}
 
 	while (!connectionDistances.empty())
