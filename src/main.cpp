@@ -1,6 +1,7 @@
 #include "app/main_logic.h"
 #include "math/math_misc.h"
 #include "raylib.h"
+#include <iostream>
 
 void Init()
 {
@@ -10,13 +11,14 @@ void Init()
 	SetTargetFPS(60);
 	SetExitKey(0);
 	SetWindowIcon(LoadImage("resources/icon.png"));
+	ChangeDirectory(GetApplicationDirectory());
 }
 
 int main()
 {
 	Init();
 
-	Font font = LoadFont("../resources/anonymous_pro_bold.ttf");
+	Font font = LoadFont("resources/anonymous_pro_bold.ttf");
 	SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
 	camera.target = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};

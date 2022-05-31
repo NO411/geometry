@@ -11,6 +11,7 @@
 
 bool firstPointed = false;
 const float movementSpeed = 6;
+const int connection_distance = 8;
 int editMode = DRAWDISTANCE;
 
 std::vector<Circle> circles;
@@ -153,7 +154,7 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 	while (!connectionDistances.empty())
 	{
 		auto minPos = std::min_element(connectionTypes.begin(), connectionTypes.end()) - connectionTypes.begin();
-		if (connectionDistances.at(minPos) <= 8)
+		if (connectionDistances.at(minPos) <= connection_distance)
 		{
 			currentPoint = connectionPoints.at(minPos);
 			return new std::tuple<int, std::size_t>{objPlaces.at(minPos)};
@@ -245,7 +246,7 @@ void Edit()
 
 			for (auto &point : points)
 			{
-				if (SameVector2(&point.point, &currentPoint))
+				if (GetDistance(&point.point, &currentPoint) < connection_distance)
 				{
 					return;
 				}

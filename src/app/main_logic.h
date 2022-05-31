@@ -22,6 +22,7 @@ enum EditMode
 
 extern bool firstPointed;
 extern const float movementSpeed;
+extern const int connection_distance;
 extern int editMode;
 
 extern std::vector<Circle> circles;

@@ -51,7 +51,7 @@ void FindLineLineIntersections(Vector2 *A1, Vector2 *A2, Vector2 *B1, Vector2 *B
 	float x, y;
 
 	// no intersection if the lines are parallel
-	if (mnA.x == mnB.x)
+	if ((int)mnA.x == (int)mnB.x)
 	{
 		return;
 	}
@@ -60,12 +60,12 @@ void FindLineLineIntersections(Vector2 *A1, Vector2 *A2, Vector2 *B1, Vector2 *B
 	x = (mnA.y - mnB.y) / (mnB.x - mnA.x);
 	y = mnA.x * x + mnA.y;
 
-	if (A1->x == A2->x)
+	if ((int)A1->x == (int)A2->x)
 	{
 		x = A1->x;
 		y = mnB.x * A1->x + mnB.y;
 	}
-	else if (B1->x == B2->x)
+	else if ((int)B1->x == (int)B2->x)
 	{
 		x = B1->x;
 		y = mnA.x * B1->x + mnA.y;
@@ -96,7 +96,7 @@ void FindCircleLineIntersections(Vector2 *A, float r, Vector2 *pointA, Vector2 *
 
 	Vector2 mn = *GetMN(&B1, &B2);
 
-	if (!(B1.x == B2.x))
+	if (!((int)B1.x == (int)B2.x))
 	{
 		if (t1 >= 0 && t1 <= 1)
 		{

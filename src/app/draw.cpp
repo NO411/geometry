@@ -1,5 +1,6 @@
 #include "draw.h"
 #include "geometry_objects.h"
+#include "main_logic.h"
 #include "../math/math_misc.h"
 #include "raylib.h"
 
@@ -34,7 +35,7 @@ void DrawDistanceLengths(Line *line, Font *font)
 
 void DrawRayObj(Line *line)
 {
-	if (SameVector2(&line->pointA, &line->secondConnectionPoint))
+	if (GetDistance(&line->pointA, &line->pointB) < 1)
 	{
 		return;
 	}

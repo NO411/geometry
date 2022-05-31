@@ -33,11 +33,6 @@ float GetDistance(Vector2 *vec1, Vector2 *vec2)
 	return sqrt(pow(vec2->x - vec1->x, 2) + pow(vec2->y - vec1->y, 2));
 }
 
-bool SameVector2(Vector2 *v1, Vector2 *v2)
-{
-	return (v1->x == v2->x && v1->y == v2->y);
-}
-
 bool IsPointOnLine(Vector2 *point, Vector2 *pointA, Vector2 *pointB)
 {
 	float x1 = pointA->x, x2 = pointB->x, _var;
@@ -51,7 +46,7 @@ bool IsPointOnLine(Vector2 *point, Vector2 *pointA, Vector2 *pointB)
 	{
 		return true;
 	}
-	if (x1 == x2)
+	if ((int)x1 == (int)x2)
 	{
 		float y1 = pointA->y, y2 = pointB->y;
 		if (y1 > y2)
@@ -78,12 +73,12 @@ Vector2 *GetOrthogonalLinesIntersection(Vector2 *point, Vector2 *pointA, Vector2
 
 	Vector2 connectionPoint = {x, y};
 
-	if (pointA->x == pointB->x)
+	if ((int)pointA->x == (int)pointB->x)
 	{
 		connectionPoint = {pointA->x, point->y};
 	}
 
-	if (pointA->y == pointB->y)
+	if ((int)pointA->y == (int)pointB->y)
 	{
 		connectionPoint = {point->x, pointA->y};
 	}
@@ -121,7 +116,7 @@ Vector2 *CalculateConnectionPoint(Vector2 *p1, Vector2 *p2, float m, float n)
 
 	connectionPoint.y = m * connectionPoint.x + n;
 
-	if (p1->x == p2->x)
+	if ((int)p1->x == (int)p2->x)
 	{
 		connectionPoint.x = p1->x;
 		if (p1->y > p2->y)
