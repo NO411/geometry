@@ -20,7 +20,7 @@ void GeometryObj::CheckIntersections(Vector2 *vec1, Vector2 *vec2, float r)
 	{
 		for (auto &circle : circles)
 		{
-			FindCircleCircleIntersections(vec1, &circle.middle, r, circle.radius);
+			FindCircleCircleIntersections(vec1, &circle.center, r, circle.radius);
 		}
 		for (auto &distance : distances)
 		{
@@ -42,7 +42,7 @@ void GeometryObj::CheckIntersections(Vector2 *vec1, Vector2 *vec2, float r)
 	{
 		for (auto &circle : circles)
 		{
-			FindCircleLineIntersections(&circle.middle, circle.radius, vec1, vec2);
+			FindCircleLineIntersections(&circle.center, circle.radius, vec1, vec2);
 		}
 		for (auto &distance : distances)
 		{
@@ -134,7 +134,7 @@ void Point::Move(int direction, bool y)
 }
 
 Circle::Circle() {}
-Circle::Circle(Vector2 middle, float radius) : middle(middle), radius(radius)
+Circle::Circle(Vector2 center, float radius) : center(center), radius(radius)
 {
 	objectNumber = CIRCLE;
 	UpdateIntersections();
@@ -143,7 +143,7 @@ Circle::~Circle() {}
 
 void Circle::UpdateIntersections()
 {
-	CheckIntersections(&middle, new Vector2{0, 0}, radius);
+	CheckIntersections(&center, new Vector2{0, 0}, radius);
 }
 
 void Circle::Move(int direction, bool y) {}

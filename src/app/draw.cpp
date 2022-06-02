@@ -12,7 +12,7 @@ void DrawPointObj(Vector2 *point)
 
 void DrawCircleObj(Circle *circle)
 {
-	DrawCircleSectorLines(circle->middle, circle->radius, 0, 360, 2 * circle->radius, LIGHTGRAY);
+	DrawCircleSectorLines(circle->center, circle->radius, 0, 360, 2 * circle->radius, LIGHTGRAY);
 }
 
 void DrawDistanceObj(Line *line)

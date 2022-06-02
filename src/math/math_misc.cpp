@@ -89,8 +89,8 @@ Vector2 *GetOrthogonalLinesIntersection(Vector2 *point, Vector2 *pointA, Vector2
 Vector2 *GetCircleConnection(Circle *circle)
 {
 	Vector2 *mouse = GetMousePosition2();
-	float x = circle->middle.x + (mouse->x - circle->middle.x) / (GetDistance(mouse, &circle->middle) / circle->radius);
-	LinearFunction *function = GetLinearFunction(&circle->middle, mouse);
+	float x = circle->center.x + (mouse->x - circle->center.x) / (GetDistance(mouse, &circle->center) / circle->radius);
+	LinearFunction *function = GetLinearFunction(&circle->center, mouse);
 	float y = function->m * x + function->n;
 
 	return new Vector2{x, y};

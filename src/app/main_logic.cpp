@@ -386,7 +386,7 @@ void DrawDrawingObj(Font *font)
 	{
 	case DRAWCIRCLE:
 	{
-		currentCircle.middle = firstPoint.point;
+		currentCircle.center = firstPoint.point;
 		currentCircle.radius = GetDistance(&firstPoint.point, &currentPoint);
 		DrawCircleObj(&currentCircle);
 	}

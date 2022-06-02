@@ -8,17 +8,18 @@
 
 std::vector<Point> intersections;
 
-void FindCircleCircleIntersections(Vector2 *A, Vector2 *B, float a, float b)
+void FindCircleCircleIntersections(Vector2 *circleCenterA, Vector2 *circleCenterB, float circleRadiusA, float circleRadiusB)
 {
-	float c = GetDistance(A, B);
-	if (c == 0)
+	float centersDistance = GetDistance(circleCenterA, circleCenterB);
+	if (centersDistance == 0)
 	{
 		return;
 	}
 
-	float powa = pow(a, 2);
-	float x = (powa + pow(c, 2) - pow(b, 2)) / (2 * c);
-	float y = powa - pow(x, 2);
+	float aSquared = pow(circleRadiusA, 2);
+	float x = (aSquared + pow(centersDistance, 2) - pow(circleRadiusB, 2)) / (2 * centersDistance);
+	float y = aSquared - pow(x, 2);
+	
 	if (y < 0)
 	{
 		return;
@@ -27,21 +28,27 @@ void FindCircleCircleIntersections(Vector2 *A, Vector2 *B, float a, float b)
 	{
 		y = sqrt(y);
 	}
-	float ex0 = (B->x - A->x) / c, ex1 = (B->y - A->y) / c;
-	float ey0 = -ex1, ey1 = ex0;
-	float Q1x = A->x + x * ex0;
-	float Q1y = A->y + x * ex1;
+
+	float ex0 = (circleCenterB->x - circleCenterA->x) / centersDistance;
+	float ex1 = (circleCenterB->y - circleCenterA->y) / centersDistance;
+	float ey0 = -ex1;
+	float ey1 = ex0;
+	float q1X = circleCenterA->x + x * ex0;
+	float q1Y = circleCenterA->y + x * ex1;
+
 	if (y == 0)
 	{
-		intersections.push_back({{Q1x, Q1y}});
+		intersections.push_back({{q1X, q1Y}});
 		return;
 	}
-	float Q2x = Q1x - y * ey0;
-	float Q2y = Q1y - y * ey1;
-	Q1x += y * ey0;
-	Q1y += y * ey1;
-	intersections.push_back({{Q1x, Q1y}});
-	intersections.push_back({{Q2x, Q2y}});
+
+	float q2X = q1X - y * ey0;
+	float q2Y = q1Y - y * ey1;
+	q1X += y * ey0;
+	q1Y += y * ey1;
+
+	intersections.push_back({{q1X, q1Y}});
+	intersections.push_back({{q2X, q2Y}});
 }
 
 void FindLineLineIntersections(Vector2 *A1, Vector2 *A2, Vector2 *B1, Vector2 *B2)

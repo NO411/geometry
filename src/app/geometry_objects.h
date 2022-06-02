@@ -46,11 +46,11 @@ public:
 class Circle : public GeometryObj
 {
 public:
-	Vector2 middle;
+	Vector2 center;
 	float radius;
 
 	Circle();
-	Circle(Vector2 middle, float radius);
+	Circle(Vector2 center, float radius);
 	~Circle();
 
 	void UpdateIntersections();
