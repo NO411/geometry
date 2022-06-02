@@ -21,9 +21,9 @@ std::vector<Line> straightLines;
 std::vector<Point> points;
 
 Point firstPoint;
-Line currentLine = {{0, 0}, {0, 0}, DISTANCE};
-Circle currentCircle = {{0, 0}, 0};
-Vector2 currentPoint = GetMousePosition();
+Line currentLine;
+Circle currentCircle;
+Vector2 currentPoint;
 
 void SetDrawObj()
 {
@@ -230,7 +230,7 @@ void Edit()
 	auto objTuple = UpdateCurrentPoint();
 	int objType = std::get<0>(*objTuple);
 	std::size_t objPos = std::get<1>(*objTuple);
-	if (!IsMouseButtonPressed(0))
+	if (!(IsMouseButtonPressed(0) || IsKeyPressed(KEY_ENTER)))
 	{
 		return;
 	}

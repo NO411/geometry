@@ -133,6 +133,7 @@ void Point::Move(int direction, bool y)
 {
 }
 
+Circle::Circle() {}
 Circle::Circle(Vector2 middle, float radius) : middle(middle), radius(radius)
 {
 	objectNumber = CIRCLE;
@@ -147,6 +148,7 @@ void Circle::UpdateIntersections()
 
 void Circle::Move(int direction, bool y) {}
 
+Line::Line() {}
 Line::Line(Vector2 pointA, Vector2 pointB, int n) : pointA(pointA), pointB(pointB)
 {
 	objectNumber = n;

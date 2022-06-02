@@ -5,6 +5,9 @@
 
 #include <string>
 
+extern float scaling;
+extern const std::string pointChars;
+
 enum GeometryObject
 {
 	CIRCLE,
@@ -46,6 +49,7 @@ public:
 	Vector2 middle;
 	float radius;
 
+	Circle();
 	Circle(Vector2 middle, float radius);
 	~Circle();
 
@@ -64,6 +68,7 @@ public:
 	float length;
 	Point middle;
 
+	Line();
 	Line(Vector2 pointA, Vector2 pointB, int n);
 	~Line();
 
