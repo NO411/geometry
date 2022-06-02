@@ -47,7 +47,7 @@ void FindCircleCircleIntersections(Vector2 *A, Vector2 *B, float a, float b)
 void FindLineLineIntersections(Vector2 *A1, Vector2 *A2, Vector2 *B1, Vector2 *B2)
 {
 	Vector2 intersection;
-	Vector2* intersection_ptr = &intersection;
+	Vector2 *intersection_ptr = &intersection;
 	if (CheckCollisionLines(*A1, *A2, *B1, *B2, intersection_ptr))
 	{
 		intersections.push_back(*intersection_ptr);
@@ -65,21 +65,21 @@ void FindCircleLineIntersections(Vector2 *A, float r, Vector2 *pointA, Vector2 *
 	float _t2 = pow(v1, 2) + pow(v2, 2);
 	float t1 = (_t1 + sqrt(D)) / _t2, t2 = (_t1 - sqrt(D)) / _t2;
 
-	Vector2 mn = *GetMN(&B1, &B2);
+	LinearFunction *function = GetLinearFunction(&B1, &B2);
 
 	if (!((int)B1.x == (int)B2.x))
 	{
 		if (t1 >= 0 && t1 <= 1)
 		{
 			float x = v1 * t1 + B1.x;
-			float y = mn.x * x + mn.y;
+			float y = function->m * x + function->n;
 			intersections.push_back({{x + A->x, y + A->y}});
 		}
 
 		if (t2 >= 0 && t2 <= 1)
 		{
 			float x = v1 * t2 + B1.x;
-			float y = mn.x * x + mn.y;
+			float y = function->m * x + function->n;
 			intersections.push_back({{x + A->x, y + A->y}});
 		}
 		return;
