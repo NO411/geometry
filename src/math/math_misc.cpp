@@ -21,11 +21,11 @@ Vector2 *GetMousePosition2()
 	return new Vector2{GetMouseX2(), GetMouseY2()};
 }
 
-Vector2 *GetMN(Vector2 *p1, Vector2 *p2)
+LinearFunction *GetLinearFunction(Vector2 *p1, Vector2 *p2)
 {
 	float m = (p1->y - p2->y) / (p1->x - p2->x);
 	float n = p2->y - (m * p2->x);
-	return new Vector2{m, n};
+	return new LinearFunction{m, n};
 }
 
 float GetDistance(Vector2 *vec1, Vector2 *vec2)
@@ -65,11 +65,11 @@ bool IsPointOnLine(Vector2 *point, Vector2 *pointA, Vector2 *pointB)
 
 Vector2 *GetOrthogonalLinesIntersection(Vector2 *point, Vector2 *pointA, Vector2 *pointB)
 {
-	Vector2 mn = *GetMN(pointA, pointB);
-	float m2 = -1 / mn.x;
+	LinearFunction *function = GetLinearFunction(pointA, pointB);
+	float m2 = -1 / function->m;
 	float n2 = point->y - m2 * point->x;
-	float x = (n2 - mn.y) / (mn.x - m2);
-	float y = mn.x * x + mn.y;
+	float x = (n2 - function->n) / (function->m - m2);
+	float y = function->m * x + function->n;
 
 	Vector2 connectionPoint = {x, y};
 
@@ -90,8 +90,8 @@ Vector2 *GetCircleConnection(Circle *circle)
 {
 	Vector2 *mouse = GetMousePosition2();
 	float x = circle->middle.x + (mouse->x - circle->middle.x) / (GetDistance(mouse, &circle->middle) / circle->radius);
-	Vector2 mn = *GetMN(&circle->middle, mouse);
-	float y = mn.x * x + mn.y;
+	LinearFunction *function = GetLinearFunction(&circle->middle, mouse);
+	float y = function->m * x + function->n;
 
 	return new Vector2{x, y};
 }

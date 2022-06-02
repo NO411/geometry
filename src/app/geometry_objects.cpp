@@ -162,13 +162,13 @@ Line::~Line() {}
 
 void Line::UpdateFirstConnectionPoint()
 {
-	Vector2 mn = *GetMN(&pointA, &pointB);
-	firstConnectionPoint = *CalculateConnectionPoint(&pointB, &pointA, mn.x, mn.y);
+	LinearFunction *function = GetLinearFunction(&pointA, &pointB);
+	firstConnectionPoint = *CalculateConnectionPoint(&pointB, &pointA, function->m, function->n);
 }
 void Line::UpdateSecondConnectionPoint()
 {
-	Vector2 mn = *GetMN(&pointA, &pointB);
-	secondConnectionPoint = *CalculateConnectionPoint(&pointA, &pointB, mn.x, mn.y);
+	LinearFunction *function = GetLinearFunction(&pointA, &pointB);
+	secondConnectionPoint = *CalculateConnectionPoint(&pointA, &pointB, function->m, function->n);
 }
 void Line::UpdateConnectionPoints()
 {
