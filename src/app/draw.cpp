@@ -12,7 +12,48 @@ void DrawPointObj(Vector2 *point)
 
 void DrawCircleObj(Circle *circle)
 {
-	DrawCircleSectorLines(circle->center, circle->radius, 0, 360, 2 * circle->radius, LIGHTGRAY);
+	std::size_t vectorSize = circle->sectors.size();
+	if (vectorSize <= 0)
+	{
+		DrawRingLines(circle->center, circle->radius, circle->radius, 0, 360, 2 * circle->radius, LIGHTGRAY);
+		return;
+	}
+
+	if (vectorSize == 1)
+	{
+		// the function DrawRingLines() switches start and end point when the end point is smaller than the start point
+		float startAngle = circle->sectors.at(0).endAngle;
+		float endAngle = circle->sectors.at(0).startAngle;
+		if (startAngle > endAngle)
+		{
+			endAngle += 360;
+		}
+		DrawRingLines(circle->center, circle->radius, circle->radius, startAngle, endAngle, 2 * circle->radius, LIGHTGRAY);
+		return;
+	}
+
+	for (std::size_t i = 0; i < vectorSize; ++i)
+	{
+		float startAngle = circle->sectors.at(i).endAngle;
+		// use the start angle of the following sector as the endAngle
+		float endAngle;
+
+		if (i == vectorSize - 1)
+		{
+			endAngle = circle->sectors.at(0).startAngle;
+		}
+		else
+		{
+			endAngle = circle->sectors.at(i + 1).startAngle;
+		}
+
+		if (startAngle > endAngle)
+		{
+			endAngle += 360;
+		}
+
+		DrawRingLines(circle->center, circle->radius, circle->radius, startAngle, endAngle, 2 * circle->radius, LIGHTGRAY);
+	}
 }
 
 void DrawDistanceObj(Line *line)

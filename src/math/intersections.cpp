@@ -67,10 +67,11 @@ void FindCircleLineIntersections(Vector2 *A, float r, Vector2 *pointA, Vector2 *
 	Vector2 B2 = {pointB->x - A->x, pointB->y - A->y};
 
 	float v1 = B2.x - B1.x, v2 = B2.y - B1.y;
-	float D = pow(r, 2) * (pow(v1, 2) + pow(v2, 2)) - pow(B1.x * v2 - B1.y * v1, 2);
+	float D = sqrt(pow(r, 2) * (pow(v1, 2) + pow(v2, 2)) - pow(B1.x * v2 - B1.y * v1, 2));
 	float _t1 = -B1.x * v1 - B1.y * v2;
 	float _t2 = pow(v1, 2) + pow(v2, 2);
-	float t1 = (_t1 + sqrt(D)) / _t2, t2 = (_t1 - sqrt(D)) / _t2;
+	float t1 = (_t1 + D) / _t2;
+	float t2 = (_t1 - D) / _t2;
 
 	LinearFunction *function = GetLinearFunction(&B1, &B2);
 

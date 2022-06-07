@@ -10,6 +10,14 @@
 float scaling = 0.025;
 const std::string pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+Sector::Sector() {}
+Sector::~Sector() {}
+Sector::Sector(float startAngle, float endAngle, Vector2 startAnglePoint, Vector2 endAnglePoint) : startAngle(startAngle), endAngle(endAngle), startAnglePoint(startAnglePoint), endAnglePoint(endAnglePoint){};
+bool Sector::operator<(const Sector &sector) const
+{
+	return (startAngle < sector.startAngle);
+}
+
 GeometryObj::GeometryObj() {}
 GeometryObj::~GeometryObj() {}
 void GeometryObj::CheckIntersections(Vector2 *vec1, Vector2 *vec2, float r)
@@ -129,9 +137,6 @@ void Point::SetPointLetter()
 
 	letterNumber = std::to_string(i);
 }
-void Point::Move(int direction, bool y)
-{
-}
 
 Circle::Circle() {}
 Circle::Circle(Vector2 center, float radius) : center(center), radius(radius)
@@ -146,7 +151,22 @@ void Circle::UpdateIntersections()
 	CheckIntersections(&center, new Vector2{0, 0}, radius);
 }
 
-void Circle::Move(int direction, bool y) {}
+void Circle::EraseSector(Vector2 *firstCircleEraserPoint, Vector2 *currentPoint)
+{
+	Sector *newSector = PointsToSector(&center, firstCircleEraserPoint, currentPoint);
+
+	sectors.erase(std::remove_if(sectors.begin(), sectors.end(),
+								[&newSector](Sector sector)
+								{
+									return SectorIncludesAngle(newSector, sector.startAngle) && SectorIncludesAngle(newSector, sector.endAngle);
+								}),
+				sectors.end());
+
+	sectors.push_back(*newSector);
+
+	// bring sectors in right order to draw them correctly
+	std::sort(sectors.begin(), sectors.end());
+}
 
 Line::Line() {}
 Line::Line(Vector2 pointA, Vector2 pointB, int n) : pointA(pointA), pointB(pointB)
@@ -194,7 +214,7 @@ void Line::UpdateIntersections()
 	}
 	CheckIntersections(&v1, &v2, 0);
 }
-void Line::Move(int direction, bool y) {}
+
 void Line::UpdateLength()
 {
 	length = GetDistance(&pointA, &pointB) * scaling;

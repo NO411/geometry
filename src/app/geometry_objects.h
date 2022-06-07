@@ -4,6 +4,7 @@
 #include "raylib.h"
 
 #include <string>
+#include <vector>
 
 extern float scaling;
 extern const std::string pointChars;
@@ -15,6 +16,22 @@ enum GeometryObject
 	RAY,
 	STRAIGHTLINE,
 	POINT
+};
+
+class Sector
+{
+public:
+	float startAngle;
+	float endAngle;
+	Vector2 startAnglePoint;
+	Vector2 endAnglePoint;
+
+	Sector();
+	~Sector();
+
+	Sector(float startAngle, float endAngle, Vector2 startAnglePoint, Vector2 endAnglePoint);
+
+	bool operator<(const Sector &sector) const;
 };
 
 class GeometryObj
@@ -40,7 +57,6 @@ public:
 	~Point();
 
 	void SetPointLetter();
-	void Move(int direction, bool y);
 };
 
 class Circle : public GeometryObj
@@ -49,12 +65,14 @@ public:
 	Vector2 center;
 	float radius;
 
+	std::vector<Sector> sectors;
+
 	Circle();
 	Circle(Vector2 center, float radius);
 	~Circle();
 
 	void UpdateIntersections();
-	void Move(int direction, bool y);
+	void EraseSector(Vector2 *firstCircleEraserPoint, Vector2 *currentPoint);
 };
 
 class Line : public GeometryObj
@@ -76,7 +94,6 @@ public:
 	void UpdateSecondConnectionPoint();
 	void UpdateConnectionPoints();
 	void UpdateIntersections();
-	void Move(int direction, bool y);
 	void UpdateLength();
 };
 

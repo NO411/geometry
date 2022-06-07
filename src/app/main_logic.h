@@ -17,7 +17,8 @@ enum EditMode
 	DISTANCEMEASUREMENT,
 	ANGLEMEASUREMENT,
 	DISTANCEMEASUREMENTERASER,
-	ANGLEMEASUREMENTERASER
+	ANGLEMEASUREMENTERASER,
+	CIRCLEERASER,
 };
 
 extern bool firstPointed;
@@ -35,6 +36,8 @@ extern Point firstPoint;
 extern Line currentLine;
 extern Circle currentCircle;
 extern Vector2 currentPoint;
+extern Vector2 firstEraserPoint;
+extern std::size_t currentObjPos;
 
 void SetDrawObj();
 std::tuple<int, std::size_t> *UpdateCurrentPoint();

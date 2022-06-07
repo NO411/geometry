@@ -24,6 +24,8 @@ Point firstPoint;
 Line currentLine;
 Circle currentCircle;
 Vector2 currentPoint;
+Vector2 firstCircleEraserPoint;
+std::size_t currentObjPos;
 
 void SetDrawObj()
 {
@@ -62,6 +64,10 @@ void SetDrawObj()
 				editMode = ANGLEMEASUREMENTERASER;
 			}
 		}
+		if (IsKeyDown(KEY_C))
+		{
+			editMode = CIRCLEERASER;
+		}
 		break;
 	case KEY_M:
 		if (IsKeyDown(KEY_D))
@@ -91,6 +97,7 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 		INTERSECTIONCONNECTION,
 		LINEANDPOINTCONNECTION,
 		LINECONNECTION,
+		CIRCLEANDPOINTCONNECTION,
 		CIRCLECONNECTION
 	};
 
@@ -130,7 +137,16 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 	}
 	for (std::size_t i = 0; i < circles.size(); ++i)
 	{
-		ConnectionDistancesPush(GetCircleConnection(&circles[i]), CIRCLECONNECTION, CIRCLE, i);
+		Vector2* connectionPoint = GetCircleConnection(&circles[i]);
+		if (IsPointOnCircle(connectionPoint, &circles[i]))
+		{
+			ConnectionDistancesPush(connectionPoint, CIRCLECONNECTION, CIRCLE, i);
+		}
+		for (auto sector : circles[i].sectors)
+		{
+			ConnectionDistancesPush(&sector.startAnglePoint, CIRCLEANDPOINTCONNECTION, CIRCLE, i);
+			ConnectionDistancesPush(&sector.endAnglePoint, CIRCLEANDPOINTCONNECTION, CIRCLE, i);
+		}
 	}
 	for (std::size_t i = 0; i < rays.size(); ++i)
 	{
@@ -277,7 +293,15 @@ void Edit()
 		case ANGLEMEASUREMENTERASER:
 			firstPointed = false;
 			break;
-
+		case CIRCLEERASER:
+			if (objType != CIRCLE)
+			{
+				firstPointed = false;
+				break;
+			}
+			firstCircleEraserPoint = currentPoint;
+			currentObjPos = objPos;
+			break;
 		default:
 			break;
 		}
@@ -299,6 +323,21 @@ void Edit()
 		case DRAWSTRAIGHTLINE:
 			straightLines.push_back(Line{firstPoint.point, currentPoint, STRAIGHTLINE});
 			break;
+		case CIRCLEERASER:
+			if (objType != CIRCLE)
+			{
+				firstPointed = true;
+				break;
+			}
+			if (objPos != currentObjPos)
+			{
+				firstPointed = true;
+				firstCircleEraserPoint = currentPoint;
+				currentObjPos = objPos;
+				break;
+			}
+			circles.at(objPos).EraseSector(&firstCircleEraserPoint, &currentPoint);
+			break;
 		default:
 			break;
 		}
@@ -307,7 +346,7 @@ void Edit()
 
 void InterruptDrawing()
 {
-	if (IsKeyPressed(KEY_ESCAPE))
+	if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_LEFT_CONTROL))
 	{
 		firstPointed = false;
 	}
@@ -343,7 +382,10 @@ void Move()
 		ray.UpdateSecondConnectionPoint();
 	}
 
-	UpdateAllIntersections();
+	if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_UP) || IsKeyDown(KEY_RIGHT))
+	{
+		UpdateAllIntersections();
+	}
 }
 
 void InputHandler()

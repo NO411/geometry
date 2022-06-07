@@ -131,3 +131,87 @@ Vector2 *CalculateConnectionPoint(Vector2 *p1, Vector2 *p2, float m, float n)
 
 	return new Vector2{connectionPoint};
 }
+
+float ArcTan(float tan)
+{
+	return atan(tan) * 180 / PI;
+}
+
+float CalculateAngleTan(Vector2 *circleCenter, Vector2 *point)
+{
+	Vector2 rightTrianglePoint = {circleCenter->x, point->y};
+
+	if ((circleCenter->y > point->y && circleCenter->x < point->x) || (circleCenter->y < point->y && circleCenter->x > point->x))
+	{
+		rightTrianglePoint = {point->x, circleCenter->y};
+	}
+
+	float opposite = GetDistance(&rightTrianglePoint, point);
+	float adjacent = GetDistance(&rightTrianglePoint, circleCenter);
+
+	return (opposite) / (adjacent);
+}
+
+float AcuteAngleToObtuseAngle(float angle, Vector2 *circleCenter, Vector2 *point)
+{
+	if (circleCenter->y > point->y && circleCenter->x < point->x)
+	{
+		angle += 90;
+	}
+
+	if (circleCenter->y > point->y && circleCenter->x > point->x)
+	{
+		angle += 180;
+	}
+
+	if (circleCenter->y < point->y && circleCenter->x > point->x)
+	{
+		angle += 270;
+	}
+
+	if (angle > 360)
+	{
+		angle -= 360;
+	}
+
+	return angle;
+}
+
+Sector *PointsToSector(Vector2 *center, Vector2 *startPoint, Vector2 *endPoint)
+{
+	float startAngle = AcuteAngleToObtuseAngle(ArcTan(CalculateAngleTan(center, startPoint)), center, startPoint);
+	float endAngle = AcuteAngleToObtuseAngle(ArcTan(CalculateAngleTan(center, endPoint)), center, endPoint);
+
+	return new Sector(startAngle, endAngle, *startPoint, *endPoint);
+}
+
+bool SectorIncludesAngle(Sector *sector, float angle)
+{
+	if (sector->startAngle > sector->endAngle)
+	{
+		if ((angle > sector->startAngle && angle > sector->endAngle) || (angle < sector->startAngle && angle < sector->endAngle))
+		{
+			return true;
+		}
+		return false;
+	}
+	if (angle > sector->startAngle && angle < sector->endAngle)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool IsPointOnCircle(Vector2 *connectionPoint, Circle *circle)
+{
+	float pointAngle = AcuteAngleToObtuseAngle(ArcTan(CalculateAngleTan(&circle->center, connectionPoint)), &circle->center, connectionPoint);
+	for (auto sector : circle->sectors)
+	{
+		if (!SectorIncludesAngle(&sector, pointAngle))
+		{
+			continue;
+		}
+		return false;
+	}
+	return true;
+}
