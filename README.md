@@ -21,6 +21,8 @@ Made with Raylib.
 | `↓`                              | move everything down                                                         |
 | `CTRL` + `D` and press `M`       | distance measurement mode                                                    |
 | `CTRL` + `D` + `M` and press `E` | distance measurement eraser mode                                             |
+| `CTRL` + `C` and press `E`       | circle sector eraser mode                                                    |
+
 
 The cursor automatically connects to intersections, other points, lines, and circles.
 
