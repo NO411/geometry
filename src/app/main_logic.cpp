@@ -137,7 +137,7 @@ std::tuple<int, std::size_t> *UpdateCurrentPoint()
 	}
 	for (std::size_t i = 0; i < circles.size(); ++i)
 	{
-		Vector2* connectionPoint = GetCircleConnection(&circles[i]);
+		Vector2 *connectionPoint = GetCircleConnection(&circles[i]);
 		if (IsPointOnCircle(connectionPoint, &circles[i]))
 		{
 			ConnectionDistancesPush(connectionPoint, CIRCLECONNECTION, CIRCLE, i);
@@ -246,6 +246,7 @@ void Edit()
 	auto objTuple = UpdateCurrentPoint();
 	int objType = std::get<0>(*objTuple);
 	std::size_t objPos = std::get<1>(*objTuple);
+	
 	if (!(IsMouseButtonPressed(0) || IsKeyPressed(KEY_ENTER)))
 	{
 		return;
@@ -446,6 +447,11 @@ void DrawDrawingObj(Font *font)
 	{
 		currentLine.UpdateConnectionPoints();
 		DrawStraightLineObj(&currentLine);
+	}
+	break;
+	case CIRCLEERASER:
+	{
+		DrawCurrentCircleSector();
 	}
 	break;
 	default:

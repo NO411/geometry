@@ -36,7 +36,7 @@ extern Point firstPoint;
 extern Line currentLine;
 extern Circle currentCircle;
 extern Vector2 currentPoint;
-extern Vector2 firstEraserPoint;
+extern Vector2 firstCircleEraserPoint;
 extern std::size_t currentObjPos;
 
 void SetDrawObj();

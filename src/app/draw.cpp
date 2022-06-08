@@ -88,3 +88,27 @@ void DrawStraightLineObj(Line *line)
 {
 	DrawLineEx(line->firstConnectionPoint, line->secondConnectionPoint, 2, LIGHTGRAY);
 }
+
+void DrawCurrentCircleSector()
+{
+	Circle *circle = &circles[currentObjPos];
+	Color sectorColor = LIGHTGRAY;
+
+	if (IsPointOnCircle(&currentPoint, circle))
+	{
+		sectorColor = GREEN;
+	}
+
+	sectorColor.a = 100;
+	float startAngle = CirclePointToAngle(&circle->center, &firstCircleEraserPoint);
+	float endAngle = CirclePointToAngle(&circle->center, &currentPoint);
+
+	if (startAngle > endAngle)
+	{
+		DrawCircleSector(circle->center, circle->radius, startAngle, 360, 2 * circle->radius, sectorColor);
+		DrawCircleSector(circle->center, circle->radius, 0, endAngle, 2 * circle->radius, sectorColor);
+		return;
+	}
+
+	DrawCircleSector(circle->center, circle->radius, startAngle, endAngle, 2 * circle->radius, sectorColor);
+}

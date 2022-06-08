@@ -156,11 +156,11 @@ void Circle::EraseSector(Vector2 *firstCircleEraserPoint, Vector2 *currentPoint)
 	Sector *newSector = PointsToSector(&center, firstCircleEraserPoint, currentPoint);
 
 	sectors.erase(std::remove_if(sectors.begin(), sectors.end(),
-								[&newSector](Sector sector)
-								{
-									return SectorIncludesAngle(newSector, sector.startAngle) && SectorIncludesAngle(newSector, sector.endAngle);
-								}),
-				sectors.end());
+			[&newSector](Sector sector)
+			{
+				return SectorIncludesAngle(newSector, sector.startAngle) && SectorIncludesAngle(newSector, sector.endAngle);
+			}),
+		sectors.end());
 
 	sectors.push_back(*newSector);
 

@@ -24,6 +24,7 @@ Vector2 *CalculateConnectionPoint(Vector2 *p1, Vector2 *p2, float m, float n);
 float ArcTan(float tan);
 float CalculateAngleTan(Vector2 *circleCenter, Vector2 *point);
 float AcuteAngleToObtuseAngle(float angle, Vector2 *circleCenter, Vector2 *point);
+float CirclePointToAngle(Vector2 *center, Vector2 *point);
 Sector *PointsToSector(Vector2 *center, Vector2 *startPoint, Vector2 *endPoint);
 bool SectorIncludesAngle(Sector *sector, float angle);
 bool IsPointOnCircle(Vector2 *connectionPoint, Circle *circle);

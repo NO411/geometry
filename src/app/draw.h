@@ -10,5 +10,6 @@ void DrawDistanceObj(Line *line);
 void DrawDistanceLengths(Line *line, Font *font);
 void DrawRayObj(Line *line);
 void DrawStraightLineObj(Line *line);
+void DrawCurrentCircleSector();
 
 #endif

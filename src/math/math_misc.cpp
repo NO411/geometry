@@ -174,13 +174,38 @@ float AcuteAngleToObtuseAngle(float angle, Vector2 *circleCenter, Vector2 *point
 		angle -= 360;
 	}
 
+	int circleX = circleCenter->x, circleY = circleCenter->y;
+	int pointX = point->x, pointY = point->y;
+
+	if (circleX == pointX)
+	{
+		angle = 180;
+		if (circleY < pointY)
+		{
+			angle += 180;
+		}
+	}
+	if (circleY == pointY)
+	{
+		angle = 90;
+		if (circleX > pointX)
+		{
+			angle += 180;
+		}
+	}
+
 	return angle;
+}
+
+float CirclePointToAngle(Vector2 *center, Vector2 *point)
+{
+	return AcuteAngleToObtuseAngle(ArcTan(CalculateAngleTan(center, point)), center, point);
 }
 
 Sector *PointsToSector(Vector2 *center, Vector2 *startPoint, Vector2 *endPoint)
 {
-	float startAngle = AcuteAngleToObtuseAngle(ArcTan(CalculateAngleTan(center, startPoint)), center, startPoint);
-	float endAngle = AcuteAngleToObtuseAngle(ArcTan(CalculateAngleTan(center, endPoint)), center, endPoint);
+	float startAngle = CirclePointToAngle(center, startPoint);
+	float endAngle = CirclePointToAngle(center, endPoint);
 
 	return new Sector(startAngle, endAngle, *startPoint, *endPoint);
 }
@@ -204,7 +229,7 @@ bool SectorIncludesAngle(Sector *sector, float angle)
 
 bool IsPointOnCircle(Vector2 *connectionPoint, Circle *circle)
 {
-	float pointAngle = AcuteAngleToObtuseAngle(ArcTan(CalculateAngleTan(&circle->center, connectionPoint)), &circle->center, connectionPoint);
+	float pointAngle = CirclePointToAngle(&circle->center, connectionPoint);
 	for (auto sector : circle->sectors)
 	{
 		if (!SectorIncludesAngle(&sector, pointAngle))
