@@ -5,24 +5,24 @@
 
 enum AppStates
 {
-    GEOMETRY_BOARD,
-    HELP,
+	GEOMETRY_BOARD,
+	HELP,
 };
 
 
 class GeometryApp
 {
 public:
-    GeometryApp(int width, int height, int fps, std::string title);
-    ~GeometryApp() noexcept;
+	GeometryApp(int width, int height, int fps, std::string title);
+	~GeometryApp() noexcept;
 
-    void Run();
+	void Run();
 private:
-    Camera2D camera;
-    Font font;
+	Camera2D camera;
+	Font font;
 
-    bool GeometryAppShouldClose() const;
-    void Tick();
-    void Draw();
-    void Update();
+	bool GeometryAppShouldClose() const;
+	void Tick();
+	void Draw();
+	void Update();
 };
