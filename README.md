@@ -7,21 +7,23 @@ Made with Raylib.
 
 | Keys                             | Action                                                                       |
 |----------------------------------|------------------------------------------------------------------------------|
-| `CTRL` and press `C`             | circle drawing mode                                                          |
-| `CTRL` and press `S`             | straight line drawing mode                                                   |
-| `CTRL` and press `D`             | distance drawing mode                                                        |
-| `CTRL` and press `R`             | ray drawing mode                                                             |
-| `CTRL` and press `P`             | point drawing mode                                                           |
-| `CTRL` and press `E`             | enable eraser                                                                |
-| `left mouse button`              | set first / second point of a line or the middle point or radius of a circle |
-| `ESC`                            | Place/use                                                                    |
-| `←`                              | move everything to the left                                                  |
-| `→`                              | move everything to the right                                                 |
-| `↑`                              | move everything up                                                           |
-| `↓`                              | move everything down                                                         |
-| `CTRL` + `D` and press `M`       | distance measurement mode                                                    |
-| `CTRL` + `D` + `M` and press `E` | distance measurement eraser mode                                             |
-| `CTRL` + `C` and press `E`       | circle sector eraser mode                                                    |
+| `CTRL` + press `C`               | circle drawing mode                                                          |
+| `CTRL` + press `S`               | straight line drawing mode                                                   |
+| `CTRL` + press `D`               | distance drawing mode                                                        |
+| `CTRL` + press `R`               | ray drawing mode                                                             |
+| `CTRL` + press `P`               | point drawing mode                                                           |
+| `CTRL` + press `E`               | enable eraser                                                                |
+| press `left mouse button`        | select point                                                                 |
+| press `ESC`                      | place / use                                                                  |
+| press `←`                        | move everything to the left                                                  |
+| press `→`                        | move everything to the right                                                 |
+| press `↑`                        | move everything up                                                           |
+| press `↓`                        | move everything down                                                         |
+| `CTRL` + `D` + press `M`         | distance measurement mode                                                    |
+| `CTRL` + `D` + `M` + press `E`   | distance measurement eraser mode                                             |
+| `CTRL` + `C` + press `E`         | circle sector eraser mode                                                    |
+| press `H`                        | switch between geometry board and help                                       |
+| `CTRL` + press `H`               | disable help button                                                          |
 
 
 The cursor automatically connects to intersections, other points, lines, and circles.
