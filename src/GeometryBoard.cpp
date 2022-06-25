@@ -14,6 +14,5 @@ GeometryBoard::~GeometryBoard() {}
 void GeometryBoard::Render()
 {
 	BeginMode2D(camera);
-	ClearBackground(WHITE);
 	EndMode2D();
 }

@@ -1,40 +1,54 @@
 #include "GeometryApp.h"
 #include "raylib.h"
-#include <iostream>
 
-HelpButton::HelpButton() {
-	radius = 20;
-	offset = 5;
-	ring = radius / 4;
-	fontSize = radius * 2;
-	center = {GetScreenWidth() - (radius + ring + offset), radius + ring + offset};
-	textCenter = {center.x - MeasureText("?", fontSize) / 2, center.y - fontSize / 2};
+HelpButton::HelpButton(GeometryApp &app) : app_(app) {
+	Update();
+	text = "Help";
+	fontSize = 16;
 }
 
 HelpButton::~HelpButton() {}
 
 bool HelpButton::Selected()
 {
-	return CheckCollisionPointCircle(GetMousePosition(), center, radius + ring);
+	return CheckCollisionPointRec(GetMousePosition(), rectangle);
 }
 
 void HelpButton::Update()
 {
-	color = BLUE;
-	center.x = GetScreenWidth() - (radius + ring + offset);
-	textCenter.x = center.x - MeasureText("?", fontSize) / 2;
+	color = DARBBLUE3;
 
-	if (Selected())
+	rectangle = {GetScreenWidth() - 80.0f, 5, 75, 30};
+	textPos = {rectangle.x + rectangle.width / 2 - MeasureText(text.c_str(), fontSize) / 2, rectangle.y + rectangle.height / 2 - fontSize / 2};
+
+	if (Selected() || IsKeyPressed(KEY_H))
 	{
-		color = {0, 140, 240, 255};
+		color = DARBBLUE2;
+
+		if (IsMouseButtonPressed(0) || IsKeyPressed(KEY_H))
+		{
+			switch (app_.GetState())
+			{
+			case GEOMETRY_BOARD:
+				app_.SetState(HELP);
+				text = "Close";
+				break;
+			case HELP:
+				app_.SetState(GEOMETRY_BOARD);
+				text = "Help";
+				break;
+			
+			default:
+				break;
+			}
+		}
 	}
 }
 
 void HelpButton::Render(Font &font)
 {
-	DrawCircleSector(center, radius, 0, 360, 200, color);
-	DrawRing(center, radius, radius + ring, 0, 360, 200, DARKBLUE);
-	DrawTextCodepoint(font, 63, textCenter, fontSize, DARKBLUE);
+	DrawRectangleRounded(rectangle, 0.5, 10, color);
+	DrawTextEx(font, text.c_str(), textPos, fontSize, 0, WHITE);
 }
 
 GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
@@ -58,8 +72,6 @@ GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 
 	font = LoadFont("resources/anonymous_pro_bold.ttf");
 	SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
-
-	board = {};
 }
 
 GeometryApp::~GeometryApp() noexcept
@@ -86,6 +98,8 @@ void GeometryApp::Tick()
 	Update();
 
 	BeginDrawing();
+
+	ClearBackground(WHITE);
 
 	switch (appState)
 	{
@@ -116,4 +130,13 @@ void GeometryApp::Update()
 	{
 		button.Update();
 	}
+}
+
+int GeometryApp::GetState()
+{
+	return appState;
+}
+
+void GeometryApp::SetState(int state){
+	appState = state;
 }
