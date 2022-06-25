@@ -5,10 +5,10 @@
 class GeometryBoard
 {
 public:
-    GeometryBoard();
-    ~GeometryBoard();
+	GeometryBoard();
+	~GeometryBoard();
 
-    void Render();
+	void Render();
 private:
-    Camera2D camera;
+	Camera2D camera;
 };
