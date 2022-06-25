@@ -16,10 +16,7 @@ GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 	font = LoadFont("resources/anonymous_pro_bold.ttf");
 	SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
-	camera = {0};
-	camera.target = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
-	camera.offset = camera.target;
-	camera.zoom = 1;
+	board = {};
 }
 
 GeometryApp::~GeometryApp() noexcept
@@ -45,15 +42,18 @@ void GeometryApp::Tick()
 {
 	Update();
 	BeginDrawing();
-	BeginMode2D(camera);
-	Draw();
-	EndMode2D();
-	EndDrawing();
-}
 
-void GeometryApp::Draw()
-{
+	switch (appState)
+	{
+	case GEOMETRY_BOARD:
+		board.Render();
+		break;
 	
+	default:
+		break;
+	}
+
+	EndDrawing();
 }
 
 void GeometryApp::Update()

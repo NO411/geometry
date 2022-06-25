@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GeometryBoard.h"
 #include "raylib.h"
 #include <string>
 
@@ -18,8 +19,10 @@ public:
 
 	void Run();
 private:
-	Camera2D camera;
+	GeometryBoard board;
+
 	Font font;
+	int appState = GEOMETRY_BOARD;
 
 	bool GeometryAppShouldClose() const;
 	void Tick();
