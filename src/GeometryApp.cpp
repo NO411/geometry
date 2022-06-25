@@ -21,11 +21,13 @@ void HelpButton::Update()
 	rectangle = {GetScreenWidth() - 80.0f, 5, 75, 30};
 	textPos = {rectangle.x + rectangle.width / 2 - MeasureText(text.c_str(), fontSize) / 2, rectangle.y + rectangle.height / 2 - fontSize / 2};
 
-	if (Selected() || IsKeyPressed(KEY_H))
+	bool hPressed = (IsKeyPressed(KEY_H) && !IsKeyDown(KEY_LEFT_CONTROL));
+
+	if (Selected() || hPressed)
 	{
 		color = DARBBLUE2;
 
-		if (IsMouseButtonPressed(0) || IsKeyPressed(KEY_H))
+		if (IsMouseButtonPressed(0) || hPressed)
 		{
 			switch (app_.GetState())
 			{
@@ -106,26 +108,32 @@ void GeometryApp::Tick()
 	case GEOMETRY_BOARD:
 		board.Render();
 		break;
+	case HELP:
+		RenderHelp();
 	
 	default:
 		break;
 	}
 
-	Render();
-
-	EndDrawing();
-}
-
-void GeometryApp::Render()
-{
 	if (showHelpButton)
 	{
 		button.Render(font);
 	}
+
+	EndDrawing();
+}
+
+void GeometryApp::RenderHelp()
+{
+
 }
 
 void GeometryApp::Update()
 {
+	if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_H))
+	{
+		showHelpButton = !showHelpButton;
+	}
 	if (showHelpButton)
 	{
 		button.Update();

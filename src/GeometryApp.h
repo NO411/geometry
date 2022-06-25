@@ -55,6 +55,6 @@ private:
 
 	bool GeometryAppShouldClose() const;
 	void Tick();
-	void Render();
+	void RenderHelp();
 	void Update();
 };
