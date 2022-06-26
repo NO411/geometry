@@ -26,28 +26,33 @@ void HelpButton::Update()
 
 	bool hPressed = (IsKeyPressed(KEY_H) && !IsKeyDown(KEY_LEFT_CONTROL));
 
-	if (Selected() || hPressed)
+	if ((IsMouseButtonPressed(0) && app_.showHelpButton && Selected()) || hPressed)
+	{
+		pressed = true;
+	}
+
+	if (Selected() || (IsKeyDown(KEY_H) && !IsKeyDown(KEY_LEFT_CONTROL)))
 	{
 		color = DARBBLUE2;
+	}
 
-		if ((IsMouseButtonPressed(0) && app_.showHelpButton) || hPressed)
+	if (pressed && ((IsMouseButtonReleased(0) && app_.showHelpButton && Selected()) || IsKeyReleased(KEY_H)))
+	{
+		pressed = false;
+		switch (app_.GetState())
 		{
-			switch (app_.GetState())
-			{
-			case GEOMETRY_BOARD:
-				app_.SetState(HELP);
-				text = "Close";
-				SetWindowTitle("Help");
-				break;
-			case HELP:
-				app_.SetState(GEOMETRY_BOARD);
-				SetWindowTitle("Geometry");
-				text = "Help";
-				break;
-
-			default:
-				break;
-			}
+		case GEOMETRY_BOARD:
+			app_.SetState(HELP);
+			text = "Close";
+			SetWindowTitle("Help");
+			break;
+		case HELP:
+			app_.SetState(GEOMETRY_BOARD);
+			SetWindowTitle("Geometry");
+			text = "Help";
+			break;
+		default:
+			break;
 		}
 	}
 }

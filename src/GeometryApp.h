@@ -30,6 +30,7 @@ private:
 	Color color;
 	std::string text;
 
+	bool pressed;
 	bool Selected();
 
 	GeometryApp &app_;
