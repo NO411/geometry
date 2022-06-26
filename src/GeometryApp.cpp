@@ -106,7 +106,9 @@ void HelpWindow::Render()
 		DrawTextEx(app_.font, shortcuts[i][0].c_str(), {tableStart.x + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, DARBBLUE3);
 		DrawTextEx(app_.font, shortcuts[i][1].c_str(), {columnSize + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, DARBBLUE3);
 		float y = tableStart.y + rowSize * (i + 1);
-		DrawLineEx({tableStart.x, y}, {settings::screenWidth - 10, y}, 1, DARBBLUE3);
+		Color lineColor = DARBBLUE3;
+		lineColor.a = 50;
+		DrawLineEx({tableStart.x, y}, {settings::screenWidth - 10, y}, 1, lineColor);
 	}
 }
 
