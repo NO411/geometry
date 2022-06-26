@@ -62,15 +62,15 @@ HelpWindow::HelpWindow(GeometryApp &app) : app_(app)
 {
 	shortcuts = {
 		{"`CTRL` + press `C`", "circle drawing mode"},
-		{"`CTRL` + press `S`", "straight line drawing mode"}, 
-		{"`CTRL` + press `D`", "distance drawing mode"}, 
-		{"`CTRL` + press `R`", "ray drawing mode"},  
+		{"`CTRL` + press `S`", "straight line drawing mode"},
+		{"`CTRL` + press `D`", "distance drawing mode"},
+		{"`CTRL` + press `R`", "ray drawing mode"},
 		{"`CTRL` + press `P`", "point drawing mode"},
 		{"`CTRL` + press `E`", "enable eraser"},
 		{"press `left mouse button`", "select point"},
-		{"press `ESC`", "place / use"},
+		{"press `ESC`", "interrupt"},
 		{"press `left`", "move everything to the left"},
-		{"press `right`", "move everything to the right"}, 
+		{"press `right`", "move everything to the right"},
 		{"press `up`", "move everything up"},
 		{"press `down`", "move everything down"},
 		{"`CTRL` + `D` + press `M`", "distance measurement mode"},
@@ -100,15 +100,56 @@ void HelpWindow::Render()
 
 	DrawTextEx(app_.font, "Keys", {tableStart.x + textOffsetX, textStart}, fontSize, 0, DARBBLUE3);
 	DrawTextEx(app_.font, "Action", {columnSize + textOffsetX, textStart}, fontSize, 0, DARBBLUE3);
-	
+
+	Color transparentColor = DARBBLUE3;
+	transparentColor.a = 50;
+
 	for (size_t i = 0; i < shortcuts.size(); i++)
 	{
 		DrawTextEx(app_.font, shortcuts[i][0].c_str(), {tableStart.x + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, DARBBLUE3);
 		DrawTextEx(app_.font, shortcuts[i][1].c_str(), {columnSize + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, DARBBLUE3);
 		float y = tableStart.y + rowSize * (i + 1);
-		Color lineColor = DARBBLUE3;
-		lineColor.a = 50;
-		DrawLineEx({tableStart.x, y}, {settings::screenWidth - 10, y}, 1, lineColor);
+		DrawLineEx({tableStart.x, y}, {settings::screenWidth - 10, y}, 1, transparentColor);
+	}
+
+	transparentColor.a = 100;
+
+	for (size_t i = 0; i < keyHighlightings.size(); i++)
+	{
+		DrawRectangleRounded(keyHighlightings[i], 0.5, 10, transparentColor);
+	}
+}
+
+void HelpWindow::CalculateKeyHigllightings()
+{
+	for (size_t i = 0; i < shortcuts.size(); i++)
+	{
+		std::string &shortcut = shortcuts[i][0];
+
+		std::size_t charPos = shortcut.find("`");
+		while (charPos != std::string::npos)
+		{
+			shortcut.erase(charPos, 1);
+
+			std::size_t secondCharPos = shortcut.find("`");
+			if (secondCharPos == std::string::npos)
+			{
+				break;
+			}
+
+			shortcut.erase(secondCharPos, 1);
+
+			float overlap = 2.5;
+
+			Rectangle rec;
+			rec.x = tableStart.x + textOffsetX + MeasureTextEx(app_.font, shortcut.substr(0, charPos).c_str(), fontSize, 0).x - overlap;
+			rec.y = textStart + (rowSize * (i + 1)) - overlap;
+			rec.width = (float)MeasureTextEx(app_.font, shortcut.substr(charPos, secondCharPos - charPos).c_str(), fontSize, 0).x + 2 * overlap;
+			rec.height = (float)fontSize + 2 * overlap;
+
+			keyHighlightings.push_back(rec);
+			charPos = shortcut.find("`");
+		}
 	}
 }
 
@@ -134,6 +175,8 @@ GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 
 	appState = GEOMETRY_BOARD;
 	showHelpButton = true;
+
+	helpWindow.CalculateKeyHigllightings();
 }
 
 GeometryApp::~GeometryApp() noexcept

@@ -39,9 +39,11 @@ class HelpWindow
 {
 public:
 	HelpWindow(GeometryApp &app);
+	void CalculateKeyHigllightings();
 	void Render();
 private:
 	std::vector<std::vector<std::string>> shortcuts;
+	std::vector<Rectangle> keyHighlightings;
 	std::string description;
 
 	int fontSize;

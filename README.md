@@ -14,7 +14,7 @@ Made with Raylib.
 | `CTRL` + press `P`               | point drawing mode                                                           |
 | `CTRL` + press `E`               | enable eraser                                                                |
 | press `left mouse button`        | select point                                                                 |
-| press `ESC`                      | place / use                                                                  |
+| press `ESC`                      | interrupt                                                                    |
 | press `←`                        | move everything to the left                                                  |
 | press `→`                        | move everything to the right                                                 |
 | press `↑`                        | move everything up                                                           |
