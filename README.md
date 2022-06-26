@@ -5,26 +5,27 @@ Made with Raylib.
 
 ## Usage
 
-| Keys                             | Action                                                                       |
-|----------------------------------|------------------------------------------------------------------------------|
-| `CTRL` + press `C`               | circle drawing mode                                                          |
-| `CTRL` + press `S`               | straight line drawing mode                                                   |
-| `CTRL` + press `D`               | distance drawing mode                                                        |
-| `CTRL` + press `R`               | ray drawing mode                                                             |
-| `CTRL` + press `P`               | point drawing mode                                                           |
-| `CTRL` + press `E`               | enable eraser                                                                |
-| press `left mouse button`        | select point                                                                 |
-| press `ESC`                      | interrupt                                                                    |
-| press `←`                        | move everything to the left                                                  |
-| press `→`                        | move everything to the right                                                 |
-| press `↑`                        | move everything up                                                           |
-| press `↓`                        | move everything down                                                         |
-| `CTRL` + `D` + press `M`         | distance measurement mode                                                    |
-| `CTRL` + `D` + `M` + press `E`   | distance measurement eraser mode                                             |
-| `CTRL` + `C` + press `E`         | circle sector eraser mode                                                    |
-| press `H`                        | switch between geometry board and help                                       |
-| `CTRL` + press `H`               | disable help button                                                          |
-
+| Keys                                               | Action                                 |
+|----------------------------------------------------|--------------------------------------- |
+| `CTRL` + press `C`                                 | circle drawing mode                    |
+| `CTRL` + press `S`                                 | straight line drawing mode             |
+| `CTRL` + press `D`                                 | distance drawing mode                  |
+| `CTRL` + press `R`                                 | ray drawing mode                       |
+| `CTRL` + press `P`                                 | point drawing mode                     |
+| `CTRL` + press `E`                                 | enable eraser                          |
+| press `left mouse button`                          | select point                           |
+| press `ESC`                                        | interrupt                              |
+| press `←`                                          | move everything to the left            |
+| press `→`                                          | move everything to the right           |
+| press `↑`                                          | move everything up                     |
+| press `↓`                                          | move everything down                   |
+| `CTRL` + `D` + press `M`                           | distance measurement mode              |
+| `CTRL` + `D` + `M` + press `E`                     | distance measurement eraser mode       |
+| `CTRL` + `C` + press `E`                           | circle sector eraser mode              |
+| press `H`                                          | switch between geometry board and help |
+| `CTRL` + press `H`                                 | disable help button                    |
+| `mouse wheel`                                      | zoom in / out                          |
+| `CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R` | zoom reset                             |
 
 The cursor automatically connects to intersections, other points, lines, and circles.
 

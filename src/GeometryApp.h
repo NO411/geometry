@@ -61,6 +61,7 @@ class GeometryApp
 {
 	friend HelpButton;
 	friend HelpWindow;
+	friend GeometryBoard;
 public:
 	GeometryApp(int width, int height, int fps, std::string title);
 	~GeometryApp() noexcept;
@@ -69,7 +70,7 @@ public:
 	int GetState();
 	void SetState(int state);
 private:
-	GeometryBoard board;
+	GeometryBoard board{this};
 	HelpButton button{*this};
 	HelpWindow helpWindow{*this};
 

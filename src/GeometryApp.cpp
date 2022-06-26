@@ -83,6 +83,8 @@ HelpWindow::HelpWindow(GeometryApp &app) : app_(app)
 		{"`CTRL` + `C` + press `E`", "circle sector eraser mode"},
 		{"press `H`", "switch between geometry board and help"},
 		{"`CTRL` + press `H`", "disable help button"},
+		{"`mouse wheel`", "zoom in / out"},
+		{"`CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R`", "zoom reset"},
 	};
 
 	description = "Geometry is an app to create Euclidean geometry without any user interface with buttons etc for faster\n"
@@ -178,7 +180,7 @@ GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 	font = LoadFont("resources/anonymous_pro_bold.ttf");
 	SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
-	appState = GEOMETRY_BOARD;
+	SetState(GEOMETRY_BOARD);
 	showHelpButton = true;
 
 	helpWindow.CalculateKeyHigllightings();
@@ -211,7 +213,7 @@ void GeometryApp::Tick()
 
 	ClearBackground(WHITE);
 
-	switch (appState)
+	switch (GetState())
 	{
 	case GEOMETRY_BOARD:
 		board.Render();
@@ -238,6 +240,16 @@ void GeometryApp::Update()
 		showHelpButton = !showHelpButton;
 	}
 	button.Update();
+
+	switch (GetState())
+	{
+	case GEOMETRY_BOARD:
+		board.Update();
+		break;
+	
+	default:
+		break;
+	}
 }
 
 int GeometryApp::GetState()
