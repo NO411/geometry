@@ -72,11 +72,11 @@ void GeometryBoard::ModifyViewField()
 
 	camera.zoom += (GetMouseWheelMove() * 0.1f);
 
-    if (camera.zoom > maxZoom)
+	if (camera.zoom > maxZoom)
 	{
 		camera.zoom = maxZoom;
 	}
-    else if (camera.zoom < 0.1)
+	else if (camera.zoom < 0.1)
 	{
 		camera.zoom = 0.1;
 	};
