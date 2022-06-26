@@ -121,17 +121,17 @@ GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 	SetTargetFPS(fps);
 	SetExitKey(0);
 
+	ChangeDirectory(GetApplicationDirectory());
+
 	Image iconImage = LoadImage("resources/icon.png");
 	SetWindowIcon(iconImage);
 	UnloadImage(iconImage);
 
-	appState = GEOMETRY_BOARD;
-	showHelpButton = true;
-
-	ChangeDirectory(GetApplicationDirectory());
-
 	font = LoadFont("resources/anonymous_pro_bold.ttf");
 	SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
+
+	appState = GEOMETRY_BOARD;
+	showHelpButton = true;
 }
 
 GeometryApp::~GeometryApp() noexcept

@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-inline const Color DARBBLUE2 = {40, 44, 52, 255}; 
-inline const Color DARBBLUE3 = {33, 37, 43, 255}; 
+inline const Color DARBBLUE2 = {50, 50, 60, 255}; 
+inline const Color DARBBLUE3 = {30, 30, 40, 255}; 
 
 enum AppStates
 {
