@@ -4,7 +4,6 @@
 #include "raylib.h"
 #include <string>
 #include <vector>
-#include <memory>
 
 inline const Color DARBBLUE2 = {50, 50, 60, 255}; 
 inline const Color DARBBLUE3 = {30, 30, 40, 255}; 
