@@ -2,7 +2,6 @@
 #include "GeometryApp.h"
 #include "math/MathMisc.h"
 #include "raylib.h"
-#include <tuple>
 
 const float GeometryBoard::movementSpeed = 6;
 const float GeometryBoard::maxZoom = 6;
