@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include <string>
 #include <vector>
+#include <memory>
 
 inline const Color DARBBLUE2 = {50, 50, 60, 255}; 
 inline const Color DARBBLUE3 = {30, 30, 40, 255}; 
@@ -14,12 +15,10 @@ enum AppStates
 	HELP,
 };
 
-class GeometryApp;
-
 class HelpButton
 {
 public:
-	HelpButton(GeometryApp &app);
+	HelpButton(GeometryApp *app);
 	~HelpButton();
 	void Update();
 	void Render();
@@ -33,13 +32,13 @@ private:
 	bool pressed;
 	bool Selected();
 
-	GeometryApp &app_;
+	GeometryApp *app_;
 };
 
 class HelpWindow
 {
 public:
-	HelpWindow(GeometryApp &app);
+	HelpWindow(GeometryApp *app);
 	void CalculateKeyHighlightings();
 	void Render();
 private:
@@ -54,7 +53,7 @@ private:
 	float textStart;
 	float textOffsetX;
 
-	GeometryApp &app_;
+	GeometryApp *app_;
 };
 
 class GeometryApp
@@ -71,8 +70,8 @@ public:
 	void SetState(int state);
 private:
 	GeometryBoard board{this};
-	HelpButton button{*this};
-	HelpWindow helpWindow{*this};
+	HelpButton button{this};
+	HelpWindow helpWindow{this};
 
 	Font font;
 

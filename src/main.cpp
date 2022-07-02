@@ -1,7 +1,5 @@
 #include "GeometryApp.h"
 #include "Settings.h"
-#include "raylib.h"
-#include <iostream>
 
 int main()
 {

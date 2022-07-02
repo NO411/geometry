@@ -1,9 +1,12 @@
 #include "GeometryBoard.h"
 #include "GeometryApp.h"
+#include "math/MathMisc.h"
 #include "raylib.h"
+#include <tuple>
 
 const float GeometryBoard::movementSpeed = 6;
 const float GeometryBoard::maxZoom = 6;
+const int GeometryBoard::connectionDistance = 8;
 
 GeometryBoard::GeometryBoard() {}
 
@@ -44,9 +47,74 @@ void GeometryBoard::CheckResized()
 void GeometryBoard::InputHandler()
 {
 	// Edit();
-	// SetDrawObj();
-	// InterruptDrawing();
+	SetEditMode();
+	InterruptDrawing();
 	ModifyViewField();
+}
+
+void GeometryBoard::SetEditMode()
+{
+	if (!IsKeyDown(KEY_LEFT_CONTROL))
+	{
+		return;
+	}
+
+	switch (GetKeyPressed())
+	{
+	case KEY_C:
+		editMode = DRAW_CIRCLE;
+		break;
+	case KEY_D:
+		editMode = DRAW_DISTANCE;
+		break;
+	case KEY_R:
+		editMode = DRAW_RAY;
+		break;
+	case KEY_S:
+		editMode = DRAW_STRAIGHT_LINE;
+		break;
+	case KEY_P:
+		editMode = DRAW_POINT;
+		break;
+	case KEY_E:
+		editMode = ERASER;
+		if (IsKeyDown(KEY_M))
+		{
+			if (IsKeyDown(KEY_D))
+			{
+				editMode = DISTANCE_MEASUREMENT_ERASER;
+			}
+			else if (IsKeyDown(KEY_A))
+			{
+				editMode = ANGLE_MEASUREMENT_ERASER;
+			}
+		}
+		if (IsKeyDown(KEY_C))
+		{
+			editMode = CIRCLE_ERASER;
+		}
+		break;
+	case KEY_M:
+		if (IsKeyDown(KEY_D))
+		{
+			editMode = DISTANCE_MEASUREMENT;
+		}
+		else if (IsKeyDown(KEY_A))
+		{
+			editMode = ANGLE_MEASUREMENT;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void GeometryBoard::InterruptDrawing()
+{
+	if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_LEFT_CONTROL))
+	{
+		firstPointed = false;
+	}
 }
 
 void GeometryBoard::ModifyViewField()

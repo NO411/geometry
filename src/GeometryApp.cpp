@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include <string>
 
-HelpButton::HelpButton(GeometryApp &app) : app_(app)
+HelpButton::HelpButton(GeometryApp *app) : app_(app)
 {
 	Update();
 	text = "Help";
@@ -26,7 +26,7 @@ void HelpButton::Update()
 
 	bool hPressed = (IsKeyPressed(KEY_H) && !IsKeyDown(KEY_LEFT_CONTROL));
 
-	if ((IsMouseButtonPressed(0) && app_.showHelpButton && Selected()) || hPressed)
+	if ((IsMouseButtonPressed(0) && app_->showHelpButton && Selected()) || hPressed)
 	{
 		pressed = true;
 	}
@@ -36,18 +36,18 @@ void HelpButton::Update()
 		color = DARBBLUE2;
 	}
 
-	if (pressed && ((IsMouseButtonReleased(0) && app_.showHelpButton && Selected()) || IsKeyReleased(KEY_H)))
+	if (pressed && ((IsMouseButtonReleased(0) && app_->showHelpButton && Selected()) || IsKeyReleased(KEY_H)))
 	{
 		pressed = false;
-		switch (app_.GetState())
+		switch (app_->GetState())
 		{
 		case GEOMETRY_BOARD:
-			app_.SetState(HELP);
+			app_->SetState(HELP);
 			text = "Close";
 			SetWindowTitle("Help");
 			break;
 		case HELP:
-			app_.SetState(GEOMETRY_BOARD);
+			app_->SetState(GEOMETRY_BOARD);
 			SetWindowTitle("Geometry");
 			text = "Help";
 			break;
@@ -60,10 +60,10 @@ void HelpButton::Update()
 void HelpButton::Render()
 {
 	DrawRectangleRounded(rectangle, 0.5, 10, color);
-	DrawTextEx(app_.font, text.c_str(), textPos, fontSize, 0, WHITE);
+	DrawTextEx(app_->font, text.c_str(), textPos, fontSize, 0, WHITE);
 }
 
-HelpWindow::HelpWindow(GeometryApp &app) : app_(app)
+HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 {
 	shortcuts = {
 		{"`CTRL` + press `C`", "circle drawing mode"},
@@ -100,21 +100,21 @@ HelpWindow::HelpWindow(GeometryApp &app) : app_(app)
 
 void HelpWindow::Render()
 {
-	DrawTextEx(app_.font, description.c_str(), {10, 40}, fontSize, 0, DARBBLUE3);
+	DrawTextEx(app_->font, description.c_str(), {10, 40}, fontSize, 0, DARBBLUE3);
 
 	DrawLineEx({tableStart.x, tableStart.y + rowSize}, {settings::screenWidth - 10, tableStart.y + rowSize}, 2, DARBBLUE3);
 	DrawLineEx({columnSize, tableStart.y}, {columnSize, (shortcuts.size() + 1) * rowSize + tableStart.y}, 2, DARBBLUE3);
 
-	DrawTextEx(app_.font, "Keys", {tableStart.x + textOffsetX, textStart}, fontSize, 0, DARBBLUE3);
-	DrawTextEx(app_.font, "Action", {columnSize + textOffsetX, textStart}, fontSize, 0, DARBBLUE3);
+	DrawTextEx(app_->font, "Keys", {tableStart.x + textOffsetX, textStart}, fontSize, 0, DARBBLUE3);
+	DrawTextEx(app_->font, "Action", {columnSize + textOffsetX, textStart}, fontSize, 0, DARBBLUE3);
 
 	Color transparentColor = DARBBLUE3;
 	transparentColor.a = 50;
 
 	for (size_t i = 0; i < shortcuts.size(); i++)
 	{
-		DrawTextEx(app_.font, shortcuts[i][0].c_str(), {tableStart.x + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, DARBBLUE3);
-		DrawTextEx(app_.font, shortcuts[i][1].c_str(), {columnSize + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, DARBBLUE3);
+		DrawTextEx(app_->font, shortcuts[i][0].c_str(), {tableStart.x + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, DARBBLUE3);
+		DrawTextEx(app_->font, shortcuts[i][1].c_str(), {columnSize + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, DARBBLUE3);
 		float y = tableStart.y + rowSize * (i + 1);
 		DrawLineEx({tableStart.x, y}, {settings::screenWidth - 10, y}, 1, transparentColor);
 	}
@@ -149,9 +149,9 @@ void HelpWindow::CalculateKeyHighlightings()
 			float overlap = 2.5;
 
 			Rectangle rec;
-			rec.x = tableStart.x + textOffsetX + MeasureTextEx(app_.font, shortcut.substr(0, charPos).c_str(), fontSize, 0).x - overlap;
+			rec.x = tableStart.x + textOffsetX + MeasureTextEx(app_->font, shortcut.substr(0, charPos).c_str(), fontSize, 0).x - overlap;
 			rec.y = textStart + (rowSize * (i + 1)) - overlap;
-			rec.width = (float)MeasureTextEx(app_.font, shortcut.substr(charPos, secondCharPos - charPos).c_str(), fontSize, 0).x + 2 * overlap;
+			rec.width = (float)MeasureTextEx(app_->font, shortcut.substr(charPos, secondCharPos - charPos).c_str(), fontSize, 0).x + 2 * overlap;
 			rec.height = (float)fontSize + 2 * overlap;
 
 			keyHighlightings.push_back(rec);
