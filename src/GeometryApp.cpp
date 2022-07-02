@@ -127,7 +127,7 @@ void HelpWindow::Render()
 	}
 }
 
-void HelpWindow::CalculateKeyHigllightings()
+void HelpWindow::CalculateKeyHighlightings()
 {
 	for (size_t i = 0; i < shortcuts.size(); i++)
 	{
@@ -183,7 +183,7 @@ GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 	SetState(GEOMETRY_BOARD);
 	showHelpButton = true;
 
-	helpWindow.CalculateKeyHigllightings();
+	helpWindow.CalculateKeyHighlightings();
 }
 
 GeometryApp::~GeometryApp() noexcept

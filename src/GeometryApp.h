@@ -40,7 +40,7 @@ class HelpWindow
 {
 public:
 	HelpWindow(GeometryApp &app);
-	void CalculateKeyHigllightings();
+	void CalculateKeyHighlightings();
 	void Render();
 private:
 	std::vector<std::vector<std::string>> shortcuts;
