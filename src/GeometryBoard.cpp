@@ -134,7 +134,6 @@ void GeometryBoard::ModifyViewField()
 	else if (IsKeyDown(KEY_DOWN))
 	{
 		camera.offset.y += movementSpeed;
-		camera.zoom = 1;
 	}
 
 	camera.zoom += (GetMouseWheelMove() * 0.1f);

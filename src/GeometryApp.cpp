@@ -44,7 +44,7 @@ void HelpButton::Update()
 		case GEOMETRY_BOARD:
 			app_->SetState(HELP);
 			text = "Close";
-			SetWindowTitle("Help");
+			SetWindowTitle("Geometry - Help");
 			break;
 		case HELP:
 			app_->SetState(GEOMETRY_BOARD);
