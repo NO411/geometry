@@ -33,6 +33,7 @@ public:
 private:
 	int editMode = DRAW_DISTANCE;
 	Camera2D camera;
+
 	static const float movementSpeed;
 	static const float maxZoom;
 	static const int connectionDistance;
@@ -51,6 +52,7 @@ private:
 	void CheckResized();
 	void InputHandler();
 	void Edit();
+	void UpdateCurrentPoint();
 	void SetEditMode();
 	void InterruptDrawing();
 	void ModifyViewField();

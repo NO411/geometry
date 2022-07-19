@@ -32,9 +32,11 @@ private:
 class Distance
 {
 public:
-	Distance();
+	Distance(Vector2 startPos, Vector2 endPos);
 
-	void Render();
+	void Render(Camera2D &camera);
+private:
+	Vector2 startPos, endPos;
 };
 
 class Ray2

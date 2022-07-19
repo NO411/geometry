@@ -14,7 +14,7 @@ HelpButton::~HelpButton() {}
 
 bool HelpButton::Selected()
 {
-	return CheckCollisionPointRec(GetMousePosition(), rectangle);
+	return (CheckCollisionPointRec(GetMousePosition(), rectangle) && app_->showHelpButton);
 }
 
 void HelpButton::Update()
@@ -26,7 +26,7 @@ void HelpButton::Update()
 
 	bool hPressed = (IsKeyPressed(KEY_H) && !IsKeyDown(KEY_LEFT_CONTROL));
 
-	if ((IsMouseButtonPressed(0) && app_->showHelpButton && Selected()) || hPressed)
+	if ((IsMouseButtonPressed(0) && Selected()) || hPressed)
 	{
 		pressed = true;
 	}

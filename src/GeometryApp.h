@@ -21,6 +21,7 @@ public:
 	~HelpButton();
 	void Update();
 	void Render();
+	bool Selected();
 private:
 	Rectangle rectangle;
 	Vector2 textPos;
@@ -29,7 +30,6 @@ private:
 	std::string text;
 
 	bool pressed;
-	bool Selected();
 
 	GeometryApp *app_;
 };

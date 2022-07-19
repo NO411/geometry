@@ -1,10 +1,11 @@
 #include "GeometryBoard.h"
 #include "GeometryApp.h"
+#include "GeometryObjetcs.h"
 #include "math/MathMisc.h"
 #include "raylib.h"
 
 const float GeometryBoard::movementSpeed = 6;
-const float GeometryBoard::maxZoom = 6;
+const float GeometryBoard::maxZoom = 0.125;
 const int GeometryBoard::connectionDistance = 8;
 
 GeometryBoard::GeometryBoard() {}
@@ -12,9 +13,6 @@ GeometryBoard::GeometryBoard() {}
 GeometryBoard::GeometryBoard(GeometryApp *app) : app_(app)
 {
 	camera = {0};
-	camera.target = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
-	camera.offset = camera.target;
-	camera.rotation = 0;
 	camera.zoom = 1;
 }
 
@@ -22,6 +20,11 @@ GeometryBoard::~GeometryBoard() {}
 
 void GeometryBoard::Render()
 {
+	for (auto &distance : distances)
+	{
+		distance.Render(camera);
+	}
+
 	BeginMode2D(camera);
 	EndMode2D();
 }
@@ -39,16 +42,132 @@ void GeometryBoard::CheckResized()
 		return;
 	}
 
-	camera.target = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
-	camera.offset = camera.target;
+	// update straight line connection points
 }
 
 void GeometryBoard::InputHandler()
 {
-	// Edit();
+	Edit();
 	SetEditMode();
 	InterruptDrawing();
 	ModifyViewField();
+}
+
+void GeometryBoard::Edit()
+{
+	UpdateCurrentPoint();
+	if (!(IsMouseButtonPressed(0) || IsKeyPressed(KEY_ENTER)) || app_->button.Selected())
+	{
+		return;
+	}
+
+	if (!firstPointed)
+	{
+		firstPointed = true;
+		firstPoint = {currentPoint};
+		switch (editMode)
+		{
+		case DRAW_POINT:
+			firstPointed = false;
+			/*
+			for (auto &point : points)
+			{
+				
+				if (GetDistance(&point.point, &currentPoint) < connection_distance)
+				{
+					return;
+				}
+				
+			}
+			*/
+			//points.push_back({currentPoint});
+			break;
+		case ERASER:
+			firstPointed = false;
+			//EraseObj(objTuple);
+			break;
+		case DISTANCE_MEASUREMENT:
+			firstPointed = false;
+			/*
+			if (objType == DISTANCE)
+			{
+				distances.at(objPos).showLength = true;
+			}
+			*/
+			break;
+		case ANGLE_MEASUREMENT:
+			firstPointed = false;
+			break;
+		case DISTANCE_MEASUREMENT_ERASER:
+			firstPointed = false;
+			/*
+			if (objType == DISTANCE)
+			{
+				distances.at(objPos).showLength = false;
+			}
+			*/
+			break;
+		case ANGLE_MEASUREMENT_ERASER:
+			firstPointed = false;
+			break;
+		case CIRCLE_ERASER:
+			/*
+			if (objType != CIRCLE)
+			{
+				firstPointed = false;
+				break;
+			}
+			*/
+			//firstCircleEraserPoint = currentPoint;
+			//currentObjPos = objPos;
+			break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		firstPointed = false;
+		switch (editMode)
+		{
+		case DRAW_CIRCLE:
+			//circles.push_back(Circle{firstPoint.point, GetDistance(&firstPoint.point, &currentPoint)});
+			break;
+		case DRAW_DISTANCE:
+			distances.push_back(Distance{firstPoint, currentPoint});
+			break;
+		case DRAW_RAY:
+			//rays.push_back(Line{firstPoint.point, currentPoint, RAY});
+			break;
+		case DRAW_STRAIGHT_LINE:
+			//straightLines.push_back(Line{firstPoint.point, currentPoint, STRAIGHTLINE});
+			break;
+		case CIRCLE_ERASER:
+			/*
+			if (objType != CIRCLE)
+			{
+				firstPointed = true;
+				break;
+			}
+			if (objPos != currentObjPos)
+			{
+				firstPointed = true;
+				firstCircleEraserPoint = currentPoint;
+				currentObjPos = objPos;
+				break;
+			}
+			*/
+			//circles.at(objPos).EraseSector(&firstCircleEraserPoint, &currentPoint);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void GeometryBoard::UpdateCurrentPoint()
+{
+	currentPoint = GetMousePosition2(camera);
 }
 
 void GeometryBoard::SetEditMode()
@@ -136,19 +255,26 @@ void GeometryBoard::ModifyViewField()
 		camera.offset.y += movementSpeed;
 	}
 
-	camera.zoom += (GetMouseWheelMove() * 0.1f);
-
-	if (camera.zoom > maxZoom)
-	{
-		camera.zoom = maxZoom;
-	}
-	else if (camera.zoom < 0.1)
-	{
-		camera.zoom = 0.1;
-	};
-
 	if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_Y) && IsKeyPressed(KEY_R))
 	{
 		camera.zoom = 1;
+	}
+
+	float wheel = GetMouseWheelMove();
+	if (wheel == 0)
+	{
+		return;
+	}
+
+	// zoom to the mouse position
+	// save this before setting camera.offset because it changes the camera which is needed for the target
+	Vector2 mouseWorldPos = GetMousePosition2(camera);
+	camera.offset = GetMousePosition();
+	camera.target = mouseWorldPos;
+
+	camera.zoom += wheel * 0.125f;
+	if (camera.zoom < maxZoom)
+	{
+		camera.zoom = maxZoom;
 	}
 }
