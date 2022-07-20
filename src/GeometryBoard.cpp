@@ -5,7 +5,8 @@
 #include "raylib.h"
 
 const float GeometryBoard::movementSpeed = 6;
-const float GeometryBoard::maxZoom = 0.125;
+const float GeometryBoard::minZoom = 0.125;
+const float GeometryBoard::maxZoom = 10;
 const int GeometryBoard::connectionDistance = 8;
 
 GeometryBoard::GeometryBoard() {}
@@ -23,6 +24,14 @@ void GeometryBoard::Render()
 	for (auto &distance : distances)
 	{
 		distance.Render(camera);
+	}
+	for (auto &straightLine : straightLines)
+	{
+		straightLine.Render();
+	}
+	for (auto &ray : rays)
+	{
+		ray.Render(camera);
 	}
 
 	BeginMode2D(camera);
@@ -137,13 +146,13 @@ void GeometryBoard::Edit()
 			distances.push_back(Distance{firstPoint, currentPoint});
 			break;
 		case DRAW_RAY:
-			//rays.push_back(Line{firstPoint.point, currentPoint, RAY});
+			rays.push_back(Ray2{firstPoint, currentPoint, camera});
 			break;
 		case DRAW_STRAIGHT_LINE:
-			//straightLines.push_back(Line{firstPoint.point, currentPoint, STRAIGHTLINE});
+			straightLines.push_back(StraightLine{firstPoint, currentPoint, camera});
 			break;
 		case CIRCLE_ERASER:
-			/*
+			/*3
 			if (objType != CIRCLE)
 			{
 				firstPointed = true;
@@ -255,26 +264,44 @@ void GeometryBoard::ModifyViewField()
 		camera.offset.y += movementSpeed;
 	}
 
-	if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_Y) && IsKeyPressed(KEY_R))
+	bool resetZoom = IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_Y) && IsKeyPressed(KEY_R);
+	if (resetZoom)
 	{
 		camera.zoom = 1;
 	}
 
 	float wheel = GetMouseWheelMove();
-	if (wheel == 0)
+	bool zoom = wheel != 0;
+	if (zoom)
 	{
-		return;
+		// zoom to the mouse position
+		// save this before setting camera.offset because it changes the camera which is needed for the target
+		Vector2 mouseWorldPos = GetMousePosition2(camera);
+		camera.offset = GetMousePosition();
+		camera.target = mouseWorldPos;
+
+		camera.zoom += wheel * 0.125f;
+		if (camera.zoom < minZoom)
+		{
+			camera.zoom = minZoom;
+		}
+		else if (camera.zoom > maxZoom)
+		{
+			camera.zoom = maxZoom;
+		}
 	}
 
-	// zoom to the mouse position
-	// save this before setting camera.offset because it changes the camera which is needed for the target
-	Vector2 mouseWorldPos = GetMousePosition2(camera);
-	camera.offset = GetMousePosition();
-	camera.target = mouseWorldPos;
+	bool viewFieldModified = zoom || resetZoom || IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN);
 
-	camera.zoom += wheel * 0.125f;
-	if (camera.zoom < maxZoom)
+	if (viewFieldModified)
 	{
-		camera.zoom = maxZoom;
+		for (auto &straightLine : straightLines)
+		{
+			straightLine.UpdateDrawPoints(camera);
+		}
+		for (auto &ray : rays)
+		{
+			ray.UpdateDrawPoint(camera);
+		}
 	}
 }

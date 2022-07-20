@@ -35,6 +35,7 @@ private:
 	Camera2D camera;
 
 	static const float movementSpeed;
+	static const float minZoom;
 	static const float maxZoom;
 	static const int connectionDistance;
 

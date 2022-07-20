@@ -11,7 +11,14 @@ enum GeometryObject
 	POINT
 };
 
-class Circle
+class GemObj
+{
+public:
+	static const Color renderColor;
+	static const int renderThickness;
+};
+
+class Circle : public GemObj
 {
 public:
 	Circle();
@@ -23,39 +30,46 @@ private:
 	float radius;
 };
 
-class Line
+class Line : public GemObj
 {
-private:
+public:
 	Vector2 pointA, pointB;
 };
 
-class Distance
+class Distance : public Line
 {
 public:
-	Distance(Vector2 startPos, Vector2 endPos);
+	Distance(Vector2 &pointA_, Vector2 &pointB_);
 
 	void Render(Camera2D &camera);
+
 private:
-	Vector2 startPos, endPos;
 };
 
-class Ray2
+class Ray2 : public Line
 {
 public:
-	Ray2();
+	Ray2(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera);
 
-	void Render();
+	void Render(Camera2D &camera);
+	void UpdateDrawPoint(Camera2D &camera);
+private:
+	Vector2 drawPoint;
 };
 
-class StraightLine
+class StraightLine : public Line
 {
 public:
-	StraightLine();
+	StraightLine(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera);
 
 	void Render();
+	void UpdateDrawPoints(Camera2D &camera);
+
+private:
+	Vector2 firstDrawPoint, secondDrawPoint;
 };
 
-class Point
+class Point : public GemObj
 {
 public:
 	Point();

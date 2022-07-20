@@ -1,11 +1,54 @@
 #include "GeometryObjetcs.h"
 #include "raylib.h"
+#include "math/MathMisc.h"
 
-Distance::Distance(Vector2 startPos, Vector2 endPos): startPos(startPos), endPos(endPos)
+const Color GemObj::renderColor = BLACK;
+const int GemObj::renderThickness = 1;
+
+Distance::Distance(Vector2 &pointA_, Vector2 &pointB_)
 {
+    pointA = pointA_;
+    pointB = pointB_;
 }
 
 void Distance::Render(Camera2D &camera)
 {
-    DrawLineEx(GetWorldToScreen2D(startPos, camera), GetWorldToScreen2D(endPos, camera), 2, LIGHTGRAY);
+    DrawLineEx(GetWorldToScreen2D(pointA, camera), GetWorldToScreen2D(pointB, camera), renderThickness, renderColor);
+}
+
+StraightLine::StraightLine(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera)
+{
+    pointA = pointA_;
+    pointB = pointB_;
+    UpdateDrawPoints(camera);
+}
+
+void StraightLine::UpdateDrawPoints(Camera2D &camera)
+{
+    LinearFunction f = GetLinearFunction(pointA, pointB);
+    firstDrawPoint = CalculateConnectionPoint(pointA, pointB, f.m, f.n, camera);
+    secondDrawPoint = CalculateConnectionPoint(pointB, pointA, f.m, f.n, camera);
+}
+
+void StraightLine::Render()
+{
+    DrawLineEx(firstDrawPoint, secondDrawPoint, renderThickness, renderColor);
+}
+
+Ray2::Ray2(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera)
+{
+    pointA = pointA_;
+    pointB = pointB_;
+    UpdateDrawPoint(camera);
+}
+
+void Ray2::UpdateDrawPoint(Camera2D &camera)
+{
+    LinearFunction f = GetLinearFunction(pointA, pointB);
+    drawPoint = CalculateConnectionPoint(pointA, pointB, f.m, f.n, camera);
+}
+
+void Ray2::Render(Camera2D &camera)
+{
+    DrawLineEx(GetWorldToScreen2D(pointA, camera), drawPoint, renderThickness, renderColor);
 }
