@@ -38,8 +38,53 @@ void GeometryBoard::Render()
 		circle.Render(camera);
 	}
 
+	DrawDrawingObj();
+
 	BeginMode2D(camera);
 	EndMode2D();
+}
+
+void GeometryBoard::DrawDrawingObj()
+{
+	if (!firstPointed)
+	{
+		return;
+	}
+
+	switch (editMode)
+	{
+	case DRAW_CIRCLE:
+	{
+		Circle currentCircle(firstPoint, GetDistance(firstPoint, currentPoint));
+		currentCircle.Render(camera);
+	}
+	break;
+	case DRAW_DISTANCE:
+	{
+		Distance currentDistance(firstPoint, currentPoint);
+		currentDistance.Render(camera);
+	}
+	break;
+	case DRAW_RAY:
+	{
+		Ray2 currentRay(firstPoint, currentPoint, camera);
+		currentRay.Render(camera);
+	}
+	break;
+	case DRAW_STRAIGHT_LINE:
+	{
+		StraightLine currentStraightLine(firstPoint, currentPoint, camera);
+		currentStraightLine.Render();
+	}
+	break;
+	case CIRCLE_ERASER:
+	{
+		//DrawCurrentCircleSector();
+	}
+	break;
+	default:
+		break;
+	}
 }
 
 void GeometryBoard::Update()

@@ -58,6 +58,6 @@ Circle::Circle(Vector2 &center, float radius) : center(center), radius(radius)
 }
 
 void Circle::Render(Camera2D &camera)
-{   
-    DrawCircleSectorLines(GetWorldToScreen2D(center, camera), radius * camera.zoom, 0, 360, 200, renderColor);
+{
+    DrawRing(GetWorldToScreen2D(center, camera), radius * camera.zoom - renderThickness / 2, radius * camera.zoom + renderThickness / 2, 0, 360, 200, renderColor);
 }

@@ -57,6 +57,7 @@ private:
 	void SetEditMode();
 	void InterruptDrawing();
 	void ModifyViewField();
+	void DrawDrawingObj();
 
 	GeometryApp *app_;
 };
