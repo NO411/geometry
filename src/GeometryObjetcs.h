@@ -21,9 +21,9 @@ public:
 class Circle : public GemObj
 {
 public:
-	Circle();
+	Circle(Vector2 &center, float radius);
 
-	void Render();
+	void Render(Camera2D &camera);
 
 private:
 	Vector2 center;

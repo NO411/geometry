@@ -6,7 +6,7 @@
 
 const float GeometryBoard::movementSpeed = 6;
 const float GeometryBoard::minZoom = 0.125;
-const float GeometryBoard::maxZoom = 10;
+const float GeometryBoard::maxZoom = 6;
 const int GeometryBoard::connectionDistance = 8;
 
 GeometryBoard::GeometryBoard() {}
@@ -32,6 +32,10 @@ void GeometryBoard::Render()
 	for (auto &ray : rays)
 	{
 		ray.Render(camera);
+	}
+	for (auto &circle : circles)
+	{
+		circle.Render(camera);
 	}
 
 	BeginMode2D(camera);
@@ -140,7 +144,7 @@ void GeometryBoard::Edit()
 		switch (editMode)
 		{
 		case DRAW_CIRCLE:
-			//circles.push_back(Circle{firstPoint.point, GetDistance(&firstPoint.point, &currentPoint)});
+			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, currentPoint)});
 			break;
 		case DRAW_DISTANCE:
 			distances.push_back(Distance{firstPoint, currentPoint});
@@ -268,6 +272,8 @@ void GeometryBoard::ModifyViewField()
 	if (resetZoom)
 	{
 		camera.zoom = 1;
+		camera.target = {0, 0};
+		camera.offset = {0, 0};
 	}
 
 	float wheel = GetMouseWheelMove();

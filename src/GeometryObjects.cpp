@@ -2,8 +2,8 @@
 #include "raylib.h"
 #include "math/MathMisc.h"
 
-const Color GemObj::renderColor = BLACK;
-const int GemObj::renderThickness = 1;
+const Color GemObj::renderColor = GRAY;
+const int GemObj::renderThickness = 2;
 
 Distance::Distance(Vector2 &pointA_, Vector2 &pointB_)
 {
@@ -51,4 +51,13 @@ void Ray2::UpdateDrawPoint(Camera2D &camera)
 void Ray2::Render(Camera2D &camera)
 {
     DrawLineEx(GetWorldToScreen2D(pointA, camera), drawPoint, renderThickness, renderColor);
+}
+
+Circle::Circle(Vector2 &center, float radius) : center(center), radius(radius)
+{
+}
+
+void Circle::Render(Camera2D &camera)
+{   
+    DrawCircleSectorLines(GetWorldToScreen2D(center, camera), radius * camera.zoom, 0, 360, 200, renderColor);
 }

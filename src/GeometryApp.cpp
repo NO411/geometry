@@ -84,7 +84,7 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 		{"press `H`", "switch between geometry board and help"},
 		{"`CTRL` + press `H`", "disable help button"},
 		{"`mouse wheel`", "zoom in / out"},
-		{"`CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R`", "zoom reset"},
+		{"`CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R`", "reset zoom and field of view"},
 	};
 
 	description = "Geometry is an app to create Euclidean geometry without any user interface with buttons etc for faster\n"
