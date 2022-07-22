@@ -79,7 +79,7 @@ void GeometryBoard::DrawDrawingObj()
 	break;
 	case CIRCLE_ERASER:
 	{
-		//DrawCurrentCircleSector();
+		// DrawCurrentCircleSector();
 	}
 	break;
 	default:
@@ -130,19 +130,19 @@ void GeometryBoard::Edit()
 			/*
 			for (auto &point : points)
 			{
-				
+
 				if (GetDistance(&point.point, &currentPoint) < connection_distance)
 				{
 					return;
 				}
-				
+
 			}
 			*/
-			//points.push_back({currentPoint});
+			// points.push_back({currentPoint});
 			break;
 		case ERASER:
 			firstPointed = false;
-			//EraseObj(objTuple);
+			// EraseObj(objTuple);
 			break;
 		case DISTANCE_MEASUREMENT:
 			firstPointed = false;
@@ -176,8 +176,8 @@ void GeometryBoard::Edit()
 				break;
 			}
 			*/
-			//firstCircleEraserPoint = currentPoint;
-			//currentObjPos = objPos;
+			// firstCircleEraserPoint = currentPoint;
+			// currentObjPos = objPos;
 			break;
 		default:
 			break;
@@ -215,7 +215,7 @@ void GeometryBoard::Edit()
 				break;
 			}
 			*/
-			//circles.at(objPos).EraseSector(&firstCircleEraserPoint, &currentPoint);
+			// circles.at(objPos).EraseSector(&firstCircleEraserPoint, &currentPoint);
 			break;
 		default:
 			break;

@@ -80,7 +80,7 @@ Copy the `libraylib.a` file from the `raylib/src` folder to your initially creat
 To create the final geometry.exe, navigate to your `geometry/src` folder on the command line and run:
 
 ```
-g++ main.cpp GeometryApp.cpp GeometryBoard.cpp -o ../geometry.exe -O1 -Wall -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
+g++ main.cpp GeometryApp.cpp GeometryBoard.cpp GeometryObjects.cpp math/MathMisc.cpp -o ../geometry.exe ../resources/gem.res -O1 -Wall -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
 ```
 
 Or just follow this [tutorial](https://www.youtube.com/watch?v=HPDLTQ4J_zQ).
