@@ -1,6 +1,7 @@
 #pragma once
 
 #include "raylib.h"
+#include <string>
 
 enum GeometryObject
 {
@@ -10,6 +11,8 @@ enum GeometryObject
 	STRAIGHTLINE,
 	POINT
 };
+
+class GeometryBoard;
 
 class GemObj
 {
@@ -73,9 +76,21 @@ class Point : public GemObj
 {
 public:
 	Point();
+	Point(Vector2 &pos, GeometryBoard *board);
 
-	void Render();
+	void Render(Camera2D &camera);
+	void Render(Camera2D &camera, Font &font);
 
-protected:
+	Vector2& GetPos();
+	std::string& GetLetter();
+	void SetPos(Vector2 &pos);
+
+private:
+	void SetPointLetter(GeometryBoard *board);
+
 	Vector2 point;
+	std::string letter;
+	std::string letterNumber;
+
+	static const std::string pointChars;
 };

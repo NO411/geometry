@@ -23,6 +23,7 @@ class GeometryApp;
 
 class GeometryBoard
 {
+	friend Point;
 public:
 	GeometryBoard();
 	GeometryBoard(GeometryApp *app);
@@ -39,11 +40,12 @@ private:
 	static const float movementSpeed;
 	static const float minZoom;
 	static const float maxZoom;
-	static const int connectionDistance;
+	static const int connectionDistance_;
+	static int connectionDistance;
 
 	bool firstPointed = false;
 	Vector2 firstPoint;
-	Vector2 currentPoint;
+	Point currentPoint;
 
 	std::vector<Circle> circles;
 	std::vector<Distance> distances;
@@ -60,6 +62,8 @@ private:
 	void InterruptDrawing();
 	void ModifyViewField();
 	void DrawDrawingObj();
+	void UpdateConnectionDistance();
+	bool PointLetterExists(std::string &letter);
 
 	GeometryApp *app_;
 };

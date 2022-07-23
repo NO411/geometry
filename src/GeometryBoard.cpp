@@ -7,7 +7,8 @@
 const float GeometryBoard::movementSpeed = 6;
 const float GeometryBoard::minZoom = 0.125;
 const float GeometryBoard::maxZoom = 6;
-const int GeometryBoard::connectionDistance = 8;
+const int GeometryBoard::connectionDistance_ = 8;
+int GeometryBoard::connectionDistance = connectionDistance_;
 
 GeometryBoard::GeometryBoard() {}
 
@@ -37,8 +38,13 @@ void GeometryBoard::Render()
 	{
 		circle.Render(camera);
 	}
+	for (auto &point : points)
+	{
+		point.Render(camera, app_->font);
+	}
 
 	DrawDrawingObj();
+	currentPoint.Render(camera);
 
 	BeginMode2D(camera);
 	EndMode2D();
@@ -51,29 +57,31 @@ void GeometryBoard::DrawDrawingObj()
 		return;
 	}
 
+	Vector2 currentPos = currentPoint.GetPos();
+
 	switch (editMode)
 	{
 	case DRAW_CIRCLE:
 	{
-		Circle currentCircle(firstPoint, GetDistance(firstPoint, currentPoint));
+		Circle currentCircle(firstPoint, GetDistance(firstPoint, currentPos));
 		currentCircle.Render(camera);
 	}
 	break;
 	case DRAW_DISTANCE:
 	{
-		Distance currentDistance(firstPoint, currentPoint);
+		Distance currentDistance(firstPoint, currentPos);
 		currentDistance.Render(camera);
 	}
 	break;
 	case DRAW_RAY:
 	{
-		Ray2 currentRay(firstPoint, currentPoint, camera);
+		Ray2 currentRay(firstPoint, currentPos, camera);
 		currentRay.Render(camera);
 	}
 	break;
 	case DRAW_STRAIGHT_LINE:
 	{
-		StraightLine currentStraightLine(firstPoint, currentPoint, camera);
+		StraightLine currentStraightLine(firstPoint, currentPos, camera);
 		currentStraightLine.Render();
 	}
 	break;
@@ -91,6 +99,11 @@ void GeometryBoard::Update()
 {
 	InputHandler();
 	CheckResized();
+}
+
+void GeometryBoard::UpdateConnectionDistance()
+{
+	connectionDistance = 8 / camera.zoom;
 }
 
 void GeometryBoard::CheckResized()
@@ -122,23 +135,19 @@ void GeometryBoard::Edit()
 	if (!firstPointed)
 	{
 		firstPointed = true;
-		firstPoint = {currentPoint};
+		firstPoint = currentPoint.GetPos();
 		switch (editMode)
 		{
 		case DRAW_POINT:
 			firstPointed = false;
-			/*
 			for (auto &point : points)
 			{
-
-				if (GetDistance(&point.point, &currentPoint) < connection_distance)
+				if (GetDistance(point.GetPos(), currentPoint.GetPos()) < connectionDistance)
 				{
 					return;
 				}
-
 			}
-			*/
-			// points.push_back({currentPoint});
+			points.push_back(Point{currentPoint.GetPos(), this});
 			break;
 		case ERASER:
 			firstPointed = false;
@@ -186,19 +195,20 @@ void GeometryBoard::Edit()
 	else
 	{
 		firstPointed = false;
+		Vector2 currentPos = currentPoint.GetPos();
 		switch (editMode)
 		{
 		case DRAW_CIRCLE:
-			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, currentPoint)});
+			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, currentPos)});
 			break;
 		case DRAW_DISTANCE:
-			distances.push_back(Distance{firstPoint, currentPoint});
+			distances.push_back(Distance{firstPoint, currentPos});
 			break;
 		case DRAW_RAY:
-			rays.push_back(Ray2{firstPoint, currentPoint, camera});
+			rays.push_back(Ray2{firstPoint, currentPos, camera});
 			break;
 		case DRAW_STRAIGHT_LINE:
-			straightLines.push_back(StraightLine{firstPoint, currentPoint, camera});
+			straightLines.push_back(StraightLine{firstPoint, currentPos, camera});
 			break;
 		case CIRCLE_ERASER:
 			/*3
@@ -225,7 +235,8 @@ void GeometryBoard::Edit()
 
 void GeometryBoard::UpdateCurrentPoint()
 {
-	currentPoint = GetMousePosition2(camera);
+	Vector2 newPos = GetMousePosition2(camera);
+	currentPoint.SetPos(newPos);
 }
 
 void GeometryBoard::SetEditMode()
@@ -340,6 +351,8 @@ void GeometryBoard::ModifyViewField()
 		{
 			camera.zoom = maxZoom;
 		}
+
+		UpdateConnectionDistance();
 	}
 
 	bool viewFieldModified = zoom || resetZoom || IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN);
@@ -360,4 +373,17 @@ void GeometryBoard::UpdateAllDrawPoints()
 	{
 		ray.UpdateDrawPoint(camera);
 	}
+}
+
+
+bool GeometryBoard::PointLetterExists(std::string &letter)
+{
+	for (auto &point : points)
+	{
+		if (point.GetLetter() == letter)
+		{
+			return true;
+		}
+	}
+	return false;
 }
