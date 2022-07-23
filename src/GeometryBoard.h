@@ -30,6 +30,8 @@ public:
 
 	void Render();
 	void Update();
+
+	void UpdateAllDrawPoints();
 private:
 	int editMode = DRAW_DISTANCE;
 	Camera2D camera;

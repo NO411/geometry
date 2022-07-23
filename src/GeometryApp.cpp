@@ -48,6 +48,7 @@ void HelpButton::Update()
 			break;
 		case HELP:
 			app_->SetState(GEOMETRY_BOARD);
+			app_->board.UpdateAllDrawPoints();
 			SetWindowTitle("Geometry");
 			text = "Help";
 			break;

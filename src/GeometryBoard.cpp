@@ -100,7 +100,7 @@ void GeometryBoard::CheckResized()
 		return;
 	}
 
-	// update straight line connection points
+	UpdateAllDrawPoints();
 }
 
 void GeometryBoard::InputHandler()
@@ -346,13 +346,18 @@ void GeometryBoard::ModifyViewField()
 
 	if (viewFieldModified)
 	{
-		for (auto &straightLine : straightLines)
-		{
-			straightLine.UpdateDrawPoints(camera);
-		}
-		for (auto &ray : rays)
-		{
-			ray.UpdateDrawPoint(camera);
-		}
+		UpdateAllDrawPoints();
+	}
+}
+
+void GeometryBoard::UpdateAllDrawPoints()
+{
+	for (auto &straightLine : straightLines)
+	{
+		straightLine.UpdateDrawPoints(camera);
+	}
+	for (auto &ray : rays)
+	{
+		ray.UpdateDrawPoint(camera);
 	}
 }
