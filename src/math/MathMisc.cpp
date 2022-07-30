@@ -2,6 +2,13 @@
 #include "raylib.h"
 #include <cmath>
 
+LinearFunction::LinearFunction(Vector2 &p1, Vector2 &p2)
+{
+	m = (p1.y - p2.y) / (p1.x - p2.x);
+	n = p2.y - (m * p2.x);
+	vertical = SameFloat(p1.x, p2.x);
+}
+
 Vector2 GetMousePosition2(Camera2D &camera)
 {
 	return GetScreenToWorld2D(GetMousePosition(), camera);
@@ -15,13 +22,6 @@ float GetDistance(Vector2 &vec1, Vector2 &vec2)
 bool SameFloat(float a, float b)
 {
 	return std::abs(a - b) <= __FLT_EPSILON__ * std::max(std::abs(a), std::abs(b));
-}
-
-LinearFunction GetLinearFunction(Vector2 &p1, Vector2 &p2)
-{
-	float m = (p1.y - p2.y) / (p1.x - p2.x);
-	float n = p2.y - (m * p2.x);
-	return LinearFunction{m, n};
 }
 
 Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n, Camera2D &camera)

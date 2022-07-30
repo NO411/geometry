@@ -52,7 +52,12 @@ private:
 	std::vector<Ray2> rays;
 	std::vector<StraightLine> straightLines;
 	std::vector<Point> points;
+
 	std::vector<Vector2> intersections;
+	void AddIntersections(Circle &circle);
+	void AddIntersections(Distance &distance);
+	void AddIntersections(Ray2 &ray);
+	void AddIntersections(StraightLine &straightLine);
 
 	void CheckResized();
 	void InputHandler();

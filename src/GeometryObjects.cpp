@@ -10,6 +10,31 @@ const Color GemObj::renderColor = GRAY;
 const int GemObj::renderThickness = 2;
 const std::string Point::pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+void GemObj::DrawLineExSmooth(Vector2 &startPos, Vector2 &endPos)
+{
+	DrawLineEx(startPos, endPos, renderThickness - 1, renderColor);
+	Color cl = renderColor;
+	cl.a = 200;
+    DrawLineEx(startPos, endPos, renderThickness, cl);
+	cl.a = 100;
+    DrawLineEx(startPos, endPos, renderThickness + 1, cl);
+}
+
+void GemObj::DrawRingSmooth(Vector2 &center, float radius)
+{
+    DrawRing(center, radius - renderThickness / 3, radius + renderThickness / 3, 0, 360, 200, renderColor);
+	Color cl = renderColor;
+	cl.a = 200;
+	DrawRing(center, radius - renderThickness / 2, radius + renderThickness / 2, 0, 360, 200, cl);
+	cl.a = 100;
+	DrawRing(center, radius - renderThickness, radius + renderThickness, 0, 360, 200, cl);
+}
+
+bool Line::IsVerticalLine()
+{
+	return SameFloat(pointA.x, pointB.x);
+}
+
 Distance::Distance(Vector2 &pointA_, Vector2 &pointB_)
 {
     pointA = pointA_;
@@ -18,7 +43,9 @@ Distance::Distance(Vector2 &pointA_, Vector2 &pointB_)
 
 void Distance::Render(Camera2D &camera)
 {
-    DrawLineEx(GetWorldToScreen2D(pointA, camera), GetWorldToScreen2D(pointB, camera), renderThickness, renderColor);
+	Vector2 startPos = GetWorldToScreen2D(pointA, camera);
+	Vector2 endPos = GetWorldToScreen2D(pointB, camera);
+    DrawLineExSmooth(startPos, endPos);
 }
 
 StraightLine::StraightLine(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera)
@@ -30,14 +57,14 @@ StraightLine::StraightLine(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera)
 
 void StraightLine::UpdateDrawPoints(Camera2D &camera)
 {
-    LinearFunction f = GetLinearFunction(pointA, pointB);
+    LinearFunction f(pointA, pointB);
     firstDrawPoint = CalculateConnectionPoint(pointA, pointB, f.m, f.n, camera);
     secondDrawPoint = CalculateConnectionPoint(pointB, pointA, f.m, f.n, camera);
 }
 
 void StraightLine::Render()
 {
-    DrawLineEx(firstDrawPoint, secondDrawPoint, renderThickness, renderColor);
+    DrawLineExSmooth(firstDrawPoint, secondDrawPoint);
 }
 
 Ray2::Ray2(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera)
@@ -49,13 +76,14 @@ Ray2::Ray2(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera)
 
 void Ray2::UpdateDrawPoint(Camera2D &camera)
 {
-    LinearFunction f = GetLinearFunction(pointA, pointB);
+    LinearFunction f(pointA, pointB);
     drawPoint = CalculateConnectionPoint(pointA, pointB, f.m, f.n, camera);
 }
 
 void Ray2::Render(Camera2D &camera)
 {
-    DrawLineEx(GetWorldToScreen2D(pointA, camera), drawPoint, renderThickness, renderColor);
+	Vector2 startPos = GetWorldToScreen2D(pointA, camera);
+    DrawLineExSmooth(startPos, drawPoint);
 }
 
 Circle::Circle(Vector2 &center, float radius) : center(center), radius(radius)
@@ -64,7 +92,8 @@ Circle::Circle(Vector2 &center, float radius) : center(center), radius(radius)
 
 void Circle::Render(Camera2D &camera)
 {
-    DrawRing(GetWorldToScreen2D(center, camera), radius * camera.zoom - renderThickness / 2, radius * camera.zoom + renderThickness / 2, 0, 360, 200, renderColor);
+	Vector2 center_ = GetWorldToScreen2D(center, camera);
+    DrawRingSmooth(center_, radius * camera.zoom);
 }
 
 Point::Point(Vector2 &pos, GeometryBoard *board): point(pos)
@@ -92,7 +121,6 @@ void Point::Render(Camera2D &camera)
     DrawCircleSector(screenPos, 3, 0, 360, 30, BLUE);
 	DrawRing(screenPos, 3, 4, 0, 360, 30, DARKBLUE);
 }
-
 
 void Point::Render(Camera2D &camera, Font &font)
 {

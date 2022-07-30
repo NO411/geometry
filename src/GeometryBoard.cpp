@@ -2,6 +2,7 @@
 #include "GeometryApp.h"
 #include "GeometryObjetcs.h"
 #include "math/MathMisc.h"
+#include "math/Intersections.h"
 #include "raylib.h"
 
 const float GeometryBoard::movementSpeed = 6;
@@ -42,7 +43,7 @@ void GeometryBoard::Render()
 	{
 		point.Render(camera, app_->font);
 	}
-
+	
 	DrawDrawingObj();
 	currentPoint.Render(camera);
 
@@ -199,17 +200,33 @@ void GeometryBoard::Edit()
 		switch (editMode)
 		{
 		case DRAW_CIRCLE:
-			circles.push_back(Circle{firstPoint, GetDistance(firstPoint, currentPos)});
-			break;
+		{
+			Circle newCircle = {firstPoint, GetDistance(firstPoint, currentPos)};
+			circles.push_back(newCircle);
+			AddIntersections(newCircle);
+		}
+		break;
 		case DRAW_DISTANCE:
-			distances.push_back(Distance{firstPoint, currentPos});
-			break;
+		{
+			Distance newDistance = {firstPoint, currentPos};
+			distances.push_back(newDistance);
+			AddIntersections(newDistance);
+		}
+		break;
 		case DRAW_RAY:
-			rays.push_back(Ray2{firstPoint, currentPos, camera});
-			break;
+		{
+			Ray2 newRay = {firstPoint, currentPos, camera};
+			rays.push_back(newRay);
+			AddIntersections(newRay);
+		}
+		break;
 		case DRAW_STRAIGHT_LINE:
-			straightLines.push_back(StraightLine{firstPoint, currentPos, camera});
-			break;
+		{
+			StraightLine newStraightLine = {firstPoint, currentPos, camera};
+			straightLines.push_back(newStraightLine);
+			AddIntersections(newStraightLine);
+		}
+		break;
 		case CIRCLE_ERASER:
 			/*3
 			if (objType != CIRCLE)
@@ -386,4 +403,84 @@ bool GeometryBoard::PointLetterExists(std::string &letter)
 		}
 	}
 	return false;
+}
+
+void GeometryBoard::AddIntersections(Circle &circle)
+{
+	for (auto distance : distances)
+	{
+		GetDistanceCircleIntersections(intersections, distance, circle);
+	}
+	for (auto straightLine : straightLines)
+	{
+		GetStraightLineCircleIntersections(intersections, straightLine, circle);
+	}
+	for (auto ray : rays)
+	{
+		GetRayCircleIntersections(intersections, ray, circle);
+	}
+	for (auto circle_ : circles)
+	{
+		GetCircleCircleIntersections(intersections, circle, circle_);
+	}
+}
+
+void GeometryBoard::AddIntersections(Distance &distance)
+{
+	for (auto distance_ : distances)
+	{
+		GetDistanceDistanceIntersections(intersections, distance, distance_);
+	}
+	for (auto straightLine : straightLines)
+	{
+		GetStraightLineDistanceIntersections(intersections, straightLine, distance);
+	}
+	for (auto ray : rays)
+	{
+		GetRayDistanceIntersections(intersections, ray, distance);
+	}
+	for (auto circle : circles)
+	{
+		GetDistanceCircleIntersections(intersections, distance, circle);
+	}
+}
+
+void GeometryBoard::AddIntersections(Ray2 &ray)
+{
+	for (auto distance : distances)
+	{
+		GetRayDistanceIntersections(intersections, ray, distance);
+	}
+	for (auto straightLine : straightLines)
+	{
+		GetStraightLineRayIntersections(intersections, straightLine, ray);
+	}
+	for (auto ray_ : rays)
+	{
+		GetRayRayIntersections(intersections, ray, ray_);
+	}
+	for (auto circle : circles)
+	{
+		GetRayCircleIntersections(intersections, ray, circle);
+	}
+}
+
+void GeometryBoard::AddIntersections(StraightLine &straightLine)
+{
+	for (auto distance : distances)
+	{
+		GetStraightLineDistanceIntersections(intersections, straightLine, distance);
+	}
+	for (auto straightLine_ : straightLines)
+	{
+		GetStraightLineStraightLinieIntersections(intersections, straightLine, straightLine_);
+	}
+	for (auto ray : rays)
+	{
+		GetStraightLineRayIntersections(intersections, straightLine, ray);
+	}
+	for (auto circle : circles)
+	{
+		GetStraightLineCircleIntersections(intersections, straightLine, circle);
+	}	
 }

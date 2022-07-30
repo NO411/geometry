@@ -19,6 +19,9 @@ class GemObj
 public:
 	static const Color renderColor;
 	static const int renderThickness;
+
+	void DrawLineExSmooth(Vector2 &startPos, Vector2 &endPos);
+	void DrawRingSmooth(Vector2 &center, float radius);
 };
 
 class Circle : public GemObj
@@ -28,7 +31,6 @@ public:
 
 	void Render(Camera2D &camera);
 
-private:
 	Vector2 center;
 	float radius;
 };
@@ -37,6 +39,8 @@ class Line : public GemObj
 {
 public:
 	Vector2 pointA, pointB;
+
+	bool IsVerticalLine();
 };
 
 class Distance : public Line
