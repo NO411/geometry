@@ -8,11 +8,11 @@
 std::vector<Vector2> GetCircleCircleIntersection(Vector2 &center, float radius, Vector2 &center_, float radius_)
 {
     std::vector<Vector2> intersections;
-    float centerDistance = GetDistance(center, center_);
 
-    if (centerDistance < radius + radius_ || SameFloat(centerDistance, radius + radius_))
+    if (CheckCollisionCircles(center, radius, center_, radius_))
     {
         float r2 = pow(radius, 2);
+        float centerDistance = GetDistance(center, center_);
 	    float x = (r2 + pow(centerDistance, 2) - pow(radius_, 2)) / (2 * centerDistance);
 	    float y = r2 - pow(x, 2);
 	
