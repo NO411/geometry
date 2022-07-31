@@ -185,3 +185,42 @@ std::string& Point::GetLetter()
 {
     return letter;
 }
+
+bool Distance::IsPointOnLine(Vector2 &point)
+{
+	float x1 = pointA.x;
+    float x2 = pointB.x;
+    if ((x1 < x2 && point.x > x1 && point.x < x2) || (x1 > x2 && point.x < x1 && point.x > x2) || ((SameFloat(point.x, x1) || SameFloat(point.x, x2)) && !IsVerticalLine()))
+    {
+        return true;
+    }
+
+    float y1 = pointA.y;
+    float y2 = pointB.y;
+    if (IsVerticalLine() && (((point.y > y1 || SameFloat(point.y, y1)) && (point.y < y2 || SameFloat(point.y, y2))) || (point.y < y1 && point.y > y2)))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool Ray2::IsPointOnLine(Vector2 &point)
+{
+	if ((pointA.x < pointB.x && (point.x > pointA.x || SameFloat(point.x, pointA.x))) || (pointA.x > pointB.x && (point.x < pointA.x || SameFloat(point.x, pointA.x))))
+    {
+        return true;
+    }
+    
+    if (IsVerticalLine() && (((pointA.y < pointB.y || SameFloat(pointA.y, pointB.y)) && (point.y > pointA.y || SameFloat(point.y, pointA.y))) || (pointA.y > pointB.y && (point.y < pointA.y || SameFloat(point.y, pointA.y)))))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool StraightLine::IsPointOnLine(Vector2 &point)
+{
+    return true;
+}

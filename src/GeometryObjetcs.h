@@ -50,6 +50,8 @@ public:
 
 	void Render(Camera2D &camera);
 
+	bool IsPointOnLine(Vector2 &point);
+
 private:
 };
 
@@ -60,6 +62,8 @@ public:
 
 	void Render(Camera2D &camera);
 	void UpdateDrawPoint(Camera2D &camera);
+
+	bool IsPointOnLine(Vector2 &point);
 private:
 	Vector2 drawPoint;
 };
@@ -71,6 +75,8 @@ public:
 
 	void Render();
 	void UpdateDrawPoints(Camera2D &camera);
+
+	bool IsPointOnLine(Vector2 &point);
 
 private:
 	Vector2 firstDrawPoint, secondDrawPoint;

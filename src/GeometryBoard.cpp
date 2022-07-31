@@ -409,78 +409,39 @@ void GeometryBoard::AddIntersections(Circle &circle)
 {
 	for (auto distance : distances)
 	{
-		GetDistanceCircleIntersections(intersections, distance, circle);
+		GetLineCircleIntersections(intersections, distance, circle);
 	}
 	for (auto straightLine : straightLines)
 	{
-		GetStraightLineCircleIntersections(intersections, straightLine, circle);
+		GetLineCircleIntersections(intersections, straightLine, circle);
 	}
 	for (auto ray : rays)
 	{
-		GetRayCircleIntersections(intersections, ray, circle);
+		GetLineCircleIntersections(intersections, ray, circle);
 	}
 	for (auto circle_ : circles)
 	{
-		GetCircleCircleIntersections(intersections, circle, circle_);
+		GetCircleCircleIntersections(intersections, circle_, circle);
 	}
 }
 
-void GeometryBoard::AddIntersections(Distance &distance)
-{
-	for (auto distance_ : distances)
-	{
-		GetDistanceDistanceIntersections(intersections, distance, distance_);
-	}
-	for (auto straightLine : straightLines)
-	{
-		GetStraightLineDistanceIntersections(intersections, straightLine, distance);
-	}
-	for (auto ray : rays)
-	{
-		GetRayDistanceIntersections(intersections, ray, distance);
-	}
-	for (auto circle : circles)
-	{
-		GetDistanceCircleIntersections(intersections, distance, circle);
-	}
-}
-
-void GeometryBoard::AddIntersections(Ray2 &ray)
+template<typename L>
+void GeometryBoard::AddIntersections(L &line)
 {
 	for (auto distance : distances)
 	{
-		GetRayDistanceIntersections(intersections, ray, distance);
+		GetLineLineIntersections(intersections, line, distance);
 	}
 	for (auto straightLine : straightLines)
 	{
-		GetStraightLineRayIntersections(intersections, straightLine, ray);
-	}
-	for (auto ray_ : rays)
-	{
-		GetRayRayIntersections(intersections, ray, ray_);
-	}
-	for (auto circle : circles)
-	{
-		GetRayCircleIntersections(intersections, ray, circle);
-	}
-}
-
-void GeometryBoard::AddIntersections(StraightLine &straightLine)
-{
-	for (auto distance : distances)
-	{
-		GetStraightLineDistanceIntersections(intersections, straightLine, distance);
-	}
-	for (auto straightLine_ : straightLines)
-	{
-		GetStraightLineStraightLinieIntersections(intersections, straightLine, straightLine_);
+		GetLineLineIntersections(intersections, line, straightLine);
 	}
 	for (auto ray : rays)
 	{
-		GetStraightLineRayIntersections(intersections, straightLine, ray);
+		GetLineLineIntersections(intersections, line, ray);
 	}
 	for (auto circle : circles)
 	{
-		GetStraightLineCircleIntersections(intersections, straightLine, circle);
-	}	
+		GetLineCircleIntersections(intersections, line, circle);
+	}
 }
