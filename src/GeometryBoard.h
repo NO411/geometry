@@ -3,6 +3,7 @@
 #include "GeometryObjetcs.h"
 #include "raylib.h"
 #include <vector>
+#include <unordered_map>
 
 enum EditMode
 {
@@ -17,6 +18,15 @@ enum EditMode
 	DISTANCE_MEASUREMENT_ERASER,
 	ANGLE_MEASUREMENT_ERASER,
 	CIRCLE_ERASER,
+};
+
+class IntersectionStorage
+{
+public:
+	std::unordered_map<int, Vector2> intersections;
+	int currentID = 0;
+
+	int Push(Vector2 &newIntersection);
 };
 
 class GeometryApp;
@@ -53,7 +63,7 @@ private:
 	std::vector<StraightLine> straightLines;
 	std::vector<Point> points;
 
-	std::vector<Vector2> intersections;
+	IntersectionStorage intersections;
 	
 	void AddIntersections(Circle &circle);
 	template<typename L>

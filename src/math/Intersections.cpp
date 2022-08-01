@@ -7,7 +7,7 @@
 
 // LineLine / CircleLine intersection in header
 
-void GetCircleCircleIntersections(std::vector<Vector2> &intersections, Circle &circle1, Circle &circle2)
+void GetCircleCircleIntersections(IntersectionStorage &intersections, Circle &circle1, Circle &circle2)
 {
 	if (!CheckCollisionCircles(circle1.center, circle1.radius, circle2.center, circle2.radius))
 	{
@@ -35,9 +35,15 @@ void GetCircleCircleIntersections(std::vector<Vector2> &intersections, Circle &c
 	float q1X = circle1.center.x + x * ex0;
 	float q1Y = circle1.center.y + x * ex1;
 
+	auto Push = [&intersections, &circle1, &circle2](Vector2 newIntersection) {
+		int newID = intersections.Push(newIntersection);
+		circle1.intersectionIDs.push_back(newID);
+		circle2.intersectionIDs.push_back(newID);
+	};
+
 	if (SameFloat(y, 0))
 	{
-		intersections.push_back({q1X, q1Y});
+		Push({q1X, q1Y});
 		return;
 	}
 
@@ -46,6 +52,6 @@ void GetCircleCircleIntersections(std::vector<Vector2> &intersections, Circle &c
 	q1X += y * ey0;
 	q1Y += y * ey1;
 
-	intersections.push_back({q1X, q1Y});
-	intersections.push_back({q2X, q2Y});
+	Push({q1X, q1Y});
+	Push({q2X, q2Y});
 }

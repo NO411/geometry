@@ -5,6 +5,13 @@
 #include "math/Intersections.h"
 #include "raylib.h"
 
+int IntersectionStorage::Push(Vector2 &newIntersection)
+{
+	currentID++;
+	intersections[currentID] = newIntersection;
+	return currentID;
+}
+
 const float GeometryBoard::movementSpeed = 6;
 const float GeometryBoard::minZoom = 0.125;
 const float GeometryBoard::maxZoom = 6;
@@ -407,19 +414,19 @@ bool GeometryBoard::PointLetterExists(std::string &letter)
 
 void GeometryBoard::AddIntersections(Circle &circle)
 {
-	for (auto distance : distances)
+	for (auto &distance : distances)
 	{
 		GetLineCircleIntersections(intersections, distance, circle);
 	}
-	for (auto straightLine : straightLines)
+	for (auto &straightLine : straightLines)
 	{
 		GetLineCircleIntersections(intersections, straightLine, circle);
 	}
-	for (auto ray : rays)
+	for (auto &ray : rays)
 	{
 		GetLineCircleIntersections(intersections, ray, circle);
 	}
-	for (auto circle_ : circles)
+	for (auto &circle_ : circles)
 	{
 		GetCircleCircleIntersections(intersections, circle_, circle);
 	}
@@ -428,19 +435,19 @@ void GeometryBoard::AddIntersections(Circle &circle)
 template<typename L>
 void GeometryBoard::AddIntersections(L &line)
 {
-	for (auto distance : distances)
+	for (auto &distance : distances)
 	{
 		GetLineLineIntersections(intersections, line, distance);
 	}
-	for (auto straightLine : straightLines)
+	for (auto &straightLine : straightLines)
 	{
 		GetLineLineIntersections(intersections, line, straightLine);
 	}
-	for (auto ray : rays)
+	for (auto &ray : rays)
 	{
 		GetLineLineIntersections(intersections, line, ray);
 	}
-	for (auto circle : circles)
+	for (auto &circle : circles)
 	{
 		GetLineCircleIntersections(intersections, line, circle);
 	}

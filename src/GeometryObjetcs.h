@@ -2,6 +2,7 @@
 
 #include "raylib.h"
 #include <string>
+#include <vector>
 
 enum GeometryObject
 {
@@ -22,6 +23,8 @@ public:
 
 	void DrawLineExSmooth(Vector2 &startPos, Vector2 &endPos);
 	void DrawRingSmooth(Vector2 &center, float radius);
+
+	std::vector<int> intersectionIDs;
 };
 
 class Circle : public GemObj
