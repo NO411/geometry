@@ -63,6 +63,10 @@ private:
 	std::vector<StraightLine> straightLines;
 	std::vector<Point> points;
 
+	template<typename T>
+	void EraseGemObj(std::vector<T> &objVec, std::size_t vecPos);
+	void ErasePoint(std::size_t vecPos);
+
 	IntersectionStorage intersections;
 	
 	void AddIntersections(Circle &circle);

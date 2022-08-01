@@ -50,6 +50,13 @@ void GeometryBoard::Render()
 	{
 		point.Render(camera, app_->font);
 	}
+
+	/*// Render intersections
+	for (auto &intersection : intersections.intersections)
+	{
+		Point point(intersection.second, this);
+		point.Render(camera);
+	}*/
 	
 	DrawDrawingObj();
 	currentPoint.Render(camera);
@@ -208,30 +215,26 @@ void GeometryBoard::Edit()
 		{
 		case DRAW_CIRCLE:
 		{
-			Circle newCircle = {firstPoint, GetDistance(firstPoint, currentPos)};
-			circles.push_back(newCircle);
-			AddIntersections(newCircle);
+			circles.emplace_back(firstPoint, GetDistance(firstPoint, currentPos));
+			AddIntersections(circles.back());
 		}
 		break;
 		case DRAW_DISTANCE:
 		{
-			Distance newDistance = {firstPoint, currentPos};
-			distances.push_back(newDistance);
-			AddIntersections(newDistance);
+			distances.emplace_back(firstPoint, currentPos);
+			AddIntersections(distances.back());
 		}
 		break;
 		case DRAW_RAY:
 		{
-			Ray2 newRay = {firstPoint, currentPos, camera};
-			rays.push_back(newRay);
-			AddIntersections(newRay);
+			rays.emplace_back(firstPoint, currentPos, camera);
+			AddIntersections(rays.back());
 		}
 		break;
 		case DRAW_STRAIGHT_LINE:
 		{
-			StraightLine newStraightLine = {firstPoint, currentPos, camera};
-			straightLines.push_back(newStraightLine);
-			AddIntersections(newStraightLine);
+			straightLines.emplace_back(firstPoint, currentPos, camera);
+			AddIntersections(straightLines.back());
 		}
 		break;
 		case CIRCLE_ERASER:
@@ -451,4 +454,20 @@ void GeometryBoard::AddIntersections(L &line)
 	{
 		GetLineCircleIntersections(intersections, line, circle);
 	}
+}
+
+template<typename T>
+void GeometryBoard::EraseGemObj(std::vector<T> &objVec, std::size_t vecPos)
+{
+	for (auto &ID : objVec[vecPos].intersectionIDs)
+	{
+		intersections.intersections.erase(ID);
+	}
+
+	objVec.erase(objVec.begin() + vecPos);
+}
+
+void GeometryBoard::ErasePoint(std::size_t vecPos)
+{
+
 }
