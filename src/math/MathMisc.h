@@ -5,11 +5,11 @@
 class LinearFunction
 {
 public:
-    LinearFunction(Vector2 &pointA, Vector2 &pointB);
+	LinearFunction(Vector2 &pointA, Vector2 &pointB);
 
-    float m;
-    float n;
-    bool vertical;
+	float m;
+	float n;
+	bool vertical;
 };
 
 Vector2 GetMousePosition2(Camera2D &camera);
