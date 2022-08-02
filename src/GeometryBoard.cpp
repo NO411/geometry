@@ -4,6 +4,8 @@
 #include "math/MathMisc.h"
 #include "math/Intersections.h"
 #include "raylib.h"
+#include <tuple>
+#include <algorithm>
 
 int IntersectionStorage::Push(Vector2 &newIntersection)
 {
@@ -260,10 +262,102 @@ void GeometryBoard::Edit()
 	}
 }
 
-void GeometryBoard::UpdateCurrentPoint()
+std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 {
-	Vector2 newPos = GetMousePosition2(camera);
-	currentPoint.SetPos(newPos);
+	std::vector<float> connectionDistances;
+	std::vector<Vector2> connectionPoints;
+	std::vector<int> connectionTypes;
+	std::vector<std::tuple<int, std::size_t>> objPlaces;
+
+	enum ConnectionOrder
+	{
+		POINT_CONNECTION,
+		INTERSECTION_CONNECTION,
+		LINE_END_POINT_CONNECTION,
+		LINE_CONNECTION,
+		SECTOR_END_POINT_CONNECTION,
+		CIRCLE_CONNECTION,
+	};
+
+	Vector2 worldMousePos = GetMousePosition2(camera);
+
+	auto ConnectionDistancesPush = [this, &worldMousePos, &connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vector2 &point, int connectionType, int objType, std::size_t objPos)
+	{
+		connectionDistances.push_back(GetDistance(point, worldMousePos));
+		connectionPoints.push_back(point);
+		connectionTypes.push_back(connectionType);
+		objPlaces.push_back(std::make_tuple(objType, objPos));
+	};
+
+	for (std::size_t i = 0; i < distances.size(); ++i)
+	{
+		ConnectionDistancesPush(distances[i].pointA, LINE_END_POINT_CONNECTION, DISTANCE, i);
+		ConnectionDistancesPush(distances[i].pointB, LINE_END_POINT_CONNECTION, DISTANCE, i);
+
+		Vector2 intersection = GetOrthogonalLinesIntersection(worldMousePos, distances[i]);
+		if (distances[i].IsPointOnLine(intersection))
+		{
+			ConnectionDistancesPush(intersection, LINE_CONNECTION, DISTANCE, i);
+		}
+	}
+	for (std::size_t i = 0; i < circles.size(); ++i)
+	{
+		Vector2 connectionPoint = GetCircleConnection(worldMousePos, circles[i]);
+		//if (IsPointOnCircle(connectionPoint, circles[i]))
+		{
+			ConnectionDistancesPush(connectionPoint, CIRCLE_CONNECTION, CIRCLE, i);
+		}
+		/*
+		for (auto sector : circles[i].sectors)
+		{
+			ConnectionDistancesPush(&sector.startAnglePoint, SECTOR_END_POINT_CONNECTION, CIRCLE, i);
+			ConnectionDistancesPush(&sector.endAnglePoint, SECTOR_END_POINT_CONNECTION, CIRCLE, i);
+		}
+		*/
+	}
+	for (std::size_t i = 0; i < rays.size(); ++i)
+	{
+		ConnectionDistancesPush(rays[i].pointA, LINE_END_POINT_CONNECTION, RAY, i);
+
+		Vector2 intersection = GetOrthogonalLinesIntersection(worldMousePos, rays[i]);
+		if (rays[i].IsPointOnLine(intersection))
+		{
+			ConnectionDistancesPush(intersection, LINE_CONNECTION, RAY, i);
+		}
+	}
+	for (std::size_t i = 0; i < straightLines.size(); ++i)
+	{
+		Vector2 intersection = GetOrthogonalLinesIntersection(worldMousePos, straightLines[i]);
+		if (straightLines[i].IsPointOnLine(intersection))
+		{
+			ConnectionDistancesPush(intersection, LINE_CONNECTION, STRAIGHTLINE, i);
+		}
+	}
+	for (std::size_t i = 0; i < points.size(); ++i)
+	{
+		ConnectionDistancesPush(points[i].GetPos(), POINT_CONNECTION, POINT, i);
+	}
+	for (auto &intersection : intersections.intersections)
+	{
+		ConnectionDistancesPush(intersection.second, INTERSECTION_CONNECTION, -1, 0);
+	}
+
+	while (!connectionDistances.empty())
+	{
+		auto minPos = std::min_element(connectionTypes.begin(), connectionTypes.end()) - connectionTypes.begin();
+		if (connectionDistances.at(minPos) <= connectionDistance)
+		{
+			currentPoint.SetPos(connectionPoints.at(minPos));
+			return std::tuple<int, std::size_t>{objPlaces.at(minPos)};
+		}
+		connectionDistances.erase(connectionDistances.begin() + minPos);
+		connectionPoints.erase(connectionPoints.begin() + minPos);
+		connectionTypes.erase(connectionTypes.begin() + minPos);
+		objPlaces.erase(objPlaces.begin() + minPos);
+	}
+
+	currentPoint.SetPos(worldMousePos);
+	return std::tuple<int, std::size_t>{std::make_tuple(-1, -1)};
 }
 
 void GeometryBoard::SetEditMode()

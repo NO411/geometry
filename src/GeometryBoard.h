@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include <vector>
 #include <unordered_map>
+#include <tuple>
 
 enum EditMode
 {
@@ -76,7 +77,7 @@ private:
 	void CheckResized();
 	void InputHandler();
 	void Edit();
-	void UpdateCurrentPoint();
+	std::tuple<int, std::size_t> UpdateCurrentPoint();
 	void SetEditMode();
 	void InterruptDrawing();
 	void ModifyViewField();

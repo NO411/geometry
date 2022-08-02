@@ -1,4 +1,5 @@
 #include "MathMisc.h"
+#include "../GeometryObjetcs.h"
 #include "raylib.h"
 #include <cmath>
 
@@ -53,4 +54,13 @@ Vector2 CalculateConnectionPoint(Vector2 &p1, Vector2 &p2, float m, float n, Cam
 	}
 
 	return GetWorldToScreen2D(Vector2{connectionPoint}, camera);
+}
+
+Vector2 GetCircleConnection(Vector2 &worldMousePos, Circle &circle)
+{
+	float x = circle.center.x + (worldMousePos.x - circle.center.x) / (GetDistance(worldMousePos, circle.center) / circle.radius);
+	LinearFunction f(circle.center, worldMousePos);
+	float y = f.m * x + f.n;
+
+	return {x, y};
 }
