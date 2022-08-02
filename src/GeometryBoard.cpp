@@ -143,7 +143,10 @@ void GeometryBoard::InputHandler()
 
 void GeometryBoard::Edit()
 {
-	UpdateCurrentPoint();
+	auto objTuple = UpdateCurrentPoint();
+	int objType = std::get<0>(objTuple);
+	std::size_t objPos = std::get<1>(objTuple);
+
 	if (!(IsMouseButtonPressed(0) || IsKeyPressed(KEY_ENTER)) || app_->button.Selected())
 	{
 		return;
@@ -168,7 +171,7 @@ void GeometryBoard::Edit()
 			break;
 		case ERASER:
 			firstPointed = false;
-			// EraseObj(objTuple);
+			EraseObj(objType, objPos);
 			break;
 		case DISTANCE_MEASUREMENT:
 			firstPointed = false;
@@ -550,6 +553,35 @@ void GeometryBoard::AddIntersections(L &line)
 	}
 }
 
+void GeometryBoard::EraseObj(int objType, std::size_t objPos)
+{
+	if (objType < CIRCLE)
+	{
+		return;
+	}
+
+	switch (objType)
+	{
+	case CIRCLE:
+		EraseGemObj(circles, objPos);
+		break;
+	case DISTANCE:
+		EraseGemObj(distances, objPos);
+		break;
+	case RAY:
+		EraseGemObj(rays, objPos);
+		break;
+	case STRAIGHTLINE:
+		EraseGemObj(straightLines, objPos);
+		break;
+	case POINT:
+		ErasePoint(objPos);
+		break;
+	default:
+		break;
+	}
+}
+
 template<typename T>
 void GeometryBoard::EraseGemObj(std::vector<T> &objVec, std::size_t vecPos)
 {
@@ -563,5 +595,5 @@ void GeometryBoard::EraseGemObj(std::vector<T> &objVec, std::size_t vecPos)
 
 void GeometryBoard::ErasePoint(std::size_t vecPos)
 {
-
+	points.erase(points.begin() + vecPos);
 }

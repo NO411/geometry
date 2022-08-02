@@ -67,6 +67,7 @@ private:
 	template<typename T>
 	void EraseGemObj(std::vector<T> &objVec, std::size_t vecPos);
 	void ErasePoint(std::size_t vecPos);
+	void EraseObj(int objType, std::size_t objPos);
 
 	IntersectionStorage intersections;
 	
