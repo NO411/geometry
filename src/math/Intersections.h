@@ -106,6 +106,11 @@ void GetLineCircleIntersections(IntersectionStorage &intersections, L &line, Cir
 
 		float b = sqrt(pow(circle.radius, 2) - pow(std::abs(circle.center.x - line.pointA.x), 2));
 		
+		if (SameFloat(circle.center.x, line.pointA.x))
+		{
+			b = circle.radius;
+		}
+
 		Push({line.pointA.x, circle.center.y - b});
 		Push({line.pointA.x, circle.center.y + b});
 	}

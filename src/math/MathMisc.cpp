@@ -62,5 +62,16 @@ Vector2 GetCircleConnection(Vector2 &worldMousePos, Circle &circle)
 	LinearFunction f(circle.center, worldMousePos);
 	float y = f.m * x + f.n;
 
+	if (SameFloat(worldMousePos.x, circle.center.x))
+	{
+		x = worldMousePos.x;
+		y = circle.center.y - circle.radius;
+
+		if (worldMousePos.y > circle.center.y)
+		{
+			y = circle.center.y + circle.radius;
+		}
+	}
+
 	return {x, y};
 }
