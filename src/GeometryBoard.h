@@ -35,6 +35,7 @@ class GeometryApp;
 class GeometryBoard
 {
 	friend Point;
+
 public:
 	GeometryBoard();
 	GeometryBoard(GeometryApp *app);
@@ -44,6 +45,7 @@ public:
 	void Update();
 
 	void UpdateAllDrawPoints();
+
 private:
 	int editMode = DRAW_DISTANCE;
 	Camera2D camera;
@@ -64,15 +66,15 @@ private:
 	std::vector<StraightLine> straightLines;
 	std::vector<Point> points;
 
-	template<typename T>
+	template <typename T>
 	void EraseGemObj(std::vector<T> &objVec, std::size_t vecPos);
 	void ErasePoint(std::size_t vecPos);
 	void EraseObj(int objType, std::size_t objPos);
 
 	IntersectionStorage intersections;
-	
+
 	void AddIntersections(Circle &circle);
-	template<typename L>
+	template <typename L>
 	void AddIntersections(L &line);
 
 	void CheckResized();

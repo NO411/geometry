@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-inline const Color DARBBLUE2 = {50, 50, 60, 255}; 
-inline const Color DARBBLUE3 = {30, 30, 40, 255}; 
+inline const Color DARBBLUE2 = {50, 50, 60, 255};
+inline const Color DARBBLUE3 = {30, 30, 40, 255};
 
 enum AppStates
 {
@@ -22,6 +22,7 @@ public:
 	void Update();
 	void Render();
 	bool Selected();
+
 private:
 	Rectangle rectangle;
 	Vector2 textPos;
@@ -40,6 +41,7 @@ public:
 	HelpWindow(GeometryApp *app);
 	void CalculateKeyHighlightings();
 	void Render();
+
 private:
 	std::vector<std::vector<std::string>> shortcuts;
 	std::vector<Rectangle> keyHighlightings;
@@ -60,6 +62,7 @@ class GeometryApp
 	friend HelpButton;
 	friend HelpWindow;
 	friend GeometryBoard;
+
 public:
 	GeometryApp(int width, int height, int fps, std::string title);
 	~GeometryApp() noexcept;
@@ -67,6 +70,7 @@ public:
 	void Run();
 	int GetState();
 	void SetState(int state);
+
 private:
 	GeometryBoard board{this};
 	HelpButton button{this};

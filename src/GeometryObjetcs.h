@@ -67,6 +67,7 @@ public:
 	void UpdateDrawPoint(Camera2D &camera);
 
 	bool IsPointOnLine(Vector2 &point);
+
 private:
 	Vector2 drawPoint;
 };
@@ -94,8 +95,8 @@ public:
 	void Render(Camera2D &camera);
 	void Render(Camera2D &camera, Font &font);
 
-	Vector2& GetPos();
-	std::string& GetLetter();
+	Vector2 &GetPos();
+	std::string &GetLetter();
 	void SetPos(Vector2 &pos);
 
 private:

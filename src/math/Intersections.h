@@ -9,10 +9,11 @@
 
 void GetCircleCircleIntersections(IntersectionStorage &intersections, Circle &circle1, Circle &circle2);
 
-template<typename L1, typename L2>
+template <typename L1, typename L2>
 void GetLineLineIntersections(IntersectionStorage &intersections, L1 &line1, L2 &line2)
 {
-	auto Push = [&intersections, &line1, &line2](Vector2 newIntersection) {
+	auto Push = [&intersections, &line1, &line2](Vector2 newIntersection)
+	{
 		if (line1.IsPointOnLine(newIntersection) && line2.IsPointOnLine(newIntersection))
 		{
 			int newID = intersections.Push(newIntersection);
@@ -42,7 +43,7 @@ void GetLineLineIntersections(IntersectionStorage &intersections, L1 &line1, L2 
 	}
 }
 
-template<typename L>
+template <typename L>
 void GetLineCircleIntersections(IntersectionStorage &intersections, L &line, Circle &circle)
 {
 	/*
@@ -56,7 +57,8 @@ void GetLineCircleIntersections(IntersectionStorage &intersections, L &line, Cir
 
 	*/
 
-	auto Push = [&intersections, &line, &circle](Vector2 newIntersection) {
+	auto Push = [&intersections, &line, &circle](Vector2 newIntersection)
+	{
 		if (line.IsPointOnLine(newIntersection))
 		{
 			int newID = intersections.Push(newIntersection);
@@ -105,7 +107,7 @@ void GetLineCircleIntersections(IntersectionStorage &intersections, L &line, Cir
 		*/
 
 		float b = sqrt(pow(circle.radius, 2) - pow(std::abs(circle.center.x - line.pointA.x), 2));
-		
+
 		if (SameFloat(circle.center.x, line.pointA.x))
 		{
 			b = circle.radius;

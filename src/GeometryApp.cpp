@@ -89,7 +89,7 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 	};
 
 	description = "Geometry is an app to create Euclidean geometry without any user interface with buttons etc for faster\n"
-		"workflow. It only uses the following keyboard shortcuts:";
+				  "workflow. It only uses the following keyboard shortcuts:";
 
 	fontSize = 15;
 	tableStart = {10, 90};
@@ -247,7 +247,7 @@ void GeometryApp::Update()
 	case GEOMETRY_BOARD:
 		board.Update();
 		break;
-	
+
 	default:
 		break;
 	}

@@ -7,18 +7,18 @@
 #include <tuple>
 #include <algorithm>
 
+const float GeometryBoard::movementSpeed = 6;
+const float GeometryBoard::minZoom = 0.125;
+const float GeometryBoard::maxZoom = 6;
+const int GeometryBoard::connectionDistance_ = 8;
+int GeometryBoard::connectionDistance = connectionDistance_;
+
 int IntersectionStorage::Push(Vector2 &newIntersection)
 {
 	currentID++;
 	intersections[currentID] = newIntersection;
 	return currentID;
 }
-
-const float GeometryBoard::movementSpeed = 6;
-const float GeometryBoard::minZoom = 0.125;
-const float GeometryBoard::maxZoom = 6;
-const int GeometryBoard::connectionDistance_ = 8;
-int GeometryBoard::connectionDistance = connectionDistance_;
 
 GeometryBoard::GeometryBoard() {}
 
@@ -59,7 +59,7 @@ void GeometryBoard::Render()
 		Point point(intersection.second, this);
 		point.Render(camera);
 	}*/
-	
+
 	DrawDrawingObj();
 	currentPoint.Render(camera);
 
@@ -306,7 +306,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	for (std::size_t i = 0; i < circles.size(); ++i)
 	{
 		Vector2 connectionPoint = GetCircleConnection(worldMousePos, circles[i]);
-		//if (IsPointOnCircle(connectionPoint, circles[i]))
+		// if (IsPointOnCircle(connectionPoint, circles[i]))
 		{
 			ConnectionDistancesPush(connectionPoint, CIRCLE_CONNECTION, CIRCLE, i);
 		}
@@ -499,7 +499,6 @@ void GeometryBoard::UpdateAllDrawPoints()
 	}
 }
 
-
 bool GeometryBoard::PointLetterExists(std::string &letter)
 {
 	for (auto &point : points)
@@ -532,7 +531,7 @@ void GeometryBoard::AddIntersections(Circle &circle)
 	}
 }
 
-template<typename L>
+template <typename L>
 void GeometryBoard::AddIntersections(L &line)
 {
 	for (auto &distance : distances)
@@ -582,7 +581,7 @@ void GeometryBoard::EraseObj(int objType, std::size_t objPos)
 	}
 }
 
-template<typename T>
+template <typename T>
 void GeometryBoard::EraseGemObj(std::vector<T> &objVec, std::size_t vecPos)
 {
 	for (auto &ID : objVec[vecPos].intersectionIDs)

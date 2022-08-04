@@ -35,7 +35,8 @@ void GetCircleCircleIntersections(IntersectionStorage &intersections, Circle &ci
 	float q1X = circle1.center.x + x * ex0;
 	float q1Y = circle1.center.y + x * ex1;
 
-	auto Push = [&intersections, &circle1, &circle2](Vector2 newIntersection) {
+	auto Push = [&intersections, &circle1, &circle2](Vector2 newIntersection)
+	{
 		int newID = intersections.Push(newIntersection);
 		circle1.intersectionIDs.push_back(newID);
 		circle2.intersectionIDs.push_back(newID);

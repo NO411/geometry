@@ -96,7 +96,7 @@ void Circle::Render(Camera2D &camera)
 	DrawRingSmooth(center_, radius * camera.zoom);
 }
 
-Point::Point(Vector2 &pos, GeometryBoard *board): point(pos)
+Point::Point(Vector2 &pos, GeometryBoard *board) : point(pos)
 {
 	SetPointLetter(board);
 }
@@ -105,7 +105,7 @@ Point::Point()
 {
 }
 
-Vector2& Point::GetPos()
+Vector2 &Point::GetPos()
 {
 	return point;
 }
@@ -181,7 +181,7 @@ void Point::SetPointLetter(GeometryBoard *board)
 	letterNumber = std::to_string(i);
 }
 
-std::string& Point::GetLetter()
+std::string &Point::GetLetter()
 {
 	return letter;
 }
@@ -211,7 +211,7 @@ bool Ray2::IsPointOnLine(Vector2 &point)
 	{
 		return true;
 	}
-	
+
 	if (IsVerticalLine() && (((pointA.y < pointB.y || SameFloat(pointA.y, pointB.y)) && (point.y > pointA.y || SameFloat(point.y, pointA.y))) || (pointA.y > pointB.y && (point.y < pointA.y || SameFloat(point.y, pointA.y)))))
 	{
 		return true;
