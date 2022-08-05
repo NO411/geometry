@@ -22,7 +22,12 @@ float GetDistance(Vec2 &vec1, Vec2 &vec2)
 
 bool SameDouble(long double a, long double b)
 {
-	return std::abs(a - b) <= 0.0001;
+	if (std::abs(a - b) <= 1.0e-5)
+	{
+		return true;
+	}
+	bool w = std::abs(a - b) <= 1.0e-5 * std::max(std::abs(a), std::abs(b));
+	return w;
 }
 
 Vec2 CalculateConnectionPoint(Vec2 &p1, Vec2 &p2, long double m, long double n, Camera2D &camera)
