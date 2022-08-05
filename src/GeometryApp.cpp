@@ -92,6 +92,7 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 		{"`CTRL` + press `H`", "disable help button"},
 		{"`mouse wheel`", "zoom in / out"},
 		{"`CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R`", "reset zoom and field of view"},
+		{"`CTRL` + `C` + `E`", "clear everything"},
 	};
 
 	fontSize = 15;
@@ -248,8 +249,15 @@ void GeometryApp::Update()
 	switch (GetState())
 	{
 	case GEOMETRY_BOARD:
+	{
 		board.Update();
-		break;
+
+		if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_C) && IsKeyPressed(KEY_E))
+		{
+			ClearBoard();
+		}
+	}
+	break;
 
 	default:
 		break;
@@ -264,4 +272,9 @@ int GeometryApp::GetState()
 void GeometryApp::SetState(int state)
 {
 	appState = state;
+}
+
+void GeometryApp::ClearBoard()
+{
+	board = {this};
 }

@@ -26,6 +26,7 @@ Made with Raylib.
 | `CTRL` + press `H`                                 | disable help button                     |
 | `mouse wheel`                                      | zoom in / out                           |
 | `CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R` | reset zoom and field of view            |
+| `CTRL` + `C` + `E`                                 | clear everything                        |
 
 The cursor automatically connects to intersections, other points, lines, and circles.
 
