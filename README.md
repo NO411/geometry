@@ -5,24 +5,27 @@ Made with Raylib.
 
 ## Usage
 
-| Keys                             | Action                                                                       |
-|----------------------------------|------------------------------------------------------------------------------|
-| `CTRL` and press `C`             | circle drawing mode                                                          |
-| `CTRL` and press `S`             | straight line drawing mode                                                   |
-| `CTRL` and press `D`             | distance drawing mode                                                        |
-| `CTRL` and press `R`             | ray drawing mode                                                             |
-| `CTRL` and press `P`             | point drawing mode                                                           |
-| `CTRL` and press `E`             | enable eraser                                                                |
-| `left mouse button`              | set first / second point of a line or the middle point or radius of a circle |
-| `ESC`                            | Place/use                                                                    |
-| `←`                              | move everything to the left                                                  |
-| `→`                              | move everything to the right                                                 |
-| `↑`                              | move everything up                                                           |
-| `↓`                              | move everything down                                                         |
-| `CTRL` + `D` and press `M`       | distance measurement mode                                                    |
-| `CTRL` + `D` + `M` and press `E` | distance measurement eraser mode                                             |
-| `CTRL` + `C` and press `E`       | circle sector eraser mode                                                    |
-
+| Keys                                               | Action                                  |
+|----------------------------------------------------|-----------------------------------------|
+| `CTRL` + press `C`                                 | circle drawing mode                     |
+| `CTRL` + press `S`                                 | straight line drawing mode              |
+| `CTRL` + press `D`                                 | distance drawing mode                   |
+| `CTRL` + press `R`                                 | ray drawing mode                        |
+| `CTRL` + press `P`                                 | point drawing mode                      |
+| `CTRL` + press `E`                                 | enable eraser                           |
+| press `left mouse button`                          | select point                            |
+| press `ESC`                                        | interrupt                               |
+| press `←`                                          | move everything to the left             |
+| press `→`                                          | move everything to the right            |
+| press `↑`                                          | move everything up                      |
+| press `↓`                                          | move everything down                    |
+| `CTRL` + `L` + press `M`                           | length measurement mode (enable)        |
+| `CTRL` + `L` + `M` + press `E`                     | length measurement eraser mode (disable)|
+| `CTRL` + `C` + press `E`                           | circle sector eraser mode (WIP)         |
+| press `H`                                          | switch between geometry board and help  |
+| `CTRL` + press `H`                                 | disable help button                     |
+| `mouse wheel`                                      | zoom in / out                           |
+| `CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R` | reset zoom and field of view            |
 
 The cursor automatically connects to intersections, other points, lines, and circles.
 
@@ -41,7 +44,7 @@ cd <path to your installation folder>
 Then run:
 
 ```
-sudo apt install g++ git make libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev && git clone https://github.com/NO411/geometry && git clone https://github.com/raysan5/raylib && cd raylib/src && make PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=SHARED && sudo make install RAYLIB_LIBTYPE=SHARED && cd ../../geometry/src && g++ main.cpp math/math_misc.cpp math/intersections.cpp app/draw.cpp app/geometry_objects.cpp app/main_logic.cpp -o ../geometry -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./../geometry
+sudo apt install g++ git make libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev && git clone https://github.com/NO411/geometry && git clone https://github.com/raysan5/raylib && cd raylib/src && make PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=SHARED && sudo make install RAYLIB_LIBTYPE=SHARED && cd ../../geometry/src && g++ main.cpp GeometryApp.cpp GeometryBoard.cpp GeometryObjects.cpp math/MathMisc.cpp math/Intersections.cpp -o ../geometry -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 && ./../geometry
 ```
 
 To run the program after installing it in your installation folder, type:
@@ -77,7 +80,7 @@ Copy the `libraylib.a` file from the `raylib/src` folder to your initially creat
 To create the final geometry.exe, navigate to your `geometry/src` folder on the command line and run:
 
 ```
-g++ main.cpp math/math_misc.cpp math/intersections.cpp app/draw.cpp app/geometry_objects.cpp app/main_logic.cpp -o ../geometry.exe -O1 -Wall -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
+g++ main.cpp GeometryApp.cpp GeometryBoard.cpp GeometryObjects.cpp math/MathMisc.cpp math/Intersections.cpp -o ../geometry.exe ../resources/gem.res -O1 -Wall -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
 ```
 
 Or just follow this [tutorial](https://www.youtube.com/watch?v=HPDLTQ4J_zQ).
