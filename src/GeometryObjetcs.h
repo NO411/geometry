@@ -15,14 +15,27 @@ enum GeometryObject
 
 class GeometryBoard;
 
+class Vec2
+{
+public:
+	Vec2(long double x, long double y);
+	Vec2(Vector2 &v);
+	Vec2(Vector2 v);
+	Vec2();
+	long double x;
+	long double y;
+
+	Vector2 ToRaylibVec();
+};
+
 class GemObj
 {
 public:
 	static const Color renderColor;
 	static const int renderThickness;
 
-	void DrawLineExSmooth(Vector2 &startPos, Vector2 &endPos);
-	void DrawRingSmooth(Vector2 &center, float radius);
+	void DrawLineExSmooth(Vec2 &startPos, Vec2 &endPos);
+	void DrawRingSmooth(Vec2 &center, long double radius);
 
 	std::vector<int> intersectionIDs;
 };
@@ -30,18 +43,18 @@ public:
 class Circle : public GemObj
 {
 public:
-	Circle(Vector2 &center, float radius);
+	Circle(Vec2 &center, long double radius);
 
 	void Render(Camera2D &camera);
 
-	Vector2 center;
-	float radius;
+	Vec2 center;
+	long double radius;
 };
 
 class Line : public GemObj
 {
 public:
-	Vector2 pointA, pointB;
+	Vec2 pointA, pointB;
 
 	bool IsVerticalLine();
 };
@@ -49,11 +62,11 @@ public:
 class Distance : public Line
 {
 public:
-	Distance(Vector2 &pointA_, Vector2 &pointB_);
+	Distance(Vec2 &pointA_, Vec2 &pointB_);
 
 	void Render(Camera2D &camera);
 
-	bool IsPointOnLine(Vector2 &point);
+	bool IsPointOnLine(Vec2 &point);
 
 private:
 };
@@ -61,48 +74,48 @@ private:
 class Ray2 : public Line
 {
 public:
-	Ray2(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera);
+	Ray2(Vec2 &pointA_, Vec2 &pointB_, Camera2D &camera);
 
 	void Render(Camera2D &camera);
 	void UpdateDrawPoint(Camera2D &camera);
 
-	bool IsPointOnLine(Vector2 &point);
+	bool IsPointOnLine(Vec2 &point);
 
 private:
-	Vector2 drawPoint;
+	Vec2 drawPoint;
 };
 
 class StraightLine : public Line
 {
 public:
-	StraightLine(Vector2 &pointA_, Vector2 &pointB_, Camera2D &camera);
+	StraightLine(Vec2 &pointA_, Vec2 &pointB_, Camera2D &camera);
 
 	void Render();
 	void UpdateDrawPoints(Camera2D &camera);
 
-	bool IsPointOnLine(Vector2 &point);
+	bool IsPointOnLine(Vec2 &point);
 
 private:
-	Vector2 firstDrawPoint, secondDrawPoint;
+	Vec2 firstDrawPoint, secondDrawPoint;
 };
 
 class Point : public GemObj
 {
 public:
 	Point();
-	Point(Vector2 &pos, GeometryBoard *board);
+	Point(Vec2 &pos, GeometryBoard *board);
 
 	void Render(Camera2D &camera);
 	void Render(Camera2D &camera, Font &font);
 
-	Vector2 &GetPos();
+	Vec2 &GetPos();
 	std::string &GetLetter();
-	void SetPos(Vector2 &pos);
+	void SetPos(Vec2 &pos);
 
 private:
 	void SetPointLetter(GeometryBoard *board);
 
-	Vector2 point;
+	Vec2 point;
 	std::string letter;
 	std::string letterNumber;
 

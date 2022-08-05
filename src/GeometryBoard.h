@@ -24,10 +24,10 @@ enum EditMode
 class IntersectionStorage
 {
 public:
-	std::unordered_map<int, Vector2> intersections;
+	std::unordered_map<int, Vec2> intersections;
 	int currentID = 0;
 
-	int Push(Vector2 &newIntersection);
+	int Push(Vec2 &newIntersection);
 };
 
 class GeometryApp;
@@ -57,7 +57,7 @@ private:
 	static int connectionDistance;
 
 	bool firstPointed = false;
-	Vector2 firstPoint;
+	Vec2 firstPoint;
 	Point currentPoint;
 
 	std::vector<Circle> circles;

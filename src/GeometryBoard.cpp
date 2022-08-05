@@ -13,7 +13,7 @@ const float GeometryBoard::maxZoom = 6;
 const int GeometryBoard::connectionDistance_ = 8;
 int GeometryBoard::connectionDistance = connectionDistance_;
 
-int IntersectionStorage::Push(Vector2 &newIntersection)
+int IntersectionStorage::Push(Vec2 &newIntersection)
 {
 	currentID++;
 	intersections[currentID] = newIntersection;
@@ -74,7 +74,7 @@ void GeometryBoard::DrawDrawingObj()
 		return;
 	}
 
-	Vector2 currentPos = currentPoint.GetPos();
+	Vec2 currentPos = currentPoint.GetPos();
 
 	switch (editMode)
 	{
@@ -215,7 +215,7 @@ void GeometryBoard::Edit()
 	else
 	{
 		firstPointed = false;
-		Vector2 currentPos = currentPoint.GetPos();
+		Vec2 currentPos = currentPoint.GetPos();
 		switch (editMode)
 		{
 		case DRAW_CIRCLE:
@@ -267,8 +267,8 @@ void GeometryBoard::Edit()
 
 std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 {
-	std::vector<float> connectionDistances;
-	std::vector<Vector2> connectionPoints;
+	std::vector<long double> connectionDistances;
+	std::vector<Vec2> connectionPoints;
 	std::vector<int> connectionTypes;
 	std::vector<std::tuple<int, std::size_t>> objPlaces;
 
@@ -282,9 +282,9 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 		CIRCLE_CONNECTION,
 	};
 
-	Vector2 worldMousePos = GetMousePosition2(camera);
+	Vec2 worldMousePos = GetMousePosition2(camera);
 
-	auto ConnectionDistancesPush = [this, &worldMousePos, &connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vector2 &point, int connectionType, int objType, std::size_t objPos)
+	auto ConnectionDistancesPush = [this, &worldMousePos, &connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vec2 &point, int connectionType, int objType, std::size_t objPos)
 	{
 		connectionDistances.push_back(GetDistance(point, worldMousePos));
 		connectionPoints.push_back(point);
@@ -297,7 +297,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 		ConnectionDistancesPush(distances[i].pointA, LINE_END_POINT_CONNECTION, DISTANCE, i);
 		ConnectionDistancesPush(distances[i].pointB, LINE_END_POINT_CONNECTION, DISTANCE, i);
 
-		Vector2 intersection = GetOrthogonalLinesIntersection(worldMousePos, distances[i]);
+		Vec2 intersection = GetOrthogonalLinesIntersection(worldMousePos, distances[i]);
 		if (distances[i].IsPointOnLine(intersection))
 		{
 			ConnectionDistancesPush(intersection, LINE_CONNECTION, DISTANCE, i);
@@ -305,7 +305,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	}
 	for (std::size_t i = 0; i < circles.size(); ++i)
 	{
-		Vector2 connectionPoint = GetCircleConnection(worldMousePos, circles[i]);
+		Vec2 connectionPoint = GetCircleConnection(worldMousePos, circles[i]);
 		// if (IsPointOnCircle(connectionPoint, circles[i]))
 		{
 			ConnectionDistancesPush(connectionPoint, CIRCLE_CONNECTION, CIRCLE, i);
@@ -322,7 +322,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	{
 		ConnectionDistancesPush(rays[i].pointA, LINE_END_POINT_CONNECTION, RAY, i);
 
-		Vector2 intersection = GetOrthogonalLinesIntersection(worldMousePos, rays[i]);
+		Vec2 intersection = GetOrthogonalLinesIntersection(worldMousePos, rays[i]);
 		if (rays[i].IsPointOnLine(intersection))
 		{
 			ConnectionDistancesPush(intersection, LINE_CONNECTION, RAY, i);
@@ -330,7 +330,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	}
 	for (std::size_t i = 0; i < straightLines.size(); ++i)
 	{
-		Vector2 intersection = GetOrthogonalLinesIntersection(worldMousePos, straightLines[i]);
+		Vec2 intersection = GetOrthogonalLinesIntersection(worldMousePos, straightLines[i]);
 		if (straightLines[i].IsPointOnLine(intersection))
 		{
 			ConnectionDistancesPush(intersection, LINE_CONNECTION, STRAIGHTLINE, i);
@@ -454,6 +454,8 @@ void GeometryBoard::ModifyViewField()
 		camera.zoom = 1;
 		camera.target = {0, 0};
 		camera.offset = {0, 0};
+
+		UpdateConnectionDistance();
 	}
 
 	float wheel = GetMouseWheelMove();
@@ -462,7 +464,7 @@ void GeometryBoard::ModifyViewField()
 	{
 		// zoom to the mouse position
 		// save this before setting camera.offset because it changes the camera which is needed for the target
-		Vector2 mouseWorldPos = GetMousePosition2(camera);
+		Vector2 mouseWorldPos = GetMousePosition2(camera).ToRaylibVec();
 		camera.offset = GetMousePosition();
 		camera.target = mouseWorldPos;
 

@@ -66,6 +66,9 @@ void HelpButton::Render()
 
 HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 {
+	description = "Geometry is an app to create Euclidean geometry without any user interface with buttons etc for faster\n"
+				  "workflow. It only uses the following keyboard shortcuts:";
+
 	shortcuts = {
 		{"`CTRL` + press `C`", "circle drawing mode"},
 		{"`CTRL` + press `S`", "straight line drawing mode"},
@@ -87,9 +90,6 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 		{"`mouse wheel`", "zoom in / out"},
 		{"`CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R`", "reset zoom and field of view"},
 	};
-
-	description = "Geometry is an app to create Euclidean geometry without any user interface with buttons etc for faster\n"
-				  "workflow. It only uses the following keyboard shortcuts:";
 
 	fontSize = 15;
 	tableStart = {10, 90};

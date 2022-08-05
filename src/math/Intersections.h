@@ -12,7 +12,7 @@ void GetCircleCircleIntersections(IntersectionStorage &intersections, Circle &ci
 template <typename L1, typename L2>
 void GetLineLineIntersections(IntersectionStorage &intersections, L1 &line1, L2 &line2)
 {
-	auto Push = [&intersections, &line1, &line2](Vector2 newIntersection)
+	auto Push = [&intersections, &line1, &line2](Vec2 newIntersection)
 	{
 		if (line1.IsPointOnLine(newIntersection) && line2.IsPointOnLine(newIntersection))
 		{
@@ -25,10 +25,10 @@ void GetLineLineIntersections(IntersectionStorage &intersections, L1 &line1, L2 
 	LinearFunction f1(line1.pointA, line1.pointB);
 	LinearFunction f2(line2.pointA, line2.pointB);
 
-	float x = -((f2.n - f1.n) / (f2.m - f1.m));
-	float y = f1.m * x + f1.n;
+	long double x = -((f2.n - f1.n) / (f2.m - f1.m));
+	long double y = f1.m * x + f1.n;
 
-	if (!SameFloat(f1.m, f2.m))
+	if (!SameDouble(f1.m, f2.m))
 	{
 		Push({x, y});
 	}
@@ -47,17 +47,14 @@ template <typename L>
 void GetLineCircleIntersections(IntersectionStorage &intersections, L &line, Circle &circle)
 {
 	/*
-
 	y = m * x + n
 	(x - center.x)² + (y - center.y)² = r²
 	(x - center.x)² + (m * x + n - center.y)² = r²
 
-	x₀ = 0.5 * (-2 * m * n + 2 * center.y * m + 2 * center.x + sqrt((-2 * center.y * m - 2 * center.x + 2 * m * n)² - 4*(-2 * center.y * n - r² + center.y² + n² + center.x²) * (1 + m²))) * (1 + m²)^-1
-	x₁ = 0.5 * (-2 * m * n + 2 * center.y * m + 2 * center.x - sqrt((-2 * center.y * m - 2 * center.x + 2 * m * n)² - 4*(-2 * center.y * n - r² + center.y² + n² + center.x²) * (1 + m²))) * (1 + m²)^-1
-
+	x₀|₁ = 0.5 * (-2 * m * n + 2 * center.y * m + 2 * center.x +/- sqrt((-2 * center.y * m - 2 * center.x + 2 * m * n)² - 4*(-2 * center.y * n - r² + center.y² + n² + center.x²) * (1 + m²))) * (1 + m²)^-1
 	*/
 
-	auto Push = [&intersections, &line, &circle](Vector2 newIntersection)
+	auto Push = [&intersections, &line, &circle](Vec2 newIntersection)
 	{
 		if (line.IsPointOnLine(newIntersection))
 		{
@@ -68,36 +65,36 @@ void GetLineCircleIntersections(IntersectionStorage &intersections, L &line, Cir
 	};
 
 	LinearFunction f(line.pointA, line.pointB);
-	float m = f.m;
-	float n = f.n;
+	long double m = f.m;
+	long double n = f.n;
 
 	// just some var saving to simplify the code
-	float mn2 = 2 * m * n;
-	float pm = pow(m, 2);
-	float cx = circle.center.x;
-	float cy = circle.center.y;
-	float cx2 = 2 * cx;
-	float cy2 = 2 * cy;
-	float cy2m = cy2 * m;
-	float pm1 = 1 + pm;
+	long double mn2 = 2 * m * n;
+	long double pm = pow(m, 2);
+	long double cx = circle.center.x;
+	long double cy = circle.center.y;
+	long double cx2 = 2 * cx;
+	long double cy2 = 2 * cy;
+	long double cy2m = cy2 * m;
+	long double pm1 = 1 + pm;
 
-	float v1 = -mn2 + cy2m + cx2;
-	float v2 = 0.5 * pow(pm1, -1);
-	float v3 = sqrt(pow(-cy2m - cx2 + mn2, 2) - 4 * (-cy2 * n - pow(circle.radius, 2) + pow(cy, 2) + pow(n, 2) + pow(cx, 2)) * pm1);
+	long double v1 = -mn2 + cy2m + cx2;
+	long double v2 = 0.5 * pow(pm1, -1);
+	long double v3 = sqrt(pow(-cy2m - cx2 + mn2, 2) - 4 * (-cy2 * n - pow(circle.radius, 2) + pow(cy, 2) + pow(n, 2) + pow(cx, 2)) * pm1);
 
 	// solutions
-	float x0 = v2 * (v1 + v3);
-	float x1 = v2 * (v1 - v3);
+	long double x0 = v2 * (v1 + v3);
+	long double x1 = v2 * (v1 - v3);
 
 	Push({x0, m * x0 + n});
 	Push({x1, m * x1 + n});
 
-	if (!SameFloat(line.pointA.x, line.pointB.x))
+	if (!SameDouble(line.pointA.x, line.pointB.x))
 	{
 		return;
 	}
 
-	if (line.pointA.x - circle.center.x < circle.radius || SameFloat(line.pointA.x - circle.center.x, circle.radius))
+	if (line.pointA.x - circle.center.x < circle.radius || SameDouble(line.pointA.x - circle.center.x, circle.radius))
 	{
 		/*
 		a² + b² = r²
@@ -106,9 +103,9 @@ void GetLineCircleIntersections(IntersectionStorage &intersections, L &line, Cir
 		y = center.y +/- b;
 		*/
 
-		float b = sqrt(pow(circle.radius, 2) - pow(std::abs(circle.center.x - line.pointA.x), 2));
+		long double b = sqrt(pow(circle.radius, 2) - pow(std::abs(circle.center.x - line.pointA.x), 2));
 
-		if (SameFloat(circle.center.x, line.pointA.x))
+		if (SameDouble(circle.center.x, line.pointA.x))
 		{
 			b = circle.radius;
 		}
