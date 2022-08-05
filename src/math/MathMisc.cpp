@@ -26,8 +26,7 @@ bool SameDouble(long double a, long double b)
 	{
 		return true;
 	}
-	bool w = std::abs(a - b) <= 1.0e-5 * std::max(std::abs(a), std::abs(b));
-	return w;
+	return std::abs(a - b) <= 1.0e-5 * std::max(std::abs(a), std::abs(b));
 }
 
 Vec2 CalculateConnectionPoint(Vec2 &p1, Vec2 &p2, long double m, long double n, Camera2D &camera)
