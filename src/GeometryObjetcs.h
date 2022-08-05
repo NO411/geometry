@@ -33,6 +33,7 @@ class GemObj
 public:
 	static const Color renderColor;
 	static const int renderThickness;
+	static const long double LE_factor;
 
 	void DrawLineExSmooth(Vec2 &startPos, Vec2 &endPos);
 	void DrawRingSmooth(Vec2 &center, long double radius);
@@ -40,7 +41,25 @@ public:
 	std::vector<int> intersectionIDs;
 };
 
-class Circle : public GemObj
+class LengthMeasurement
+{
+public:
+	void EnableLength(Vec2 &pos, Font *font);
+	void DisableLength();
+	bool IsLengthEnabled();
+
+	void RenderLength(Camera2D &camera);
+
+	bool showLength = false;
+	Vec2 lengthPos;
+	std::string length;
+	Vector2 measure;
+
+	Font *boardFont;
+	static const int fontSize;
+};
+
+class Circle : public GemObj, public LengthMeasurement
 {
 public:
 	Circle(Vec2 &center, long double radius);
@@ -49,6 +68,7 @@ public:
 
 	Vec2 center;
 	long double radius;
+	void UpdateLength();
 };
 
 class Line : public GemObj
@@ -59,7 +79,7 @@ public:
 	bool IsVerticalLine();
 };
 
-class Distance : public Line
+class Distance : public Line, public LengthMeasurement
 {
 public:
 	Distance(Vec2 &pointA_, Vec2 &pointB_);
@@ -67,8 +87,7 @@ public:
 	void Render(Camera2D &camera);
 
 	bool IsPointOnLine(Vec2 &point);
-
-private:
+	void UpdateLength();
 };
 
 class Ray2 : public Line

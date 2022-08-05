@@ -5,9 +5,6 @@
 #include <string>
 #include <vector>
 
-inline const Color DARBBLUE2 = {50, 50, 60, 255};
-inline const Color DARBBLUE3 = {30, 30, 40, 255};
-
 enum AppStates
 {
 	GEOMETRY_BOARD,
@@ -85,4 +82,7 @@ private:
 	void Tick();
 	void RenderHelp();
 	void Update();
+
+	static const Color DARBBLUE2;
+	static const Color DARBBLUE3;
 };

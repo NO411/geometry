@@ -5,10 +5,14 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <cmath>
 
 const Color GemObj::renderColor = GRAY;
 const int GemObj::renderThickness = 2;
+const long double GemObj::LE_factor = 0.025;
+
 const std::string Point::pointChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const int LengthMeasurement::fontSize = 12;
 
 Vec2::Vec2(long double x, long double y) : x(x), y(y)
 {
@@ -69,6 +73,43 @@ void Distance::Render(Camera2D &camera)
 	Vec2 startPos = {GetWorldToScreen2D(pointA.ToRaylibVec(), camera)};
 	Vec2 endPos = {GetWorldToScreen2D(pointB.ToRaylibVec(), camera)};
 	DrawLineExSmooth(startPos, endPos);
+
+	RenderLength(camera);
+}
+
+void Distance::UpdateLength()
+{
+	length = std::to_string(GetDistance(pointA, pointB) * LE_factor);
+	measure = MeasureTextEx(*boardFont, length.c_str(), fontSize, 0);
+}
+
+void LengthMeasurement::RenderLength(Camera2D &camera)
+{
+	if (!IsLengthEnabled())
+	{
+		return;
+	}
+	Vector2 drawPos = GetWorldToScreen2D(lengthPos.ToRaylibVec(), camera);
+
+	DrawTextEx(*boardFont, length.c_str(), drawPos, fontSize, 0, BLACK);
+	DrawRectangleRec({drawPos.x - 2, drawPos.y - 2, measure.x + 4, measure.y + 4}, {200, 200, 200, 150});
+}
+
+void LengthMeasurement::EnableLength(Vec2 &pos, Font *font)
+{
+	lengthPos = pos;
+	showLength = true;
+	boardFont = font;
+}
+
+void LengthMeasurement::DisableLength()
+{
+	showLength = false;
+}
+
+bool LengthMeasurement::IsLengthEnabled()
+{
+	return showLength;
 }
 
 StraightLine::StraightLine(Vec2 &pointA_, Vec2 &pointB_, Camera2D &camera)
@@ -117,6 +158,14 @@ void Circle::Render(Camera2D &camera)
 {
 	Vec2 center_ = {GetWorldToScreen2D(center.ToRaylibVec(), camera)};
 	DrawRingSmooth(center_, radius * camera.zoom);
+
+	RenderLength(camera);
+}
+
+void Circle::UpdateLength()
+{
+	length = std::to_string(2 * PI * radius * LE_factor);
+	measure = MeasureTextEx(*boardFont, length.c_str(), fontSize, 0);
 }
 
 Point::Point(Vec2 &pos, GeometryBoard *board) : point(pos)
@@ -175,14 +224,14 @@ void Point::SetPointLetter(GeometryBoard *board)
 		auto found = pointChars.find(point.letter);
 		if (found != std::string::npos)
 		{
-			letterQuantity.at(found)++;
+			letterQuantity[found]++;
 
 			int n = 0;
 			if (point.letterNumber != "")
 			{
 				n = std::stoi(point.letterNumber);
 			}
-			letterNumbers.at(found).push_back(n);
+			letterNumbers[found].push_back(n);
 		}
 	}
 
@@ -190,7 +239,7 @@ void Point::SetPointLetter(GeometryBoard *board)
 	letter = pointChars.substr(minPos, 1);
 
 	int i = 0;
-	while (std::count(letterNumbers.at(minPos).begin(), letterNumbers.at(minPos).end(), i))
+	while (std::count(letterNumbers[minPos].begin(), letterNumbers[minPos].end(), i))
 	{
 		i++;
 	}

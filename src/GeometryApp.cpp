@@ -3,6 +3,9 @@
 #include "raylib.h"
 #include <string>
 
+const Color DARBBLUE2 = {50, 50, 60, 255};
+const Color DARBBLUE3 = {30, 30, 40, 255};
+
 HelpButton::HelpButton(GeometryApp *app) : app_(app)
 {
 	Update();
@@ -82,8 +85,8 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 		{"press `right`", "move everything to the right"},
 		{"press `up`", "move everything up"},
 		{"press `down`", "move everything down"},
-		{"`CTRL` + `D` + press `M`", "distance measurement mode"},
-		{"`CTRL` + `D` + `M` + press `E`", "distance measurement eraser mode"},
+		{"`CTRL` + `L` + press `M`", "length measurement mode (enable)"},
+		{"`CTRL` + `L` + `M` + press `E`", "length measurement eraser mode (disable)"},
 		{"`CTRL` + `C` + press `E`", "circle sector eraser mode"},
 		{"press `H`", "switch between geometry board and help"},
 		{"`CTRL` + press `H`", "disable help button"},

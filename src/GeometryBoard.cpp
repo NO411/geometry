@@ -141,6 +141,13 @@ void GeometryBoard::InputHandler()
 	ModifyViewField();
 }
 
+template <typename O>
+void GeometryBoard::Measure(O &object)
+{
+	object.EnableLength(currentPoint.GetPos(), &app_->font);
+	object.UpdateLength();
+}
+
 void GeometryBoard::Edit()
 {
 	auto objTuple = UpdateCurrentPoint();
@@ -173,26 +180,38 @@ void GeometryBoard::Edit()
 			firstPointed = false;
 			EraseObj(objType, objPos);
 			break;
-		case DISTANCE_MEASUREMENT:
+		case LENGTH_MEASUREMENT:
 			firstPointed = false;
-			/*
-			if (objType == DISTANCE)
+			switch (objType)
 			{
-				distances.at(objPos).showLength = true;
+			case DISTANCE:
+				Measure(distances[objPos]);
+				break;
+			case CIRCLE:
+				Measure(circles[objPos]);
+				break;
+
+			default:
+				break;
 			}
-			*/
 			break;
 		case ANGLE_MEASUREMENT:
 			firstPointed = false;
 			break;
-		case DISTANCE_MEASUREMENT_ERASER:
+		case LENGTH_MEASUREMENT_ERASER:
 			firstPointed = false;
-			/*
-			if (objType == DISTANCE)
+			switch (objType)
 			{
-				distances.at(objPos).showLength = false;
+			case DISTANCE:
+				distances[objPos].DisableLength();
+				break;
+			case CIRCLE:
+				circles[objPos].DisableLength();
+				break;
+
+			default:
+				break;
 			}
-			*/
 			break;
 		case ANGLE_MEASUREMENT_ERASER:
 			firstPointed = false;
@@ -348,10 +367,10 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	while (!connectionDistances.empty())
 	{
 		auto minPos = std::min_element(connectionTypes.begin(), connectionTypes.end()) - connectionTypes.begin();
-		if (connectionDistances.at(minPos) <= connectionDistance)
+		if (connectionDistances[minPos] <= connectionDistance)
 		{
-			currentPoint.SetPos(connectionPoints.at(minPos));
-			return std::tuple<int, std::size_t>{objPlaces.at(minPos)};
+			currentPoint.SetPos(connectionPoints[minPos]);
+			return std::tuple<int, std::size_t>{objPlaces[minPos]};
 		}
 		connectionDistances.erase(connectionDistances.begin() + minPos);
 		connectionPoints.erase(connectionPoints.begin() + minPos);
@@ -391,9 +410,9 @@ void GeometryBoard::SetEditMode()
 		editMode = ERASER;
 		if (IsKeyDown(KEY_M))
 		{
-			if (IsKeyDown(KEY_D))
+			if (IsKeyDown(KEY_L))
 			{
-				editMode = DISTANCE_MEASUREMENT_ERASER;
+				editMode = LENGTH_MEASUREMENT_ERASER;
 			}
 			else if (IsKeyDown(KEY_A))
 			{
@@ -406,9 +425,9 @@ void GeometryBoard::SetEditMode()
 		}
 		break;
 	case KEY_M:
-		if (IsKeyDown(KEY_D))
+		if (IsKeyDown(KEY_L))
 		{
-			editMode = DISTANCE_MEASUREMENT;
+			editMode = LENGTH_MEASUREMENT;
 		}
 		else if (IsKeyDown(KEY_A))
 		{

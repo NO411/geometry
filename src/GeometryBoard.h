@@ -14,9 +14,9 @@ enum EditMode
 	DRAW_STRAIGHT_LINE,
 	DRAW_POINT,
 	ERASER,
-	DISTANCE_MEASUREMENT,
+	LENGTH_MEASUREMENT,
 	ANGLE_MEASUREMENT,
-	DISTANCE_MEASUREMENT_ERASER,
+	LENGTH_MEASUREMENT_ERASER,
 	ANGLE_MEASUREMENT_ERASER,
 	CIRCLE_ERASER,
 };
@@ -87,6 +87,9 @@ private:
 	void DrawDrawingObj();
 	void UpdateConnectionDistance();
 	bool PointLetterExists(std::string &letter);
+
+	template <typename O>
+	void Measure(O &object);
 
 	GeometryApp *app_;
 };
