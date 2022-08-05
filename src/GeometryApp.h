@@ -82,6 +82,7 @@ private:
 	void Tick();
 	void RenderHelp();
 	void Update();
+	void ClearBoard();
 
 	static const Color DARBBLUE2;
 	static const Color DARBBLUE3;
