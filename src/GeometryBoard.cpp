@@ -370,7 +370,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 		if (connectionDistances[minPos] <= connectionDistance)
 		{
 			currentPoint.SetPos(connectionPoints[minPos]);
-			return std::tuple<int, std::size_t>{objPlaces[minPos]};
+			return objPlaces[minPos];
 		}
 		connectionDistances.erase(connectionDistances.begin() + minPos);
 		connectionPoints.erase(connectionPoints.begin() + minPos);
@@ -379,7 +379,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	}
 
 	currentPoint.SetPos(worldMousePos);
-	return std::tuple<int, std::size_t>{std::make_tuple(-1, -1)};
+	return std::make_tuple(-1, -1);
 }
 
 void GeometryBoard::SetEditMode()

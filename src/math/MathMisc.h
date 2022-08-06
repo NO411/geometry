@@ -14,7 +14,7 @@ public:
 };
 
 Vec2 GetMousePosition2(Camera2D &camera);
-float GetDistance(Vec2 &vec1, Vec2 &vec2);
+long double GetDistance(Vec2 &vec1, Vec2 &vec2);
 bool SameDouble(long double a, long double b);
 Vec2 CalculateConnectionPoint(Vec2 &p1, Vec2 &p2, long double m, long double n, Camera2D &camera);
 

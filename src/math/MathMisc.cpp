@@ -15,7 +15,7 @@ Vec2 GetMousePosition2(Camera2D &camera)
 	return {GetScreenToWorld2D(GetMousePosition(), camera)};
 }
 
-float GetDistance(Vec2 &vec1, Vec2 &vec2)
+long double GetDistance(Vec2 &vec1, Vec2 &vec2)
 {
 	return sqrt(pow(vec2.x - vec1.x, 2) + pow(vec2.y - vec1.y, 2));
 }
