@@ -33,6 +33,11 @@ Vec2 CalculateConnectionPoint(Vec2 &p1, Vec2 &p2, long double m, long double n, 
 {
 	Vec2 connectionPoint;
 
+	if (p1 == p2)
+	{
+		return p1;
+	}
+
 	if (p1.x > p2.x)
 	{
 		connectionPoint.x = GetScreenToWorld2D({0, 0}, camera).x;

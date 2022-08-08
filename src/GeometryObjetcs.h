@@ -25,6 +25,8 @@ public:
 	long double x;
 	long double y;
 
+	bool operator==(Vec2 &v);
+
 	Vector2 ToRaylibVec();
 };
 

@@ -32,6 +32,11 @@ Vec2::Vec2()
 	y = 0;
 }
 
+bool Vec2::operator==(Vec2 &v)
+{
+	return (SameDouble(v.x, x) && SameDouble(v.y, y));
+}
+
 Vector2 Vec2::ToRaylibVec()
 {
 	return {(float)x, (float)y};

@@ -163,6 +163,7 @@ void GeometryBoard::Edit()
 	{
 		firstPointed = true;
 		firstPoint = currentPoint.GetPos();
+
 		switch (editMode)
 		{
 		case DRAW_POINT:
@@ -233,8 +234,16 @@ void GeometryBoard::Edit()
 	}
 	else
 	{
+		// operations which need two mouse clicks
+
 		firstPointed = false;
 		Vec2 currentPos = currentPoint.GetPos();
+
+		if (firstPoint == currentPos)
+		{
+			return;
+		}
+
 		switch (editMode)
 		{
 		case DRAW_CIRCLE:
