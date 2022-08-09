@@ -323,14 +323,13 @@ ScrollBar::ScrollBar(Rectangle boxRect, HelpWindow *helpWindow_) : box(boxRect),
 
 void ScrollBar::UpdateDragBoxHeight()
 {
-	dragBox.height = std::min((float)GetScreenHeight() / helpWindow_->textRenderHeight * box.height, box.height); //works
+	dragBox.height = std::min((float)GetScreenHeight() / helpWindow_->textRenderHeight * box.height, box.height);
 }
 
 void ScrollBar::Update()
 {
 	if (IsWindowResized())
 	{
-		// TODO: fix weird behaviour!
 		box.x = (float)GetScreenWidth() - 25;
 		box.height = (float)GetScreenHeight() - 5 - box.y;
 		dragBox.x = box.x;
