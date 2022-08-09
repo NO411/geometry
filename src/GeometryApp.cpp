@@ -381,6 +381,21 @@ void ScrollBar::Update()
 		move = false;
 	}
 
+	float wheel = GetMouseWheelMove();
+	bool scroll = wheel != 0;
+	if (scroll)
+	{
+		dragBox.y -= 10 * wheel;
+		if (dragBox.y < box.y)
+		{
+			dragBox.y = box.y;
+		}
+		else if (dragBox.y + dragBox.height > box.y + box.height)
+		{
+			dragBox.y = box.y + box.height - dragBox.height;
+		}
+	}
+
 	if (move)
 	{
 		float newY = moveStartY - (movePos.y - GetMousePosition().y);
@@ -397,11 +412,11 @@ void ScrollBar::Update()
 		{
 			dragBox.y = box.y + box.height - dragBox.height;
 		}
+	}
 
-		if (GetScreenHeight() < helpWindow_->textRenderHeight)
-		{
-			helpWindow_->camera.offset.y = -((dragBox.y - box.y) * ((helpWindow_->textRenderHeight - (float)GetScreenHeight()) / (box.height - dragBox.height)));
-		}
+	if (GetScreenHeight() < helpWindow_->textRenderHeight && (move || scroll))
+	{
+		helpWindow_->camera.offset.y = -((dragBox.y - box.y) * ((helpWindow_->textRenderHeight - (float)GetScreenHeight()) / (box.height - dragBox.height)));
 	}
 }
 

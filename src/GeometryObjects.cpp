@@ -54,12 +54,12 @@ void GemObj::DrawLineExSmooth(Vec2 &startPos, Vec2 &endPos)
 
 void GemObj::DrawRingSmooth(Vec2 &center, long double radius)
 {
-	DrawRing(center.ToRaylibVec(), radius - renderThickness / 3, radius + renderThickness / 3, 0, 360, 200, renderColor);
+	DrawRing(center.ToRaylibVec(), radius - renderThickness / 3, radius + renderThickness / 3, 0, 360, 500, renderColor);
 	Color cl = renderColor;
 	cl.a = 200;
-	DrawRing(center.ToRaylibVec(), radius - renderThickness / 2, radius + renderThickness / 2, 0, 360, 200, cl);
+	DrawRing(center.ToRaylibVec(), radius - renderThickness / 2, radius + renderThickness / 2, 0, 360, 500, cl);
 	cl.a = 100;
-	DrawRing(center.ToRaylibVec(), radius - renderThickness, radius + renderThickness, 0, 360, 200, cl);
+	DrawRing(center.ToRaylibVec(), radius - renderThickness, radius + renderThickness, 0, 360, 500, cl);
 }
 
 bool Line::IsVerticalLine()

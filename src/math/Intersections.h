@@ -43,6 +43,7 @@ void GetLineLineIntersections(IntersectionStorage &intersections, L1 &line1, L2 
 	}
 }
 
+// the intersections are correct, the intersection is not always on the circle because of the raylib circle drawing function
 template <typename L>
 void GetLineCircleIntersections(IntersectionStorage &intersections, L &line, Circle &circle)
 {
