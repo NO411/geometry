@@ -219,7 +219,7 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 		{"`CTRL` + `C` + press `E`", "circle sector eraser mode (WIP)"},
 		{"press `H`", "switch between geometry board and help"},
 		{"`CTRL` + press `H`", "disable help button"},
-		{"`mouse wheel`", "zoom in / out"},
+		{"`mouse wheel`", "zoom in / out | scroll in help menu"},
 		{"`CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R`", "reset zoom and field of view"},
 		{"`CTRL` + `C` + `E`", "clear everything"},
 	};
