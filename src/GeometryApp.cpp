@@ -1,8 +1,10 @@
 #include "GeometryApp.h"
+#include "math/MathMisc.h"
 #include "Settings.h"
 #include "raylib.h"
 #include <string>
 
+const Color GeometryApp::DARBBLUE1 = {70, 70, 80, 255};
 const Color GeometryApp::DARBBLUE2 = {50, 50, 60, 255};
 const Color GeometryApp::DARBBLUE3 = {30, 30, 40, 255};
 
@@ -12,7 +14,7 @@ GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 	SetTraceLogLevel(LOG_NONE);
 
 	InitWindow(width, height, title.c_str());
-	SetWindowMinSize(width, height);
+	SetWindowMinSize(770, 200);
 
 	SetTargetFPS(fps);
 	SetExitKey(0);
@@ -29,7 +31,7 @@ GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 	SetState(GEOMETRY_BOARD);
 	showHelpButton = true;
 
-	helpWindow.CalculateKeyHighlightings();
+	helpWindow.Init();
 }
 
 GeometryApp::~GeometryApp() noexcept
@@ -97,6 +99,10 @@ void GeometryApp::Update()
 		{
 			ClearBoard();
 		}
+	}
+	case HELP:
+	{
+		helpWindow.Update();
 	}
 	break;
 
@@ -181,10 +187,19 @@ void HelpButton::Render()
 	DrawTextEx(app_->font, text.c_str(), textPos, fontSize, 0, WHITE);
 }
 
+void HelpWindow::Init()
+{
+	CalculateKeyHighlightings();
+	float scrollBarWidth = 20;
+	Rectangle box = {(float)GetScreenWidth() - scrollBarWidth - 5, app_->button.rectangle.y + app_->button.rectangle.height + 5, scrollBarWidth, (float)GetScreenHeight() - 5};
+	box.height -= box.y;
+	scrollBar = {box, this};
+}
+
 HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 {
-	description = "Geometry is an app to create Euclidean geometry without any user interface with buttons etc for faster\n"
-				  "workflow. It only uses the following keyboard shortcuts:";
+	description = "Geometry is an app to create Euclidean geometry without any user interface with buttons etc\n"
+				  "for a faster workflow. It only uses the following keyboard shortcuts:";
 
 	shortcuts = {
 		{"`CTRL` + press `C`", "circle drawing mode"},
@@ -215,14 +230,23 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 	columnSize = 400;
 	textStart = tableStart.y + (rowSize / 2) - fontSize / 2;
 	textOffsetX = 4;
+
+	textRenderHeight = (shortcuts.size() + 1) * rowSize + tableStart.y + 5;
+
+	camera = {0};
+	camera.zoom = 1;
 }
 
 void HelpWindow::Render()
 {
+	BeginMode2D(camera);
+
 	DrawTextEx(app_->font, description.c_str(), {10, 40}, fontSize, 0, app_->DARBBLUE3);
 
-	DrawLineEx({tableStart.x, tableStart.y + rowSize}, {settings::screenWidth - 10, tableStart.y + rowSize}, 2, app_->DARBBLUE3);
-	DrawLineEx({columnSize, tableStart.y}, {columnSize, (shortcuts.size() + 1) * rowSize + tableStart.y}, 2, app_->DARBBLUE3);
+	float linesEnd = std::min(scrollBar.box.x - 5, 2 * columnSize);
+
+	DrawLineEx({tableStart.x, tableStart.y + rowSize}, {linesEnd, tableStart.y + rowSize}, 2, app_->DARBBLUE3);
+	DrawLineEx({columnSize, tableStart.y}, {columnSize, textRenderHeight - 5}, 2, app_->DARBBLUE3);
 
 	DrawTextEx(app_->font, "Keys", {tableStart.x + textOffsetX, textStart}, fontSize, 0, app_->DARBBLUE3);
 	DrawTextEx(app_->font, "Action", {columnSize + textOffsetX, textStart}, fontSize, 0, app_->DARBBLUE3);
@@ -235,7 +259,7 @@ void HelpWindow::Render()
 		DrawTextEx(app_->font, shortcuts[i][0].c_str(), {tableStart.x + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, app_->DARBBLUE3);
 		DrawTextEx(app_->font, shortcuts[i][1].c_str(), {columnSize + textOffsetX, textStart + rowSize * (i + 1)}, fontSize, 0, app_->DARBBLUE3);
 		float y = tableStart.y + rowSize * (i + 1);
-		DrawLineEx({tableStart.x, y}, {settings::screenWidth - 10, y}, 1, transparentColor);
+		DrawLineEx({tableStart.x, y}, {linesEnd, y}, 1, transparentColor);
 	}
 
 	transparentColor.a = 100;
@@ -244,6 +268,15 @@ void HelpWindow::Render()
 	{
 		DrawRectangleRounded(keyHighlightings[i], 0.5, 10, transparentColor);
 	}
+
+	EndMode2D();
+
+	scrollBar.Render();
+}
+
+void HelpWindow::Update()
+{
+	scrollBar.Update();
 }
 
 void HelpWindow::CalculateKeyHighlightings()
@@ -277,4 +310,109 @@ void HelpWindow::CalculateKeyHighlightings()
 			charPos = shortcut.find("`");
 		}
 	}
+}
+
+ScrollBar::ScrollBar()
+{
+}
+
+ScrollBar::ScrollBar(Rectangle boxRect, HelpWindow *helpWindow_) : box(boxRect), dragBox(boxRect), helpWindow_(helpWindow_)
+{
+	UpdateDragBoxHeight();
+}
+
+void ScrollBar::UpdateDragBoxHeight()
+{
+	dragBox.height = std::min((float)GetScreenHeight() / helpWindow_->textRenderHeight * box.height, box.height); //works
+}
+
+void ScrollBar::Update()
+{
+	if (IsWindowResized())
+	{
+		// TODO: fix weird behaviour!
+		box.x = (float)GetScreenWidth() - 25;
+		box.height = (float)GetScreenHeight() - 5 - box.y;
+		dragBox.x = box.x;
+		UpdateDragBoxHeight();
+
+		auto AttachCameraToBottom = [this]()
+		{
+			helpWindow_->camera.offset.y = -helpWindow_->textRenderHeight + (float)GetScreenHeight();
+		};
+
+		if (dragBox.y + dragBox.height >= box.y + box.height)
+		{
+			AttachCameraToBottom();
+			dragBox.y -= (dragBox.y + dragBox.height) - (box.y + box.height);
+		}
+
+		if (GetScreenHeight() - helpWindow_->camera.offset.y >= helpWindow_->textRenderHeight)
+		{
+			AttachCameraToBottom();
+			helpWindow_->camera.offset.y = -helpWindow_->textRenderHeight + (float)GetScreenHeight();
+		}
+
+		if (GetScreenHeight() >= helpWindow_->textRenderHeight)
+		{
+			helpWindow_->camera.offset = {0, 0};
+			dragBox = box;
+		}
+
+		return;
+	}
+
+	if (Selected() || move)
+	{
+		dragBoxColor = helpWindow_->app_->DARBBLUE1;
+		if (IsMouseButtonPressed(0) && Selected())
+		{
+			move = true;
+			moveStartY = dragBox.y;
+			movePos = GetMousePosition();
+		}
+	}
+	else
+	{
+		dragBoxColor = helpWindow_->app_->DARBBLUE2;
+	}
+
+	if (IsMouseButtonReleased(0))
+	{
+		move = false;
+	}
+
+	if (move)
+	{
+		float newY = moveStartY - (movePos.y - GetMousePosition().y);
+		if (newY > box.y)
+		{
+			dragBox.y = newY;
+		}
+		else
+		{
+			dragBox.y = box.y;
+		}
+
+		if (newY + dragBox.height > box.y + box.height)
+		{
+			dragBox.y = box.y + box.height - dragBox.height;
+		}
+
+		if (GetScreenHeight() < helpWindow_->textRenderHeight)
+		{
+			helpWindow_->camera.offset.y = -((dragBox.y - box.y) * ((helpWindow_->textRenderHeight - (float)GetScreenHeight()) / (box.height - dragBox.height)));
+		}
+	}
+}
+
+void ScrollBar::Render()
+{
+	DrawRectangleRec(box, helpWindow_->app_->DARBBLUE3);
+	DrawRectangleRec(dragBox, dragBoxColor);
+}
+
+bool ScrollBar::Selected()
+{
+	return CheckCollisionPointRec(GetMousePosition(), dragBox);
 }
