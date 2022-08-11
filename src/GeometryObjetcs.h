@@ -51,6 +51,7 @@ public:
 	bool IsLengthEnabled();
 
 	void RenderLength(Camera2D &camera);
+	void SetLength(long double newLength);
 
 	bool showLength = false;
 	Vec2 lengthPos;

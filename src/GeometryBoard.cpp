@@ -228,6 +228,8 @@ void GeometryBoard::Edit()
 			// firstCircleEraserPoint = currentPoint;
 			// currentObjPos = objPos;
 			break;
+		case MOVE_OBJECT:
+			break;
 		default:
 			break;
 		}
@@ -286,6 +288,8 @@ void GeometryBoard::Edit()
 			}
 			*/
 			// circles.at(objPos).EraseSector(&firstCircleEraserPoint, &currentPoint);
+			break;
+		case MOVE_OBJECT:
 			break;
 		default:
 			break;
@@ -434,6 +438,7 @@ void GeometryBoard::SetEditMode()
 		}
 		break;
 	case KEY_M:
+		editMode = MOVE_OBJECT; 
 		if (IsKeyDown(KEY_L))
 		{
 			editMode = LENGTH_MEASUREMENT;

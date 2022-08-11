@@ -84,8 +84,7 @@ void Distance::Render(Camera2D &camera)
 
 void Distance::UpdateLength()
 {
-	length = std::to_string(GetDistance(pointA, pointB) * LE_factor);
-	measure = MeasureTextEx(*boardFont, length.c_str(), fontSize, 0);
+	SetLength(GetDistance(pointA, pointB) * LE_factor);
 }
 
 void LengthMeasurement::RenderLength(Camera2D &camera)
@@ -98,6 +97,12 @@ void LengthMeasurement::RenderLength(Camera2D &camera)
 
 	DrawTextEx(*boardFont, length.c_str(), drawPos, fontSize, 0, BLACK);
 	DrawRectangleRec({drawPos.x - 2, drawPos.y - 2, measure.x + 4, measure.y + 4}, {200, 200, 200, 150});
+}
+
+void LengthMeasurement::SetLength(long double newLength)
+{
+	length = std::to_string(newLength) + " u";
+	measure = MeasureTextEx(*boardFont, length.c_str(), fontSize, 0);
 }
 
 void LengthMeasurement::EnableLength(Vec2 &pos, Font *font)
@@ -169,8 +174,7 @@ void Circle::Render(Camera2D &camera)
 
 void Circle::UpdateLength()
 {
-	length = std::to_string(2 * PI * radius * LE_factor);
-	measure = MeasureTextEx(*boardFont, length.c_str(), fontSize, 0);
+	SetLength(2 * PI * radius * LE_factor);
 }
 
 Point::Point(Vec2 &pos, GeometryBoard *board) : point(pos)

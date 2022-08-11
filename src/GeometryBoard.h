@@ -19,6 +19,7 @@ enum EditMode
 	LENGTH_MEASUREMENT_ERASER,
 	ANGLE_MEASUREMENT_ERASER,
 	CIRCLE_ERASER,
+	MOVE_OBJECT,
 };
 
 class IntersectionStorage

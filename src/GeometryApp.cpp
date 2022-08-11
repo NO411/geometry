@@ -100,6 +100,7 @@ void GeometryApp::Update()
 			ClearBoard();
 		}
 	}
+	break;
 	case HELP:
 	{
 		helpWindow.Update();
@@ -202,13 +203,14 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 				  "for a faster workflow. It only uses the following keyboard shortcuts:";
 
 	shortcuts = {
+		{"press `left mouse button`", "select point"},
 		{"`CTRL` + press `C`", "circle drawing mode"},
 		{"`CTRL` + press `S`", "straight line drawing mode"},
 		{"`CTRL` + press `D`", "distance drawing mode"},
 		{"`CTRL` + press `R`", "ray drawing mode"},
 		{"`CTRL` + press `P`", "point drawing mode"},
 		{"`CTRL` + press `E`", "enable eraser"},
-		{"press `left mouse button`", "select point"},
+		{"`CTRL` + press `M`", "move object mode"},
 		{"press `ESC`", "interrupt"},
 		{"press `left`", "move everything to the left"},
 		{"press `right`", "move everything to the right"},
@@ -221,7 +223,7 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 		{"`CTRL` + press `H`", "disable help button"},
 		{"`mouse wheel`", "zoom in / out | scroll in help menu"},
 		{"`CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R`", "reset zoom and field of view"},
-		{"`CTRL` + `C` + `E`", "clear everything"},
+		{"`CTRL` + `C` + press `E`", "clear everything"},
 	};
 
 	fontSize = 15;
@@ -396,9 +398,16 @@ void ScrollBar::Update()
 		}
 	}
 
-	if (move)
+	bool setInstantPos = BoxSelected() && IsMouseButtonPressed(0);
+	if (move || setInstantPos)
 	{
 		float newY = moveStartY - (movePos.y - GetMousePosition().y);
+
+		if (setInstantPos)
+		{
+			newY = (float)GetMouseY() - dragBox.height / 2;
+		}
+
 		if (newY > box.y)
 		{
 			dragBox.y = newY;
@@ -414,7 +423,7 @@ void ScrollBar::Update()
 		}
 	}
 
-	if (GetScreenHeight() < helpWindow_->textRenderHeight && (move || scroll))
+	if (GetScreenHeight() < helpWindow_->textRenderHeight && (move || scroll || setInstantPos))
 	{
 		helpWindow_->camera.offset.y = -((dragBox.y - box.y) * ((helpWindow_->textRenderHeight - (float)GetScreenHeight()) / (box.height - dragBox.height)));
 	}
@@ -429,4 +438,9 @@ void ScrollBar::Render()
 bool ScrollBar::Selected()
 {
 	return CheckCollisionPointRec(GetMousePosition(), dragBox);
+}
+
+bool ScrollBar::BoxSelected()
+{
+	return (CheckCollisionPointRec(GetMousePosition(), box) && !Selected());
 }

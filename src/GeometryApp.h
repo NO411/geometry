@@ -24,6 +24,7 @@ public:
 	void Render();
 private:
 	bool Selected();
+	bool BoxSelected();
 
 	void UpdateDragBoxHeight();
 
