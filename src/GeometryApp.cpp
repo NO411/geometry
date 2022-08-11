@@ -328,37 +328,42 @@ void ScrollBar::UpdateDragBoxHeight()
 	dragBox.height = std::min((float)GetScreenHeight() / helpWindow_->textRenderHeight * box.height, box.height);
 }
 
+void ScrollBar::UpdateOnResize()
+{
+	box.x = (float)GetScreenWidth() - 25;
+	box.height = (float)GetScreenHeight() - 5 - box.y;
+	dragBox.x = box.x;
+	UpdateDragBoxHeight();
+
+	auto AttachCameraToBottom = [this]()
+	{
+		helpWindow_->camera.offset.y = -helpWindow_->textRenderHeight + (float)GetScreenHeight();
+	};
+
+	if (dragBox.y + dragBox.height >= box.y + box.height)
+	{
+		AttachCameraToBottom();
+		dragBox.y -= (dragBox.y + dragBox.height) - (box.y + box.height);
+	}
+
+	if (GetScreenHeight() - helpWindow_->camera.offset.y >= helpWindow_->textRenderHeight)
+	{
+		AttachCameraToBottom();
+		helpWindow_->camera.offset.y = -helpWindow_->textRenderHeight + (float)GetScreenHeight();
+	}
+
+	if (GetScreenHeight() >= helpWindow_->textRenderHeight)
+	{
+		helpWindow_->camera.offset = {0, 0};
+		dragBox = box;
+	}
+}
+
 void ScrollBar::Update()
 {
 	if (IsWindowResized())
 	{
-		box.x = (float)GetScreenWidth() - 25;
-		box.height = (float)GetScreenHeight() - 5 - box.y;
-		dragBox.x = box.x;
-		UpdateDragBoxHeight();
-
-		auto AttachCameraToBottom = [this]()
-		{
-			helpWindow_->camera.offset.y = -helpWindow_->textRenderHeight + (float)GetScreenHeight();
-		};
-
-		if (dragBox.y + dragBox.height >= box.y + box.height)
-		{
-			AttachCameraToBottom();
-			dragBox.y -= (dragBox.y + dragBox.height) - (box.y + box.height);
-		}
-
-		if (GetScreenHeight() - helpWindow_->camera.offset.y >= helpWindow_->textRenderHeight)
-		{
-			AttachCameraToBottom();
-			helpWindow_->camera.offset.y = -helpWindow_->textRenderHeight + (float)GetScreenHeight();
-		}
-
-		if (GetScreenHeight() >= helpWindow_->textRenderHeight)
-		{
-			helpWindow_->camera.offset = {0, 0};
-			dragBox = box;
-		}
+		UpdateOnResize();
 
 		return;
 	}

@@ -76,6 +76,11 @@ void GeometryBoard::DrawDrawingObj()
 
 	Vec2 currentPos = currentPoint.GetPos();
 
+	if (currentPos == firstPoint)
+	{
+		return;
+	}
+
 	switch (editMode)
 	{
 	case DRAW_CIRCLE:
@@ -131,6 +136,7 @@ void GeometryBoard::CheckResized()
 	}
 
 	UpdateAllDrawPoints();
+	app_->helpWindow.scrollBar.UpdateOnResize();
 }
 
 void GeometryBoard::InputHandler()

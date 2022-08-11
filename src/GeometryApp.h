@@ -22,6 +22,8 @@ public:
 
 	void Update();
 	void Render();
+	void UpdateOnResize();
+	
 private:
 	bool Selected();
 	bool BoxSelected();
@@ -42,6 +44,7 @@ private:
 class HelpWindow
 {
 	friend ScrollBar;
+
 public:
 	HelpWindow(GeometryApp *app);
 	void CalculateKeyHighlightings();
@@ -49,13 +52,14 @@ public:
 	void Update();
 	void Init();
 
+	ScrollBar scrollBar;
+
 private:
 	std::vector<std::vector<std::string>> shortcuts;
 	std::vector<Rectangle> keyHighlightings;
 	std::string description;
 
 	Camera2D camera;
-	ScrollBar scrollBar;
 
 	int fontSize;
 	Vector2 tableStart;
