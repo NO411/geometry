@@ -32,21 +32,22 @@ GeometryBoard::~GeometryBoard() {}
 
 void GeometryBoard::Render()
 {
+	bool renderMovingPoints = (editMode == MOVE_OBJECT);
 	for (auto &distance : distances)
 	{
-		distance.Render(camera);
+		distance.Render(camera, renderMovingPoints);
 	}
 	for (auto &straightLine : straightLines)
 	{
-		straightLine.Render();
+		straightLine.Render(camera, renderMovingPoints);
 	}
 	for (auto &ray : rays)
 	{
-		ray.Render(camera);
+		ray.Render(camera, renderMovingPoints);
 	}
 	for (auto &circle : circles)
 	{
-		circle.Render(camera);
+		circle.Render(camera, renderMovingPoints);
 	}
 	for (auto &point : points)
 	{
@@ -85,26 +86,26 @@ void GeometryBoard::DrawDrawingObj()
 	{
 	case DRAW_CIRCLE:
 	{
-		Circle currentCircle(firstPoint, GetDistance(firstPoint, currentPos));
-		currentCircle.Render(camera);
+		Circle currentCircle(firstPoint, currentPos);
+		currentCircle.Render(camera, false);
 	}
 	break;
 	case DRAW_DISTANCE:
 	{
 		Distance currentDistance(firstPoint, currentPos);
-		currentDistance.Render(camera);
+		currentDistance.Render(camera, false);
 	}
 	break;
 	case DRAW_RAY:
 	{
 		Ray2 currentRay(firstPoint, currentPos, camera);
-		currentRay.Render(camera);
+		currentRay.Render(camera, false);
 	}
 	break;
 	case DRAW_STRAIGHT_LINE:
 	{
 		StraightLine currentStraightLine(firstPoint, currentPos, camera);
-		currentStraightLine.Render();
+		currentStraightLine.Render(camera, false);
 	}
 	break;
 	case CIRCLE_ERASER:
@@ -256,7 +257,7 @@ void GeometryBoard::Edit()
 		{
 		case DRAW_CIRCLE:
 		{
-			circles.emplace_back(firstPoint, GetDistance(firstPoint, currentPos));
+			circles.emplace_back(firstPoint, currentPos);
 			AddIntersections(circles.back());
 		}
 		break;
@@ -312,6 +313,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 
 	enum ConnectionOrder
 	{
+		MOVING_POINT_CONNECTION,
 		POINT_CONNECTION,
 		INTERSECTION_CONNECTION,
 		LINE_END_POINT_CONNECTION,
@@ -324,6 +326,11 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 
 	auto ConnectionDistancesPush = [this, &worldMousePos, &connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vec2 &point, int connectionType, int objType, std::size_t objPos)
 	{
+		if (connectionType == MOVING_POINT_CONNECTION && editMode != MOVE_OBJECT)
+		{
+			return;
+		}
+
 		connectionDistances.push_back(GetDistance(point, worldMousePos));
 		connectionPoints.push_back(point);
 		connectionTypes.push_back(connectionType);
@@ -344,6 +351,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	for (std::size_t i = 0; i < circles.size(); ++i)
 	{
 		Vec2 connectionPoint = GetCircleConnection(worldMousePos, circles[i]);
+		ConnectionDistancesPush(circles[i].pointOnCircle, MOVING_POINT_CONNECTION, CIRCLE, i);
 		// if (IsPointOnCircle(connectionPoint, circles[i]))
 		{
 			ConnectionDistancesPush(connectionPoint, CIRCLE_CONNECTION, CIRCLE, i);
@@ -359,6 +367,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	for (std::size_t i = 0; i < rays.size(); ++i)
 	{
 		ConnectionDistancesPush(rays[i].pointA, LINE_END_POINT_CONNECTION, RAY, i);
+		ConnectionDistancesPush(rays[i].pointB, MOVING_POINT_CONNECTION, RAY, i);
 
 		Vec2 intersection = GetOrthogonalLinesIntersection(worldMousePos, rays[i]);
 		if (rays[i].IsPointOnLine(intersection))
@@ -368,6 +377,10 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	}
 	for (std::size_t i = 0; i < straightLines.size(); ++i)
 	{
+		ConnectionDistancesPush(straightLines[i].pointA, MOVING_POINT_CONNECTION, STRAIGHTLINE, i);
+		ConnectionDistancesPush(straightLines[i].pointB, MOVING_POINT_CONNECTION, STRAIGHTLINE, i);
+
+
 		Vec2 intersection = GetOrthogonalLinesIntersection(worldMousePos, straightLines[i]);
 		if (straightLines[i].IsPointOnLine(intersection))
 		{

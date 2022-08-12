@@ -42,6 +42,22 @@ Vector2 Vec2::ToRaylibVec()
 	return {(float)x, (float)y};
 }
 
+void Vec2::Render(Camera2D &camera, bool renderAsMovingPoint)
+{
+	Vector2 screenPos = GetWorldToScreen2D(ToRaylibVec(), camera);
+	Color clr1 = BLUE;
+	Color clr2 = DARKBLUE;
+
+	if  (renderAsMovingPoint)
+	{
+		clr1 = ORANGE;
+		clr2 = RED;
+	}
+
+	DrawCircleSector(screenPos, 3, 0, 360, 30, clr1);
+	DrawRing(screenPos, 3, 4, 0, 360, 30, clr2);
+}
+
 void GemObj::DrawLineExSmooth(Vec2 &startPos, Vec2 &endPos)
 {
 	DrawLineEx(startPos.ToRaylibVec(), endPos.ToRaylibVec(), renderThickness - 1, renderColor);
@@ -67,19 +83,29 @@ bool Line::IsVerticalLine()
 	return SameDouble(pointA.x, pointB.x);
 }
 
+void Line::RenderMovingPoints(Camera2D &camera, bool renderMovingPoints)
+{
+	if (renderMovingPoints)
+	{
+		pointA.Render(camera, true);
+		pointB.Render(camera, true);
+	}
+}
+
 Distance::Distance(Vec2 &pointA_, Vec2 &pointB_)
 {
 	pointA = pointA_;
 	pointB = pointB_;
 }
 
-void Distance::Render(Camera2D &camera)
+void Distance::Render(Camera2D &camera, bool renderMovingPoints)
 {
 	Vec2 startPos = {GetWorldToScreen2D(pointA.ToRaylibVec(), camera)};
 	Vec2 endPos = {GetWorldToScreen2D(pointB.ToRaylibVec(), camera)};
 	DrawLineExSmooth(startPos, endPos);
 
 	RenderLength(camera);
+	RenderMovingPoints(camera, renderMovingPoints);
 }
 
 void Distance::UpdateLength()
@@ -136,9 +162,10 @@ void StraightLine::UpdateDrawPoints(Camera2D &camera)
 	secondDrawPoint = CalculateConnectionPoint(pointB, pointA, f.m, f.n, camera);
 }
 
-void StraightLine::Render()
+void StraightLine::Render(Camera2D &camera, bool renderMovingPoints)
 {
 	DrawLineExSmooth(firstDrawPoint, secondDrawPoint);
+	RenderMovingPoints(camera, renderMovingPoints);
 }
 
 Ray2::Ray2(Vec2 &pointA_, Vec2 &pointB_, Camera2D &camera)
@@ -154,22 +181,28 @@ void Ray2::UpdateDrawPoint(Camera2D &camera)
 	drawPoint = CalculateConnectionPoint(pointA, pointB, f.m, f.n, camera);
 }
 
-void Ray2::Render(Camera2D &camera)
+void Ray2::Render(Camera2D &camera, bool renderMovingPoints)
 {
 	Vec2 startPos = {GetWorldToScreen2D(pointA.ToRaylibVec(), camera)};
 	DrawLineExSmooth(startPos, drawPoint);
+	RenderMovingPoints(camera, renderMovingPoints);
 }
 
-Circle::Circle(Vec2 &center, long double radius) : center(center), radius(radius)
+Circle::Circle(Vec2 &center, Vec2 &pointOnCircle) : center(center), pointOnCircle(pointOnCircle)
 {
+	radius = GetDistance(center, pointOnCircle);
 }
 
-void Circle::Render(Camera2D &camera)
+void Circle::Render(Camera2D &camera, bool renderMovingPoints)
 {
 	Vec2 center_ = {GetWorldToScreen2D(center.ToRaylibVec(), camera)};
 	DrawRingSmooth(center_, radius * camera.zoom);
 
 	RenderLength(camera);
+	if (renderMovingPoints)
+	{
+		pointOnCircle.Render(camera, true);
+	}
 }
 
 void Circle::UpdateLength()
@@ -198,9 +231,7 @@ void Point::SetPos(Vec2 &pos)
 
 void Point::Render(Camera2D &camera)
 {
-	Vector2 screenPos = GetWorldToScreen2D(point.ToRaylibVec(), camera);
-	DrawCircleSector(screenPos, 3, 0, 360, 30, BLUE);
-	DrawRing(screenPos, 3, 4, 0, 360, 30, DARKBLUE);
+	point.Render(camera, false);
 }
 
 void Point::Render(Camera2D &camera, Font &font)

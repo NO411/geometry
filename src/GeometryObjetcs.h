@@ -28,6 +28,7 @@ public:
 	bool operator==(Vec2 &v);
 
 	Vector2 ToRaylibVec();
+	void Render(Camera2D &camera, bool renderAsMovingPoint);
 };
 
 class GemObj
@@ -65,11 +66,12 @@ public:
 class Circle : public GemObj, public LengthMeasurement
 {
 public:
-	Circle(Vec2 &center, long double radius);
+	Circle(Vec2 &center, Vec2 &pointOnCircle);
 
-	void Render(Camera2D &camera);
+	void Render(Camera2D &camera, bool renderMovingPoints);
 
 	Vec2 center;
+	Vec2 pointOnCircle;
 	long double radius;
 	void UpdateLength();
 };
@@ -80,6 +82,7 @@ public:
 	Vec2 pointA, pointB;
 
 	bool IsVerticalLine();
+	void RenderMovingPoints(Camera2D &camera, bool renderMovingPoints);
 };
 
 class Distance : public Line, public LengthMeasurement
@@ -87,7 +90,7 @@ class Distance : public Line, public LengthMeasurement
 public:
 	Distance(Vec2 &pointA_, Vec2 &pointB_);
 
-	void Render(Camera2D &camera);
+	void Render(Camera2D &camera, bool renderMovingPoints);
 
 	bool IsPointOnLine(Vec2 &point);
 	void UpdateLength();
@@ -98,7 +101,7 @@ class Ray2 : public Line
 public:
 	Ray2(Vec2 &pointA_, Vec2 &pointB_, Camera2D &camera);
 
-	void Render(Camera2D &camera);
+	void Render(Camera2D &camera, bool renderMovingPoints);
 	void UpdateDrawPoint(Camera2D &camera);
 
 	bool IsPointOnLine(Vec2 &point);
@@ -112,7 +115,7 @@ class StraightLine : public Line
 public:
 	StraightLine(Vec2 &pointA_, Vec2 &pointB_, Camera2D &camera);
 
-	void Render();
+	void Render(Camera2D &camera, bool renderMovingPoints);
 	void UpdateDrawPoints(Camera2D &camera);
 
 	bool IsPointOnLine(Vec2 &point);
