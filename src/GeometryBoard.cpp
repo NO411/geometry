@@ -236,6 +236,12 @@ void GeometryBoard::Edit()
 			// currentObjPos = objPos;
 			break;
 		case MOVE_OBJECT:
+			if (objType < CIRCLE || objType == POINT)
+			{
+				firstPointed = false;
+				break;
+			}
+
 			break;
 		default:
 			break;
@@ -394,7 +400,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	}
 	for (auto &intersection : intersections.intersections)
 	{
-		ConnectionDistancesPush(intersection.second, INTERSECTION_CONNECTION, -1, 0);
+		ConnectionDistancesPush(intersection.second, INTERSECTION_CONNECTION, -1, -1);
 	}
 
 	while (!connectionDistances.empty())
