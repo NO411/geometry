@@ -202,6 +202,7 @@ void Circle::Render(Camera2D &camera, bool renderMovingPoints)
 	if (renderMovingPoints)
 	{
 		pointOnCircle.Render(camera, true);
+		center.Render(camera, true);
 	}
 }
 

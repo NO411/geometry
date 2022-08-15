@@ -326,7 +326,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 
 	auto ConnectionDistancesPush = [this, &worldMousePos, &connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vec2 &point, int connectionType, int objType, std::size_t objPos)
 	{
-		if (connectionType == MOVING_POINT_CONNECTION && editMode != MOVE_OBJECT)
+		if (connectionType == MOVING_POINT_CONNECTION && (editMode != MOVE_OBJECT || (editMode == MOVE_OBJECT && firstPointed)))
 		{
 			return;
 		}
@@ -352,6 +352,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	{
 		Vec2 connectionPoint = GetCircleConnection(worldMousePos, circles[i]);
 		ConnectionDistancesPush(circles[i].pointOnCircle, MOVING_POINT_CONNECTION, CIRCLE, i);
+		ConnectionDistancesPush(circles[i].center, MOVING_POINT_CONNECTION, CIRCLE, i);
 		// if (IsPointOnCircle(connectionPoint, circles[i]))
 		{
 			ConnectionDistancesPush(connectionPoint, CIRCLE_CONNECTION, CIRCLE, i);
