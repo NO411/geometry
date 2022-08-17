@@ -26,6 +26,9 @@ public:
 	long double y;
 
 	bool operator==(Vec2 &v);
+	bool operator!=(Vec2 &v);
+	void operator+=(Vec2 v);
+	Vec2 operator-(Vec2 &v);
 
 	Vector2 ToRaylibVec();
 	void Render(Camera2D &camera, bool renderAsMovingPoint);
@@ -69,11 +72,16 @@ public:
 	Circle(Vec2 &center, Vec2 &pointOnCircle);
 
 	void Render(Camera2D &camera, bool renderMovingPoints);
+	void MovePos(Vec2 &originalPoint, Vec2 &moveToPoint);
+	void MoveRadius(Vec2 &originalPoint, Vec2 &moveToPoint);
 
 	Vec2 center;
 	Vec2 pointOnCircle;
 	long double radius;
 	void UpdateLength();
+
+private:
+	void UpdateRadius();
 };
 
 class Line : public GemObj
@@ -83,6 +91,9 @@ public:
 
 	bool IsVerticalLine();
 	void RenderMovingPoints(Camera2D &camera, bool renderMovingPoints);
+
+	void MovePosGeneral(Vec2 &originalPoint, Vec2 &moveToPoint);
+	void MovePointGeneral(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAorB);
 };
 
 class Distance : public Line, public LengthMeasurement
@@ -94,6 +105,15 @@ public:
 
 	bool IsPointOnLine(Vec2 &point);
 	void UpdateLength();
+
+	void MovePos(Vec2 &originalPoint, Vec2 &moveToPoint);
+	void MovePoint(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAorB);
+	void UpdateLengthPos(Vec2 &startPoint, Vec2 &moveToPoint, long double lengthPointPosition_);
+
+	void SetLengthPointPosition();
+
+	/// from pointA to pointB (0.0 - 1.0)
+	long double lengthPointPosition[2];
 };
 
 class Ray2 : public Line
@@ -105,6 +125,9 @@ public:
 	void UpdateDrawPoint(Camera2D &camera);
 
 	bool IsPointOnLine(Vec2 &point);
+
+	void MovePos(Vec2 &originalPoint, Vec2 &moveToPoint, Camera2D &camera);
+	void MovePoint(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAorB, Camera2D &camera);
 
 private:
 	Vec2 drawPoint;
@@ -119,6 +142,9 @@ public:
 	void UpdateDrawPoints(Camera2D &camera);
 
 	bool IsPointOnLine(Vec2 &point);
+
+	void MovePos(Vec2 &originalPoint, Vec2 &moveToPoint, Camera2D &camera);
+	void MovePoint(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAorB, Camera2D &camera);
 
 private:
 	Vec2 firstDrawPoint, secondDrawPoint;

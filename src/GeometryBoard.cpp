@@ -155,11 +155,71 @@ void GeometryBoard::Measure(O &object)
 	object.UpdateLength();
 }
 
+void GeometryBoard::UpdateMovingObj()
+{
+	switch (selectedThing.objType)
+	{
+	case CIRCLE:
+		if (selectedThing.memberObj < 2)
+		{
+			circles[selectedThing.objPos].MovePos(selectedThing.originalPoint, currentPoint.GetPos());
+		}
+		else
+		{
+			circles[selectedThing.objPos].MoveRadius(selectedThing.originalPoint, currentPoint.GetPos());
+		}
+		break;
+	case DISTANCE:
+		if (selectedThing.memberObj == 0)
+		{
+			distances[selectedThing.objPos].MovePos(selectedThing.originalPoint, currentPoint.GetPos());
+		}
+		else
+		{
+			distances[selectedThing.objPos].MovePoint(selectedThing.originalPoint, currentPoint.GetPos(), selectedThing.memberObj);
+		}
+		break;
+	case RAY:
+		if (selectedThing.memberObj == 0)
+		{
+			rays[selectedThing.objPos].MovePos(selectedThing.originalPoint, currentPoint.GetPos(), camera);
+		}
+		else
+		{
+			rays[selectedThing.objPos].MovePoint(selectedThing.originalPoint, currentPoint.GetPos(), selectedThing.memberObj, camera);
+		}
+		break;
+	case STRAIGHTLINE:
+		if (selectedThing.memberObj == 0)
+		{
+			straightLines[selectedThing.objPos].MovePos(selectedThing.originalPoint, currentPoint.GetPos(), camera);
+		}
+		else
+		{
+			straightLines[selectedThing.objPos].MovePoint(selectedThing.originalPoint, currentPoint.GetPos(), selectedThing.memberObj, camera);
+		}
+		break;
+	case POINT:
+		points[selectedThing.objPos].SetPos(currentPoint.GetPos());
+		break;
+
+	default:
+		break;
+	}
+
+	selectedThing.originalPoint = currentPoint.GetPos();
+}
+
 void GeometryBoard::Edit()
 {
 	auto objTuple = UpdateCurrentPoint();
 	int objType = std::get<0>(objTuple);
 	std::size_t objPos = std::get<1>(objTuple);
+
+	if (editMode == MOVE_OBJECT && firstPointed)
+	{
+		UpdateMovingObj();
+	}
 
 	if (!(IsMouseButtonPressed(0) || IsKeyPressed(KEY_ENTER)) || app_->button.Selected())
 	{
@@ -186,7 +246,7 @@ void GeometryBoard::Edit()
 			break;
 		case ERASER:
 			firstPointed = false;
-			EraseObj(objType, objPos);
+			EraseObj(objType, objPos, true);
 			break;
 		case LENGTH_MEASUREMENT:
 			firstPointed = false;
@@ -194,6 +254,7 @@ void GeometryBoard::Edit()
 			{
 			case DISTANCE:
 				Measure(distances[objPos]);
+				distances[objPos].SetLengthPointPosition();
 				break;
 			case CIRCLE:
 				Measure(circles[objPos]);
@@ -236,11 +297,14 @@ void GeometryBoard::Edit()
 			// currentObjPos = objPos;
 			break;
 		case MOVE_OBJECT:
-			if (objType < CIRCLE || objType == POINT)
+			if (objType < CIRCLE)
 			{
 				firstPointed = false;
 				break;
 			}
+
+			EraseObj(objType, objPos, false);
+			selectedThing = {objPos, objType, currentPoint.GetPos(), this};
 
 			break;
 		default:
@@ -303,6 +367,26 @@ void GeometryBoard::Edit()
 			// circles.at(objPos).EraseSector(&firstCircleEraserPoint, &currentPoint);
 			break;
 		case MOVE_OBJECT:
+			// add intersections again
+
+			switch (selectedThing.objType)
+			{
+			case CIRCLE:
+				AddIntersections(circles[selectedThing.objPos]);
+				break;
+			case DISTANCE:
+				AddIntersections(distances[selectedThing.objPos]);
+				break;
+			case RAY:
+				AddIntersections(rays[selectedThing.objPos]);
+				break;
+			case STRAIGHTLINE:
+				AddIntersections(straightLines[selectedThing.objPos]);
+				break;
+
+			default:
+				break;
+			}
 			break;
 		default:
 			break;
@@ -317,6 +401,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	std::vector<int> connectionTypes;
 	std::vector<std::tuple<int, std::size_t>> objPlaces;
 
+	// other order when not firstpointed and moveobject mode
 	enum ConnectionOrder
 	{
 		MOVING_POINT_CONNECTION,
@@ -332,7 +417,9 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 
 	auto ConnectionDistancesPush = [this, &worldMousePos, &connectionDistances, &connectionPoints, &connectionTypes, &objPlaces](Vec2 &point, int connectionType, int objType, std::size_t objPos)
 	{
-		if (connectionType == MOVING_POINT_CONNECTION && (editMode != MOVE_OBJECT || (editMode == MOVE_OBJECT && firstPointed)))
+		if (
+			(connectionType == MOVING_POINT_CONNECTION && (editMode != MOVE_OBJECT || (editMode == MOVE_OBJECT && firstPointed))) ||
+			((editMode == MOVE_OBJECT) && (selectedThing.objPos == objPos) && (selectedThing.objType == objType) && firstPointed))
 		{
 			return;
 		}
@@ -386,7 +473,6 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	{
 		ConnectionDistancesPush(straightLines[i].pointA, MOVING_POINT_CONNECTION, STRAIGHTLINE, i);
 		ConnectionDistancesPush(straightLines[i].pointB, MOVING_POINT_CONNECTION, STRAIGHTLINE, i);
-
 
 		Vec2 intersection = GetOrthogonalLinesIntersection(worldMousePos, straightLines[i]);
 		if (straightLines[i].IsPointOnLine(intersection))
@@ -464,7 +550,7 @@ void GeometryBoard::SetEditMode()
 		}
 		break;
 	case KEY_M:
-		editMode = MOVE_OBJECT; 
+		editMode = MOVE_OBJECT;
 		if (IsKeyDown(KEY_L))
 		{
 			editMode = LENGTH_MEASUREMENT;
@@ -613,7 +699,7 @@ void GeometryBoard::AddIntersections(L &line)
 	}
 }
 
-void GeometryBoard::EraseObj(int objType, std::size_t objPos)
+void GeometryBoard::EraseObj(int objType, std::size_t objPos, bool eraseFromVector)
 {
 	if (objType < CIRCLE)
 	{
@@ -623,19 +709,22 @@ void GeometryBoard::EraseObj(int objType, std::size_t objPos)
 	switch (objType)
 	{
 	case CIRCLE:
-		EraseGemObj(circles, objPos);
+		EraseGemObj(circles, objPos, eraseFromVector);
 		break;
 	case DISTANCE:
-		EraseGemObj(distances, objPos);
+		EraseGemObj(distances, objPos, eraseFromVector);
 		break;
 	case RAY:
-		EraseGemObj(rays, objPos);
+		EraseGemObj(rays, objPos, eraseFromVector);
 		break;
 	case STRAIGHTLINE:
-		EraseGemObj(straightLines, objPos);
+		EraseGemObj(straightLines, objPos, eraseFromVector);
 		break;
 	case POINT:
-		ErasePoint(objPos);
+		if (eraseFromVector)
+		{
+			ErasePoint(objPos);
+		}
 		break;
 	default:
 		break;
@@ -643,17 +732,68 @@ void GeometryBoard::EraseObj(int objType, std::size_t objPos)
 }
 
 template <typename T>
-void GeometryBoard::EraseGemObj(std::vector<T> &objVec, std::size_t vecPos)
+void GeometryBoard::EraseGemObj(std::vector<T> &objVec, std::size_t vecPos, bool eraseFromVector)
 {
 	for (auto &ID : objVec[vecPos].intersectionIDs)
 	{
 		intersections.intersections.erase(ID);
 	}
 
-	objVec.erase(objVec.begin() + vecPos);
+	if (eraseFromVector)
+	{
+		objVec.erase(objVec.begin() + vecPos);
+	}
 }
 
 void GeometryBoard::ErasePoint(std::size_t vecPos)
 {
 	points.erase(points.begin() + vecPos);
+}
+
+SelectedThing::SelectedThing()
+{
+}
+
+template <typename L>
+void SelectedThing::SetUpLineMemberObjNumber(std::vector<L> &objVector)
+{
+	if (originalPoint == objVector[objPos].pointA)
+	{
+		memberObj = 1;
+	}
+	else if (originalPoint == objVector[objPos].pointB)
+	{
+		memberObj = 2;
+	}
+}
+
+SelectedThing::SelectedThing(std::size_t objPos, int objType, Vec2 &originalPoint, GeometryBoard *board_) : objPos(objPos), objType(objType), originalPoint(originalPoint), board_(board_)
+{
+	memberObj = 0;
+
+	switch (objType)
+	{
+	case CIRCLE:
+		if (originalPoint == board_->circles[objPos].center)
+		{
+			memberObj = 1;
+		}
+		else if (originalPoint == board_->circles[objPos].pointOnCircle)
+		{
+			memberObj = 2;
+		}
+		break;
+	case DISTANCE:
+		SetUpLineMemberObjNumber(board_->distances);
+		break;
+	case RAY:
+		SetUpLineMemberObjNumber(board_->rays);
+		break;
+	case STRAIGHTLINE:
+		SetUpLineMemberObjNumber(board_->straightLines);
+		break;
+
+	default:
+		break;
+	}
 }

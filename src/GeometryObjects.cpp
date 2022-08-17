@@ -37,6 +37,22 @@ bool Vec2::operator==(Vec2 &v)
 	return (SameDouble(v.x, x) && SameDouble(v.y, y));
 }
 
+bool Vec2::operator!=(Vec2 &v)
+{
+	return !(v == *this);
+}
+
+void Vec2::operator+=(Vec2 v)
+{
+	x += v.x;
+	y += v.y;
+}
+
+Vec2 Vec2::operator-(Vec2 &v)
+{
+	return {x - v.x, y - v.y};
+}
+
 Vector2 Vec2::ToRaylibVec()
 {
 	return {(float)x, (float)y};
@@ -92,6 +108,27 @@ void Line::RenderMovingPoints(Camera2D &camera, bool renderMovingPoints)
 	}
 }
 
+void Line::MovePosGeneral(Vec2 &originalPoint, Vec2 &moveToPoint)
+{
+	Vec2 offset = moveToPoint - originalPoint;
+	pointA += offset;
+	pointB += offset;
+}
+
+void Line::MovePointGeneral(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAorB)
+{
+	Vec2 offset = moveToPoint - originalPoint;
+
+	if (pointAorB == 1)
+	{
+		pointA += offset;
+	}
+	else
+	{
+		pointB += offset;
+	}
+}
+
 Distance::Distance(Vec2 &pointA_, Vec2 &pointB_)
 {
 	pointA = pointA_;
@@ -113,6 +150,62 @@ void Distance::UpdateLength()
 	SetLength(GetDistance(pointA, pointB) * LE_factor);
 }
 
+void Distance::MovePos(Vec2 &originalPoint, Vec2 &moveToPoint)
+{
+	MovePosGeneral(originalPoint, moveToPoint);
+	Vec2 offset = moveToPoint - originalPoint;
+	lengthPos += offset;
+}
+
+void Distance::UpdateLengthPos(Vec2 &startPoint, Vec2 &moveToPoint, long double lengthPointPosition_)
+{
+	LinearFunction f(startPoint, moveToPoint);
+
+	if (f.vertical)
+	{
+		long double lengthY = startPoint.y - (startPoint.y - moveToPoint.y) * lengthPointPosition_;
+
+		if (moveToPoint.x > startPoint.y)
+		{
+			startPoint.y + (moveToPoint.y - startPoint.y) * lengthPointPosition_;
+		}
+
+		lengthPos = {startPoint.x, lengthY};
+		return;
+	}
+
+	long double lengthX = (moveToPoint.x - startPoint.x) * lengthPointPosition_ + startPoint.x;
+
+	lengthPos = {lengthX, f.m * lengthX + f.n};
+}
+
+void Distance::MovePoint(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAorB)
+{
+	MovePointGeneral(originalPoint, moveToPoint, pointAorB);
+
+	if (!IsLengthEnabled())
+	{
+		return;
+	}
+
+	UpdateLength();
+
+	if (pointAorB == 1)
+	{
+		UpdateLengthPos(pointB, moveToPoint, lengthPointPosition[pointAorB - 1]);
+	}
+	else
+	{
+		UpdateLengthPos(pointA, moveToPoint, lengthPointPosition[pointAorB - 1]);
+	}
+}
+
+void Distance::SetLengthPointPosition()
+{
+	lengthPointPosition[0] = 1 - GetDistance(pointA, lengthPos) / GetDistance(pointA, pointB);
+	lengthPointPosition[1] = 1 - lengthPointPosition[0];
+}
+
 void LengthMeasurement::RenderLength(Camera2D &camera)
 {
 	if (!IsLengthEnabled())
@@ -127,7 +220,7 @@ void LengthMeasurement::RenderLength(Camera2D &camera)
 
 void LengthMeasurement::SetLength(long double newLength)
 {
-	length = std::to_string(newLength) + " u";
+	length = std::to_string(newLength) + " u"; // in length units
 	measure = MeasureTextEx(*boardFont, length.c_str(), fontSize, 0);
 }
 
@@ -168,6 +261,18 @@ void StraightLine::Render(Camera2D &camera, bool renderMovingPoints)
 	RenderMovingPoints(camera, renderMovingPoints);
 }
 
+void StraightLine::MovePos(Vec2 &originalPoint, Vec2 &moveToPoint, Camera2D &camera)
+{
+	MovePosGeneral(originalPoint, moveToPoint);
+	UpdateDrawPoints(camera);
+}
+
+void StraightLine::MovePoint(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAorB, Camera2D &camera)
+{
+	MovePointGeneral(originalPoint, moveToPoint, pointAorB);
+	UpdateDrawPoints(camera);
+}
+
 Ray2::Ray2(Vec2 &pointA_, Vec2 &pointB_, Camera2D &camera)
 {
 	pointA = pointA_;
@@ -179,6 +284,11 @@ void Ray2::UpdateDrawPoint(Camera2D &camera)
 {
 	LinearFunction f(pointA, pointB);
 	drawPoint = CalculateConnectionPoint(pointA, pointB, f.m, f.n, camera);
+
+	if (pointA == pointB)
+	{
+		drawPoint = pointA;
+	}
 }
 
 void Ray2::Render(Camera2D &camera, bool renderMovingPoints)
@@ -188,7 +298,24 @@ void Ray2::Render(Camera2D &camera, bool renderMovingPoints)
 	RenderMovingPoints(camera, renderMovingPoints);
 }
 
+void Ray2::MovePos(Vec2 &originalPoint, Vec2 &moveToPoint, Camera2D &camera)
+{
+	MovePosGeneral(originalPoint, moveToPoint);
+	UpdateDrawPoint(camera);
+}
+
+void Ray2::MovePoint(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAorB, Camera2D &camera)
+{
+	MovePointGeneral(originalPoint, moveToPoint, pointAorB);
+	UpdateDrawPoint(camera);
+}
+
 Circle::Circle(Vec2 &center, Vec2 &pointOnCircle) : center(center), pointOnCircle(pointOnCircle)
+{
+	UpdateRadius();
+}
+
+void Circle::UpdateRadius()
 {
 	radius = GetDistance(center, pointOnCircle);
 }
@@ -209,6 +336,33 @@ void Circle::Render(Camera2D &camera, bool renderMovingPoints)
 void Circle::UpdateLength()
 {
 	SetLength(2 * PI * radius * LE_factor);
+}
+
+void Circle::MovePos(Vec2 &originalPoint, Vec2 &moveToPoint)
+{
+	Vec2 offset = moveToPoint - originalPoint;
+	pointOnCircle += (moveToPoint - originalPoint);
+	lengthPos += offset;
+	center += moveToPoint - originalPoint;
+}
+
+void Circle::MoveRadius(Vec2 &originalPoint, Vec2 &moveToPoint)
+{
+	Vec2 offset = moveToPoint - originalPoint;
+	pointOnCircle += (moveToPoint - originalPoint);
+
+	UpdateRadius();
+
+	if (!IsLengthEnabled())
+	{
+		return;
+	}
+
+	UpdateLength();
+	if (moveToPoint != center)
+	{
+		lengthPos = GetCircleConnection(lengthPos, *this);
+	}
 }
 
 Point::Point(Vec2 &pos, GeometryBoard *board) : point(pos)

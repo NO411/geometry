@@ -31,11 +31,33 @@ public:
 	int Push(Vec2 &newIntersection);
 };
 
+class GeometryBoard;
+
+class SelectedThing
+{
+public:
+	SelectedThing();
+	SelectedThing(std::size_t objPos, int objType, Vec2 &originalPoint, GeometryBoard *board_);
+
+	std::size_t objPos;
+	int objType;
+
+	Vec2 originalPoint;
+	int memberObj;
+
+private:
+	GeometryBoard *board_;
+
+	template<typename L>
+	void SetUpLineMemberObjNumber(std::vector<L> &objVector);
+};
+
 class GeometryApp;
 
 class GeometryBoard
 {
 	friend Point;
+	friend SelectedThing;
 
 public:
 	GeometryBoard();
@@ -67,10 +89,13 @@ private:
 	std::vector<StraightLine> straightLines;
 	std::vector<Point> points;
 
+	SelectedThing selectedThing;
+	void UpdateMovingObj();
+
 	template <typename T>
-	void EraseGemObj(std::vector<T> &objVec, std::size_t vecPos);
+	void EraseGemObj(std::vector<T> &objVec, std::size_t vecPos, bool eraseFromVector);
+	void EraseObj(int objType, std::size_t objPos, bool eraseFromVector);
 	void ErasePoint(std::size_t vecPos);
-	void EraseObj(int objType, std::size_t objPos);
 
 	IntersectionStorage intersections;
 
