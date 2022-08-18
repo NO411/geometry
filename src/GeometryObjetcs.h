@@ -88,6 +88,7 @@ class Line : public GemObj
 {
 public:
 	Vec2 pointA, pointB;
+	bool IsLinePoint();
 
 	bool IsVerticalLine();
 	void RenderMovingPoints(Camera2D &camera, bool renderMovingPoints);

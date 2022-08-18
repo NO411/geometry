@@ -48,7 +48,7 @@ public:
 private:
 	GeometryBoard *board_;
 
-	template<typename L>
+	template <typename L>
 	void SetUpLineMemberObjNumber(std::vector<L> &objVector);
 };
 

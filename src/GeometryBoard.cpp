@@ -430,10 +430,17 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 		objPlaces.push_back(std::make_tuple(objType, objPos));
 	};
 
+	int lineEndPointConnection = LINE_END_POINT_CONNECTION;
+
+	if (!firstPointed && editMode == MOVE_OBJECT)
+	{
+		lineEndPointConnection = MOVING_POINT_CONNECTION;
+	}
+
 	for (std::size_t i = 0; i < distances.size(); ++i)
 	{
-		ConnectionDistancesPush(distances[i].pointA, LINE_END_POINT_CONNECTION, DISTANCE, i);
-		ConnectionDistancesPush(distances[i].pointB, LINE_END_POINT_CONNECTION, DISTANCE, i);
+		ConnectionDistancesPush(distances[i].pointA, lineEndPointConnection, DISTANCE, i);
+		ConnectionDistancesPush(distances[i].pointB, lineEndPointConnection, DISTANCE, i);
 
 		Vec2 intersection = GetOrthogonalLinesIntersection(worldMousePos, distances[i]);
 		if (distances[i].IsPointOnLine(intersection))
@@ -460,7 +467,7 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 	}
 	for (std::size_t i = 0; i < rays.size(); ++i)
 	{
-		ConnectionDistancesPush(rays[i].pointA, LINE_END_POINT_CONNECTION, RAY, i);
+		ConnectionDistancesPush(rays[i].pointA, lineEndPointConnection, RAY, i);
 		ConnectionDistancesPush(rays[i].pointB, MOVING_POINT_CONNECTION, RAY, i);
 
 		Vec2 intersection = GetOrthogonalLinesIntersection(worldMousePos, rays[i]);

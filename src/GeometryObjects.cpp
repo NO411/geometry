@@ -64,7 +64,7 @@ void Vec2::Render(Camera2D &camera, bool renderAsMovingPoint)
 	Color clr1 = BLUE;
 	Color clr2 = DARKBLUE;
 
-	if  (renderAsMovingPoint)
+	if (renderAsMovingPoint)
 	{
 		clr1 = ORANGE;
 		clr2 = RED;
@@ -127,6 +127,11 @@ void Line::MovePointGeneral(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAor
 	{
 		pointB += offset;
 	}
+}
+
+bool Line::IsLinePoint()
+{
+	return (pointA == pointB);
 }
 
 Distance::Distance(Vec2 &pointA_, Vec2 &pointB_)
@@ -455,6 +460,11 @@ std::string &Point::GetLetter()
 
 bool Distance::IsPointOnLine(Vec2 &point)
 {
+	if (IsLinePoint())
+	{
+		return false;
+	}
+
 	long double x1 = pointA.x;
 	long double x2 = pointB.x;
 	if ((x1 < x2 && point.x > x1 && point.x < x2) || (x1 > x2 && point.x < x1 && point.x > x2) || ((SameDouble(point.x, x1) || SameDouble(point.x, x2)) && !IsVerticalLine()))
@@ -474,6 +484,11 @@ bool Distance::IsPointOnLine(Vec2 &point)
 
 bool Ray2::IsPointOnLine(Vec2 &point)
 {
+	if (IsLinePoint())
+	{
+		return false;
+	}
+
 	if ((pointA.x < pointB.x && (point.x > pointA.x || SameDouble(point.x, pointA.x))) || (pointA.x > pointB.x && (point.x < pointA.x || SameDouble(point.x, pointA.x))))
 	{
 		return true;
@@ -489,5 +504,10 @@ bool Ray2::IsPointOnLine(Vec2 &point)
 
 bool StraightLine::IsPointOnLine(Vec2 &point)
 {
+	if (IsLinePoint())
+	{
+		return false;
+	}
+
 	return true;
 }
