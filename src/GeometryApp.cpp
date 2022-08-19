@@ -218,7 +218,7 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 		{"press `down`", "move everything down"},
 		{"`CTRL` + `L` + press `M`", "length measurement mode (enable)"},
 		{"`CTRL` + `L` + `M` + press `E`", "length measurement eraser mode (disable)"},
-		{"`CTRL` + `E` + press `C`", "circle sector eraser mode (WIP)"},
+		{"`CTRL` + `E` + press `C`", "circle sector eraser mode"},
 		{"press `H`", "switch between geometry board and help"},
 		{"`CTRL` + press `H`", "disable help button"},
 		{"`mouse wheel`", "zoom in / out | scroll in help menu"},
