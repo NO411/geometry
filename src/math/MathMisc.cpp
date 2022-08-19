@@ -84,3 +84,116 @@ Vec2 GetCircleConnection(Vec2 &worldMousePos, Circle &circle)
 
 	return {x, y};
 }
+
+long double ArcTan(long double tan)
+{
+	return atan(tan) * 180 / PI;
+}
+
+long double CalculateAngleTan(Vec2 &circleCenter, Vec2 &point)
+{
+	Vec2 rightTrianglePoint = {circleCenter.x, point.y};
+
+	if ((circleCenter.y > point.y && circleCenter.x < point.x) || (circleCenter.y < point.y && circleCenter.x > point.x))
+	{
+		rightTrianglePoint = {point.x, circleCenter.y};
+	}
+
+	long double opposite = GetDistance(rightTrianglePoint, point);
+	long double adjacent = GetDistance(rightTrianglePoint, circleCenter);
+
+	return (opposite) / (adjacent);
+}
+
+long double AcuteAngleToObtuseAngle(long double angle, Vec2 &circleCenter, Vec2 &point)
+{
+	if (circleCenter.y > point.y && circleCenter.x < point.x)
+	{
+		angle += 90;
+	}
+
+	if (circleCenter.y > point.y && circleCenter.x > point.x)
+	{
+		angle += 180;
+	}
+
+	if (circleCenter.y < point.y && circleCenter.x > point.x)
+	{
+		angle += 270;
+	}
+
+	if (angle > 360)
+	{
+		angle -= 360;
+	}
+
+	int circleX = circleCenter.x, circleY = circleCenter.y;
+	int pointX = point.x, pointY = point.y;
+
+	if (circleX == pointX)
+	{
+		angle = 180;
+		if (circleY < pointY)
+		{
+			angle += 180;
+		}
+	}
+	if (circleY == pointY)
+	{
+		angle = 90;
+		if (circleX > pointX)
+		{
+			angle += 180;
+		}
+	}
+
+	return angle;
+}
+
+long double CirclePointToAngle(Vec2 &center, Vec2 &point)
+{
+	return AcuteAngleToObtuseAngle(ArcTan(CalculateAngleTan(center, point)), center, point);
+}
+
+Sector PointsToSector(Vec2 &center, Vec2 &startPoint, Vec2 &endPoint)
+{
+	long double startAngle = CirclePointToAngle(center, startPoint);
+	long double endAngle = CirclePointToAngle(center, endPoint);
+
+	return {startAngle, endAngle, startPoint, endPoint};
+}
+
+bool SectorIncludesAngle(Sector &sector, long double angle, bool includeSectorEndPoints)
+{
+	if (SameDouble(angle, sector.startAngle) || SameDouble(angle, sector.endAngle))
+	{
+		return includeSectorEndPoints; // point is included by the circle because it is a sector end point
+	}
+
+	if (sector.startAngle > sector.endAngle)
+	{
+		if ((angle > sector.startAngle && angle > sector.endAngle) || (angle < sector.startAngle && angle < sector.endAngle))
+		{
+			return true;
+		}
+		return false;
+	}
+	if (angle > sector.startAngle && angle < sector.endAngle)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool IsPointOnCircle(Vec2 &connectionPoint, Circle &circle)
+{
+	long double pointAngle = CirclePointToAngle(circle.center, connectionPoint);
+	for (auto sector : circle.sectors)
+	{
+		if (SectorIncludesAngle(sector, pointAngle, false))
+		{
+			return false;
+		}
+	}
+	return true;
+}

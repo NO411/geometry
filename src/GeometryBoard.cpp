@@ -110,12 +110,38 @@ void GeometryBoard::DrawDrawingObj()
 	break;
 	case CIRCLE_ERASER:
 	{
-		// DrawCurrentCircleSector();
+		DrawCurrentCircleSector();
 	}
 	break;
 	default:
 		break;
 	}
+}
+
+void GeometryBoard::DrawCurrentCircleSector()
+{
+	Circle circle = circles[currentObjPos];
+	Color sectorColor = GRAY;
+
+	if (IsPointOnCircle(currentPoint.GetPos(), circle))
+	{
+		sectorColor = GREEN;
+	}
+
+	sectorColor.a = 100;
+	float startAngle = CirclePointToAngle(circle.center, firstCircleEraserPos);
+	float endAngle = CirclePointToAngle(circle.center, currentPoint.GetPos());
+
+	Vector2 center_ = GetWorldToScreen2D(circle.center.ToRaylibVec(), camera);
+
+	if (startAngle > endAngle)
+	{
+		DrawCircleSector(center_, circle.radius * camera.zoom, startAngle, 360, 500, sectorColor);
+		DrawCircleSector(center_, circle.radius * camera.zoom, 0, endAngle, 500, sectorColor);
+		return;
+	}
+
+	DrawCircleSector(center_, circle.radius * camera.zoom, startAngle, endAngle, 500, sectorColor);
 }
 
 void GeometryBoard::Update()
@@ -286,15 +312,14 @@ void GeometryBoard::Edit()
 			firstPointed = false;
 			break;
 		case CIRCLE_ERASER:
-			/*
 			if (objType != CIRCLE)
 			{
 				firstPointed = false;
 				break;
 			}
-			*/
-			// firstCircleEraserPoint = currentPoint;
-			// currentObjPos = objPos;
+
+			firstCircleEraserPos = firstPoint;
+			currentObjPos = objPos;
 			break;
 		case MOVE_OBJECT:
 			if (objType < CIRCLE)
@@ -304,7 +329,7 @@ void GeometryBoard::Edit()
 			}
 
 			EraseObj(objType, objPos, false);
-			selectedThing = {objPos, objType, currentPoint.GetPos(), this};
+			selectedThing = {objPos, objType, firstPoint, this};
 
 			break;
 		default:
@@ -350,7 +375,7 @@ void GeometryBoard::Edit()
 		}
 		break;
 		case CIRCLE_ERASER:
-			/*3
+		{
 			if (objType != CIRCLE)
 			{
 				firstPointed = true;
@@ -359,12 +384,23 @@ void GeometryBoard::Edit()
 			if (objPos != currentObjPos)
 			{
 				firstPointed = true;
-				firstCircleEraserPoint = currentPoint;
+				firstCircleEraserPos = currentPos;
 				currentObjPos = objPos;
 				break;
 			}
-			*/
-			// circles.at(objPos).EraseSector(&firstCircleEraserPoint, &currentPoint);
+			bool eraseWholeCircle = circles[objPos].EraseSector(firstCircleEraserPos, currentPos);
+
+			if (eraseWholeCircle || circles[objPos].CompletelyErased())
+			{
+				EraseObj(objType, objPos, true);
+			}
+			else
+			{
+				// update intersections (some could be in erased sectors)
+				EraseObj(objType, objPos, false);
+				AddIntersections(circles[objPos]);
+			}
+		}
 			break;
 		case MOVE_OBJECT:
 			// add intersections again
@@ -383,7 +419,6 @@ void GeometryBoard::Edit()
 			case STRAIGHTLINE:
 				AddIntersections(straightLines[selectedThing.objPos]);
 				break;
-
 			default:
 				break;
 			}
@@ -453,17 +488,17 @@ std::tuple<int, std::size_t> GeometryBoard::UpdateCurrentPoint()
 		Vec2 connectionPoint = GetCircleConnection(worldMousePos, circles[i]);
 		ConnectionDistancesPush(circles[i].pointOnCircle, MOVING_POINT_CONNECTION, CIRCLE, i);
 		ConnectionDistancesPush(circles[i].center, MOVING_POINT_CONNECTION, CIRCLE, i);
-		// if (IsPointOnCircle(connectionPoint, circles[i]))
+		if (IsPointOnCircle(connectionPoint, circles[i]))
 		{
 			ConnectionDistancesPush(connectionPoint, CIRCLE_CONNECTION, CIRCLE, i);
 		}
-		/*
+		
 		for (auto sector : circles[i].sectors)
 		{
-			ConnectionDistancesPush(&sector.startAnglePoint, SECTOR_END_POINT_CONNECTION, CIRCLE, i);
-			ConnectionDistancesPush(&sector.endAnglePoint, SECTOR_END_POINT_CONNECTION, CIRCLE, i);
+			ConnectionDistancesPush(sector.startAnglePoint, SECTOR_END_POINT_CONNECTION, CIRCLE, i);
+			ConnectionDistancesPush(sector.endAnglePoint, SECTOR_END_POINT_CONNECTION, CIRCLE, i);
 		}
-		*/
+		
 	}
 	for (std::size_t i = 0; i < rays.size(); ++i)
 	{
@@ -525,6 +560,10 @@ void GeometryBoard::SetEditMode()
 	{
 	case KEY_C:
 		editMode = DRAW_CIRCLE;
+		if (IsKeyDown(KEY_E))
+		{
+			editMode = CIRCLE_ERASER;
+		}
 		break;
 	case KEY_D:
 		editMode = DRAW_DISTANCE;
@@ -550,10 +589,6 @@ void GeometryBoard::SetEditMode()
 			{
 				editMode = ANGLE_MEASUREMENT_ERASER;
 			}
-		}
-		if (IsKeyDown(KEY_C))
-		{
-			editMode = CIRCLE_ERASER;
 		}
 		break;
 	case KEY_M:

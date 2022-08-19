@@ -57,7 +57,7 @@ void GetLineCircleIntersections(IntersectionStorage &intersections, L &line, Cir
 
 	auto Push = [&intersections, &line, &circle](Vec2 newIntersection)
 	{
-		if (line.IsPointOnLine(newIntersection))
+		if (line.IsPointOnLine(newIntersection) && IsPointOnCircle(newIntersection, circle))
 		{
 			int newID = intersections.Push(newIntersection);
 			line.intersectionIDs.push_back(newID);

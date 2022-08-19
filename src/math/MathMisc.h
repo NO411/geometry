@@ -43,3 +43,10 @@ Vec2 GetOrthogonalLinesIntersection(Vec2 &worldMousePos, L &line)
 }
 
 Vec2 GetCircleConnection(Vec2 &worldMousePos, Circle &circle);
+long double ArcTan(long double tan);
+long double CalculateAngleTan(Vec2 &circleCenter, Vec2 &point);
+long double AcuteAngleToObtuseAngle(long double angle, Vec2 &circleCenter, Vec2 &point);
+long double CirclePointToAngle(Vec2 &center, Vec2 &point);
+Sector PointsToSector(Vec2 &center, Vec2 &startPoint, Vec2 &endPoint);
+bool SectorIncludesAngle(Sector &sector, long double angle, bool includeSectorEndPoints);
+bool IsPointOnCircle(Vec2 &connectionPoint, Circle &circle);

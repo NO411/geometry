@@ -82,6 +82,8 @@ private:
 	bool firstPointed = false;
 	Vec2 firstPoint;
 	Point currentPoint;
+	Vec2 firstCircleEraserPos;
+	std::size_t currentObjPos;
 
 	std::vector<Circle> circles;
 	std::vector<Distance> distances;
@@ -116,6 +118,8 @@ private:
 
 	template <typename O>
 	void Measure(O &object);
+
+	void DrawCurrentCircleSector();
 
 	GeometryApp *app_;
 };

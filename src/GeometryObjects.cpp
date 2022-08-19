@@ -84,14 +84,14 @@ void GemObj::DrawLineExSmooth(Vec2 &startPos, Vec2 &endPos)
 	DrawLineEx(startPos.ToRaylibVec(), endPos.ToRaylibVec(), renderThickness + 1, cl);
 }
 
-void GemObj::DrawRingSmooth(Vec2 &center, long double radius)
+void GemObj::DrawRingSmooth(Vec2 &center, long double radius, long double startAngle, long double endAngle)
 {
-	DrawRing(center.ToRaylibVec(), radius - renderThickness / 3, radius + renderThickness / 3, 0, 360, 500, renderColor);
+	DrawRing(center.ToRaylibVec(), radius - renderThickness / 3, radius + renderThickness / 3, startAngle, endAngle, 500, renderColor);
 	Color cl = renderColor;
 	cl.a = 200;
-	DrawRing(center.ToRaylibVec(), radius - renderThickness / 2, radius + renderThickness / 2, 0, 360, 500, cl);
+	DrawRing(center.ToRaylibVec(), radius - renderThickness / 2, radius + renderThickness / 2, startAngle, endAngle, 500, cl);
 	cl.a = 100;
-	DrawRing(center.ToRaylibVec(), radius - renderThickness, radius + renderThickness, 0, 360, 500, cl);
+	DrawRing(center.ToRaylibVec(), radius - renderThickness, radius + renderThickness, startAngle, endAngle, 500, cl);
 }
 
 bool Line::IsVerticalLine()
@@ -315,6 +315,28 @@ void Ray2::MovePoint(Vec2 &originalPoint, Vec2 &moveToPoint, int pointAorB, Came
 	UpdateDrawPoint(camera);
 }
 
+Sector::Sector() {}
+Sector::Sector(long double startAngle, long double endAngle, Vec2 &startAnglePoint, Vec2 &endAnglePoint) : startAngle(startAngle), endAngle(endAngle), startAnglePoint(startAnglePoint), endAnglePoint(endAnglePoint){};
+bool Sector::operator<(const Sector &sector) const
+{
+	return (startAngle < sector.startAngle);
+}
+
+long double Sector::GetAngle()
+{
+	if (SameDouble(endAngle, startAngle))
+	{
+		return 360;
+	}
+
+	long double angle = (endAngle - startAngle);
+	if (endAngle < startAngle)
+	{
+		return 360 - angle;
+	}
+	return angle;
+}
+
 Circle::Circle(Vec2 &center, Vec2 &pointOnCircle) : center(center), pointOnCircle(pointOnCircle)
 {
 	UpdateRadius();
@@ -327,14 +349,56 @@ void Circle::UpdateRadius()
 
 void Circle::Render(Camera2D &camera, bool renderMovingPoints)
 {
-	Vec2 center_ = {GetWorldToScreen2D(center.ToRaylibVec(), camera)};
-	DrawRingSmooth(center_, radius * camera.zoom);
-
 	RenderLength(camera);
 	if (renderMovingPoints)
 	{
 		pointOnCircle.Render(camera, true);
 		center.Render(camera, true);
+	}
+
+	Vec2 center_ = {GetWorldToScreen2D(center.ToRaylibVec(), camera)};
+
+	std::size_t vectorSize = sectors.size();
+	if (vectorSize <= 0)
+	{
+		DrawRingSmooth(center_, radius * camera.zoom, 0, 360);
+		return;
+	}
+
+	if (vectorSize == 1)
+	{
+		// the function DrawRingLines() switches start and end point when the end point is smaller than the start point
+		float startAngle = sectors[0].endAngle;
+		float endAngle = sectors[0].startAngle;
+		if (startAngle > endAngle)
+		{
+			endAngle += 360;
+		}
+		DrawRingSmooth(center_, radius * camera.zoom, startAngle, endAngle);
+		return;
+	}
+
+	for (std::size_t i = 0; i < vectorSize; ++i)
+	{
+		float startAngle = sectors[i].endAngle;
+		// use the start angle of the following sector as the endAngle
+		float endAngle;
+
+		if (i == vectorSize - 1)
+		{
+			endAngle = sectors[0].startAngle;
+		}
+		else
+		{
+			endAngle = sectors[i + 1].startAngle;
+		}
+
+		if (startAngle > endAngle)
+		{
+			endAngle += 360;
+		}
+
+		DrawRingSmooth(center_, radius * camera.zoom, startAngle, endAngle);
 	}
 }
 
@@ -358,6 +422,13 @@ void Circle::MoveRadius(Vec2 &originalPoint, Vec2 &moveToPoint)
 
 	UpdateRadius();
 
+	// update to make it possible to select them after radius moving
+	for (auto &sector : sectors)
+	{
+		sector.startAnglePoint = GetCircleConnection(sector.startAnglePoint, *this);
+		sector.endAnglePoint = GetCircleConnection(sector.endAnglePoint, *this);
+	}
+
 	if (!IsLengthEnabled())
 	{
 		return;
@@ -368,6 +439,53 @@ void Circle::MoveRadius(Vec2 &originalPoint, Vec2 &moveToPoint)
 	{
 		lengthPos = GetCircleConnection(lengthPos, *this);
 	}
+}
+
+bool Circle::EraseSector(Vec2 &firstCircleEraserPos, Vec2 &currentPos)
+{
+	Sector newSector = PointsToSector(center, firstCircleEraserPos, currentPos);
+
+	bool eraseWholeCircle = false;
+	sectors.erase(std::remove_if(sectors.begin(), sectors.end(),
+		[&newSector, &eraseWholeCircle](Sector sector)
+		{
+			if (SameDouble(sector.endAngle, newSector.startAngle) && SameDouble(sector.startAngle, newSector.endAngle))
+			{
+				eraseWholeCircle = true;
+				return true;
+			}
+			if (SameDouble(sector.startAngle, newSector.endAngle))
+			{
+				newSector = {newSector.startAngle, sector.endAngle, newSector.startAnglePoint, sector.endAnglePoint};
+				return true;
+			}
+			if (SameDouble(sector.endAngle, newSector.startAngle))
+			{
+				newSector = {sector.startAngle, newSector.endAngle, sector.startAnglePoint, newSector.endAnglePoint};
+				return true;
+			}
+			return SectorIncludesAngle(newSector, sector.startAngle, true) && SectorIncludesAngle(newSector, sector.endAngle, true) && !(SameDouble(newSector.startAngle, sector.endAngle) && SameDouble(newSector.endAngle, sector.startAngle));
+		}),
+	sectors.end());
+
+	sectors.push_back(newSector);
+
+	// bring sectors in right order to draw them correctly
+	std::sort(sectors.begin(), sectors.end());
+
+	return eraseWholeCircle;
+}
+
+bool Circle::CompletelyErased()
+{
+	long double sectorSum;
+
+	for (auto &sector : sectors)
+	{
+		sectorSum += sector.GetAngle();
+	}
+
+	return SameDouble(360, sectorSum);
 }
 
 Point::Point(Vec2 &pos, GeometryBoard *board) : point(pos)

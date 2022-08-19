@@ -37,6 +37,11 @@ void GetCircleCircleIntersections(IntersectionStorage &intersections, Circle &ci
 
 	auto Push = [&intersections, &circle1, &circle2](Vec2 newIntersection)
 	{
+		if (!IsPointOnCircle(newIntersection, circle1) || !IsPointOnCircle(newIntersection, circle2))
+		{
+			return;
+		}
+
 		int newID = intersections.Push(newIntersection);
 		circle1.intersectionIDs.push_back(newID);
 		circle2.intersectionIDs.push_back(newID);

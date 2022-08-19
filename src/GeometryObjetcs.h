@@ -42,7 +42,7 @@ public:
 	static const long double LE_factor;
 
 	void DrawLineExSmooth(Vec2 &startPos, Vec2 &endPos);
-	void DrawRingSmooth(Vec2 &center, long double radius);
+	void DrawRingSmooth(Vec2 &center, long double radius, long double startAngle, long double endAngle);
 
 	std::vector<int> intersectionIDs;
 };
@@ -66,6 +66,22 @@ public:
 	static const int fontSize;
 };
 
+class Sector
+{
+public:
+	long double startAngle;
+	long double endAngle;
+	Vec2 startAnglePoint;
+	Vec2 endAnglePoint;
+
+	Sector();
+
+	Sector(long double startAngle, long double endAngle, Vec2 &startAnglePoint, Vec2 &endAnglePoint);
+
+	bool operator<(const Sector &sector) const;
+	long double GetAngle();
+};
+
 class Circle : public GemObj, public LengthMeasurement
 {
 public:
@@ -79,6 +95,10 @@ public:
 	Vec2 pointOnCircle;
 	long double radius;
 	void UpdateLength();
+
+	std::vector<Sector> sectors;
+	bool EraseSector(Vec2 &firstCircleEraserPos, Vec2 &currentPos);
+	bool CompletelyErased();
 
 private:
 	void UpdateRadius();
