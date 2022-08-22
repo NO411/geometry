@@ -247,6 +247,11 @@ void HelpWindow::Render()
 
 	float linesEnd = std::min(scrollBar.box.x - 5, 2 * columnSize);
 
+	if (!scrollBar.Enabled())
+	{
+		linesEnd = std::min((float)GetScreenWidth() - 5, 2 * columnSize);
+	}
+
 	DrawLineEx({tableStart.x, tableStart.y + rowSize}, {linesEnd, tableStart.y + rowSize}, 2, app_->DARBBLUE3);
 	DrawLineEx({columnSize, tableStart.y}, {columnSize, textRenderHeight - 5}, 2, app_->DARBBLUE3);
 
@@ -361,6 +366,11 @@ void ScrollBar::UpdateOnResize()
 
 void ScrollBar::Update()
 {
+	if (!Enabled())
+	{
+		return;
+	}
+
 	if (IsWindowResized())
 	{
 		UpdateOnResize();
@@ -436,6 +446,10 @@ void ScrollBar::Update()
 
 void ScrollBar::Render()
 {
+	if (!Enabled())
+	{
+		return;
+	}
 	DrawRectangleRec(box, helpWindow_->app_->DARBBLUE3);
 	DrawRectangleRec(dragBox, dragBoxColor);
 }
@@ -448,4 +462,9 @@ bool ScrollBar::Selected()
 bool ScrollBar::BoxSelected()
 {
 	return (CheckCollisionPointRec(GetMousePosition(), box) && !Selected());
+}
+
+bool ScrollBar::Enabled()
+{
+	return (GetScreenHeight() < helpWindow_->textRenderHeight);
 }

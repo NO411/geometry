@@ -23,6 +23,7 @@ public:
 	void Update();
 	void Render();
 	void UpdateOnResize();
+	bool Enabled();
 	
 private:
 	bool Selected();
