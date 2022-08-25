@@ -29,6 +29,7 @@ public:
 	bool operator!=(Vec2 &v);
 	void operator+=(Vec2 v);
 	Vec2 operator-(Vec2 &v);
+	Vec2 operator+(Vec2 &v);
 
 	Vector2 ToRaylibVec();
 	void Render(Camera2D &camera, bool renderAsMovingPoint);

@@ -53,6 +53,11 @@ Vec2 Vec2::operator-(Vec2 &v)
 	return {x - v.x, y - v.y};
 }
 
+Vec2 Vec2::operator+(Vec2 &v)
+{
+	return {x + v.x, y + v.y};
+}
+
 Vector2 Vec2::ToRaylibVec()
 {
 	return {(float)x, (float)y};

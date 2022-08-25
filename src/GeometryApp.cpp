@@ -8,6 +8,9 @@ const Color GeometryApp::DARBBLUE1 = {70, 70, 80, 255};
 const Color GeometryApp::DARBBLUE2 = {50, 50, 60, 255};
 const Color GeometryApp::DARBBLUE3 = {30, 30, 40, 255};
 
+const Color CloseButton::RED1 = {185, 75, 75, 255};
+const Color CloseButton::RED2 = {165, 55, 55, 255};
+
 GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 {
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -29,9 +32,9 @@ GeometryApp::GeometryApp(int width, int height, int fps, std::string title)
 	SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
 	SetState(GEOMETRY_BOARD);
-	showHelpButton = true;
 
 	helpWindow.Init();
+	saveWindow.Init();
 }
 
 GeometryApp::~GeometryApp() noexcept
@@ -65,17 +68,18 @@ void GeometryApp::Tick()
 	{
 	case GEOMETRY_BOARD:
 		board.Render();
+		button.Render();
 		break;
 	case HELP:
 		helpWindow.Render();
+		button.Render();
+		break;
+	case SAVE:
+		saveWindow.Render();
+		break;
 
 	default:
 		break;
-	}
-
-	if (showHelpButton)
-	{
-		button.Render();
 	}
 
 	EndDrawing();
@@ -83,29 +87,24 @@ void GeometryApp::Tick()
 
 void GeometryApp::Update()
 {
-	if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_H))
-	{
-		showHelpButton = !showHelpButton;
-	}
-	button.Update();
-
 	switch (GetState())
 	{
 	case GEOMETRY_BOARD:
-	{
+		button.Update();
 		board.Update();
 
 		if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_C) && IsKeyPressed(KEY_E))
 		{
 			ClearBoard();
 		}
-	}
-	break;
+		break;
 	case HELP:
-	{
+		button.Update();
 		helpWindow.Update();
-	}
-	break;
+		break;
+	case SAVE:
+		saveWindow.Update();
+		break;
 
 	default:
 		break;
@@ -127,26 +126,37 @@ void GeometryApp::ClearBoard()
 	board = {this};
 }
 
-HelpButton::HelpButton(GeometryApp *app) : app_(app)
+Button::Button()
+{
+}
+
+HelpButton::HelpButton(GeometryApp *app)
 {
 	Update();
 	text = "Help";
 	fontSize = 16;
+	showHelpButton = true;
+	app_ = app;
 }
 
 HelpButton::~HelpButton() {}
 
 bool HelpButton::Selected()
 {
-	return (CheckCollisionPointRec(GetMousePosition(), rectangle) && app_->showHelpButton);
+	return (CheckCollisionPointRec(GetMousePosition(), rectangle) && showHelpButton);
 }
 
 void HelpButton::Update()
 {
+	if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_H))
+	{
+		showHelpButton = !showHelpButton;
+	}
+
 	color = app_->DARBBLUE3;
 
 	rectangle = {GetScreenWidth() - 80.0f, 5, 75, 30};
-	textPos = {rectangle.x + rectangle.width / 2 - MeasureText(text.c_str(), fontSize) / 2, rectangle.y + rectangle.height / 2 - fontSize / 2};
+	pos = {rectangle.x + rectangle.width / 2 - MeasureText(text.c_str(), fontSize) / 2, rectangle.y + rectangle.height / 2 - fontSize / 2};
 
 	bool hPressed = (IsKeyPressed(KEY_H) && !IsKeyDown(KEY_LEFT_CONTROL));
 
@@ -160,7 +170,7 @@ void HelpButton::Update()
 		color = app_->DARBBLUE2;
 	}
 
-	if (pressed && ((IsMouseButtonReleased(0) && app_->showHelpButton && Selected()) || IsKeyReleased(KEY_H)))
+	if (pressed && ((IsMouseButtonReleased(0) && showHelpButton && Selected()) || IsKeyReleased(KEY_H)))
 	{
 		pressed = false;
 		switch (app_->GetState())
@@ -182,10 +192,21 @@ void HelpButton::Update()
 	}
 }
 
+Window::Window()
+{
+	camera = {0};
+	camera.zoom = 1;
+}
+
 void HelpButton::Render()
 {
+	if (!showHelpButton)
+	{
+		return;
+	}
+
 	DrawRectangleRounded(rectangle, 0.5, 10, color);
-	DrawTextEx(app_->font, text.c_str(), textPos, fontSize, 0, WHITE);
+	DrawTextEx(app_->font, text.c_str(), pos.ToRaylibVec(), fontSize, 0, WHITE);
 }
 
 void HelpWindow::Init()
@@ -197,8 +218,9 @@ void HelpWindow::Init()
 	scrollBar = {box, this};
 }
 
-HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
+HelpWindow::HelpWindow(GeometryApp *app)
 {
+	app_ = app;
 	description = "Geometry is an app to create Euclidean geometry without any user interface with buttons etc\n"
 				  "for a faster workflow. It only uses the following keyboard shortcuts:";
 
@@ -224,6 +246,7 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 		{"`mouse wheel`", "zoom in / out | scroll in help menu"},
 		{"`CTRL` + `Z` (`Y` for QWERTY keyboard) + press `R`", "reset zoom and field of view"},
 		{"`CTRL` + `C` + press `E`", "clear everything"},
+		{"`CTRL` + `ALT` + press `S`", "save"},
 	};
 
 	fontSize = 15;
@@ -234,9 +257,6 @@ HelpWindow::HelpWindow(GeometryApp *app) : app_(app)
 	textOffsetX = 4;
 
 	textRenderHeight = (shortcuts.size() + 1) * rowSize + tableStart.y + 5;
-
-	camera = {0};
-	camera.zoom = 1;
 }
 
 void HelpWindow::Render()
@@ -323,14 +343,14 @@ ScrollBar::ScrollBar()
 {
 }
 
-ScrollBar::ScrollBar(Rectangle boxRect, HelpWindow *helpWindow_) : box(boxRect), dragBox(boxRect), helpWindow_(helpWindow_)
+ScrollBar::ScrollBar(Rectangle boxRect, Window *window_) : box(boxRect), dragBox(boxRect), window_(window_)
 {
 	UpdateDragBoxHeight();
 }
 
 void ScrollBar::UpdateDragBoxHeight()
 {
-	dragBox.height = std::min((float)GetScreenHeight() / helpWindow_->textRenderHeight * box.height, box.height);
+	dragBox.height = std::min((float)GetScreenHeight() / window_->textRenderHeight * box.height, box.height);
 }
 
 void ScrollBar::UpdateOnResize()
@@ -342,7 +362,7 @@ void ScrollBar::UpdateOnResize()
 
 	auto AttachCameraToBottom = [this]()
 	{
-		helpWindow_->camera.offset.y = -helpWindow_->textRenderHeight + (float)GetScreenHeight();
+		window_->camera.offset.y = -window_->textRenderHeight + (float)GetScreenHeight();
 	};
 
 	if (dragBox.y + dragBox.height >= box.y + box.height)
@@ -351,15 +371,15 @@ void ScrollBar::UpdateOnResize()
 		dragBox.y -= (dragBox.y + dragBox.height) - (box.y + box.height);
 	}
 
-	if (GetScreenHeight() - helpWindow_->camera.offset.y >= helpWindow_->textRenderHeight)
+	if (GetScreenHeight() - window_->camera.offset.y >= window_->textRenderHeight)
 	{
 		AttachCameraToBottom();
-		helpWindow_->camera.offset.y = -helpWindow_->textRenderHeight + (float)GetScreenHeight();
+		window_->camera.offset.y = -window_->textRenderHeight + (float)GetScreenHeight();
 	}
 
-	if (GetScreenHeight() >= helpWindow_->textRenderHeight)
+	if (GetScreenHeight() >= window_->textRenderHeight)
 	{
-		helpWindow_->camera.offset = {0, 0};
+		window_->camera.offset = {0, 0};
 		dragBox = box;
 	}
 }
@@ -380,7 +400,7 @@ void ScrollBar::Update()
 
 	if (Selected() || move)
 	{
-		dragBoxColor = helpWindow_->app_->DARBBLUE1;
+		dragBoxColor = window_->app_->DARBBLUE1;
 		if (IsMouseButtonPressed(0) && Selected())
 		{
 			move = true;
@@ -390,7 +410,7 @@ void ScrollBar::Update()
 	}
 	else
 	{
-		dragBoxColor = helpWindow_->app_->DARBBLUE2;
+		dragBoxColor = window_->app_->DARBBLUE2;
 	}
 
 	if (IsMouseButtonReleased(0))
@@ -438,9 +458,9 @@ void ScrollBar::Update()
 		}
 	}
 
-	if (GetScreenHeight() < helpWindow_->textRenderHeight && (move || scroll || setInstantPos))
+	if (GetScreenHeight() < window_->textRenderHeight && (move || scroll || setInstantPos))
 	{
-		helpWindow_->camera.offset.y = -((dragBox.y - box.y) * ((helpWindow_->textRenderHeight - (float)GetScreenHeight()) / (box.height - dragBox.height)));
+		window_->camera.offset.y = -((dragBox.y - box.y) * ((window_->textRenderHeight - (float)GetScreenHeight()) / (box.height - dragBox.height)));
 	}
 }
 
@@ -450,7 +470,7 @@ void ScrollBar::Render()
 	{
 		return;
 	}
-	DrawRectangleRec(box, helpWindow_->app_->DARBBLUE3);
+	DrawRectangleRec(box, window_->app_->DARBBLUE3);
 	DrawRectangleRec(dragBox, dragBoxColor);
 }
 
@@ -466,5 +486,77 @@ bool ScrollBar::BoxSelected()
 
 bool ScrollBar::Enabled()
 {
-	return (GetScreenHeight() < helpWindow_->textRenderHeight);
+	return (GetScreenHeight() < window_->textRenderHeight);
+}
+
+CloseButton::CloseButton()
+{
+}
+
+CloseButton::CloseButton(GeometryApp *app)
+{
+	app_ = app;
+}
+
+void CloseButton::Render()
+{
+	DrawCircleSector(pos.ToRaylibVec(), radius, 0, 360, 100, color);
+	DrawLineEx((pos - crossPointOffset).ToRaylibVec(), (pos + crossPointOffset).ToRaylibVec(), 3, WHITE);
+	DrawLineEx((pos - crossPointOffset2).ToRaylibVec(), (pos + crossPointOffset2).ToRaylibVec(), 3, WHITE);
+}
+
+bool CloseButton::Selected()
+{
+	return CheckCollisionPointCircle(GetMousePosition(), pos.ToRaylibVec(), radius);
+}
+
+void CloseButton::Update()
+{
+	color = RED2;
+
+	if (IsMouseButtonPressed(0) && Selected())
+	{
+		pressed = true;
+	}
+
+	if (Selected())
+	{
+		color = RED1;
+	}
+
+	if (pressed && IsMouseButtonReleased(0) && Selected())
+	{
+		pressed = false;
+		app_->SetState(GEOMETRY_BOARD);
+	}
+}
+
+void CloseButton::Init()
+{
+	pos = {45, 45};
+	crossPointOffset = {10, 10};
+	crossPointOffset2 = {crossPointOffset.x, -crossPointOffset.y};
+	Vec2 crossPos = (pos - crossPointOffset);
+	radius = GetDistance(crossPos, pos) + 5;
+	color = RED2;
+}
+
+SaveWindow::SaveWindow(GeometryApp *app)
+{
+	closeButton = {app};
+}
+
+void SaveWindow::Render()
+{
+	closeButton.Render();
+}
+
+void SaveWindow::Update()
+{
+	closeButton.Update();
+}
+
+void SaveWindow::Init()
+{
+	closeButton.Init();
 }

@@ -573,6 +573,10 @@ void GeometryBoard::SetEditMode()
 		break;
 	case KEY_S:
 		editMode = DRAW_STRAIGHT_LINE;
+		if (IsKeyDown(KEY_LEFT_ALT))
+		{
+			app_->SetState(SAVE);
+		}
 		break;
 	case KEY_P:
 		editMode = DRAW_POINT;

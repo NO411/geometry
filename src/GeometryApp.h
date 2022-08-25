@@ -9,29 +9,32 @@ enum AppStates
 {
 	GEOMETRY_BOARD,
 	HELP,
+	SAVE,
 };
 
+class Window;
 class HelpWindow;
 
 class ScrollBar
 {
-	friend HelpWindow;
+	friend Window;
+
 public:
 	ScrollBar();
-	ScrollBar(Rectangle boxRect, HelpWindow *helpWindow_);
+	ScrollBar(Rectangle boxRect, Window *window_);
 
 	void Update();
 	void Render();
 	void UpdateOnResize();
 	bool Enabled();
 	
+	Rectangle box;
 private:
 	bool Selected();
 	bool BoxSelected();
 
 	void UpdateDragBoxHeight();
 
-	Rectangle box;
 	Rectangle dragBox;
 	Color dragBoxColor;
 
@@ -39,10 +42,22 @@ private:
 	Vector2 movePos;
 	float moveStartY;
 
-	HelpWindow *helpWindow_;
+	Window *window_;
 };
 
-class HelpWindow
+class Window
+{
+public:
+	Window();
+
+	ScrollBar scrollBar;
+	Camera2D camera;
+	float textRenderHeight;
+
+	GeometryApp *app_;
+};
+
+class HelpWindow : public Window
 {
 	friend ScrollBar;
 
@@ -53,14 +68,10 @@ public:
 	void Update();
 	void Init();
 
-	ScrollBar scrollBar;
-
 private:
 	std::vector<std::vector<std::string>> shortcuts;
 	std::vector<Rectangle> keyHighlightings;
 	std::string description;
-
-	Camera2D camera;
 
 	int fontSize;
 	Vector2 tableStart;
@@ -68,13 +79,53 @@ private:
 	float columnSize;
 	float textStart;
 	float textOffsetX;
+};
 
-	float textRenderHeight;
+class Button
+{
+public:
+	Button();
+
+	Color color;
+	Vec2 pos;
+	bool pressed;
 
 	GeometryApp *app_;
 };
 
-class HelpButton
+class CloseButton : public Button
+{
+public:
+	CloseButton();
+	CloseButton(GeometryApp *app);
+
+	void Render();
+	void Update();
+	void Init();
+private:
+	bool Selected();
+
+	Vec2 crossPointOffset;
+	Vec2 crossPointOffset2;
+	float radius;
+
+	static const Color RED1;
+	static const Color RED2;
+};
+
+class SaveWindow : public Window
+{
+public:
+	SaveWindow(GeometryApp *app);
+
+	void Render();
+	void Update();
+	void Init();
+private:
+	CloseButton closeButton;
+};
+
+class HelpButton : public Button
 {
 	friend HelpWindow;
 public:
@@ -86,14 +137,9 @@ public:
 
 private:
 	Rectangle rectangle;
-	Vector2 textPos;
 	float fontSize;
-	Color color;
 	std::string text;
-
-	bool pressed;
-
-	GeometryApp *app_;
+	bool showHelpButton;
 };
 
 class GeometryApp
@@ -118,11 +164,11 @@ private:
 	GeometryBoard board{this};
 	HelpButton button{this};
 	HelpWindow helpWindow{this};
+	SaveWindow saveWindow{this};
 
 	Font font;
 
 	int appState;
-	bool showHelpButton;
 
 	bool GeometryAppShouldClose() const;
 	void Tick();
